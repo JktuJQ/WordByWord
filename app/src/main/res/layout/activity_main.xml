@@ -95,7 +95,8 @@
         android:layout_height="wrap_content" android:orientation="vertical"
         android:paddingHorizontal="20dp" android:paddingTop="8dp" android:paddingBottom="12dp">
         <Button android:id="@+id/import_audio" style="@style/ActionButton"
-            android:layout_width="match_parent" android:layout_height="52dp" android:text="@string/import_audio" />
+            android:layout_width="match_parent" android:layout_height="52dp"
+            android:background="@drawable/rounded_import_button" android:text="@string/import_audio" />
         <TextView android:id="@+id/record_shortcut" android:layout_width="match_parent"
             android:layout_height="40dp" android:gravity="center"
             android:text="@string/recording_shortcut" android:textColor="@color/accent"
