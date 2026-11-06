@@ -27,3 +27,4 @@ keystore.properties
 /local-models/
 
 /docs/asr-results.json
+*.hyp.rttm
