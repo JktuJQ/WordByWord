@@ -2,8 +2,6 @@ package dev.wordbyword.app.ui.view;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.media.MediaPlayer;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -12,6 +10,7 @@ import android.widget.TextView;
 import dev.wordbyword.app.R;
 import dev.wordbyword.app.core.transcript.Transcript;
 import dev.wordbyword.app.ui.AppController;
+import dev.wordbyword.app.ui.audio.TranscriptPlayback;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -19,28 +18,25 @@ public final class TranscriptView {
   private final View root;
   private final LinearLayout items;
   private final AppController controller;
-  private MediaPlayer player;
-  private String playerRecordingId;
-  private long playingStart = -1;
+  private final TranscriptPlayback playback;
 
   public TranscriptView(View root, LinearLayout items, AppController controller) {
     this.root = root;
     this.items = items;
     this.controller = controller;
+    playback =
+        new TranscriptPlayback(
+            items.getContext(),
+            () ->
+                controller.notifyMessage(items.getContext().getString(R.string.audio_unavailable)));
   }
 
   public void release() {
-    if (player != null) {
-      player.release();
-      player = null;
-    }
-    playerRecordingId = null;
-    playingStart = -1;
+    playback.release();
   }
 
   public void render(Transcript transcript) {
-    if (playerRecordingId != null && !playerRecordingId.equals(transcript.recording().id()))
-      release();
+    playback.showRecording(transcript.recording());
     text(R.id.screen_title, transcript.recording().title());
     text(
         R.id.screen_description,
@@ -100,11 +96,13 @@ public final class TranscriptView {
                       R.string.time_range, time(utterance.startMs()), time(utterance.endMs())));
       ((TextView) card.findViewById(R.id.utterance_text)).setText(utterance.text());
       card.findViewById(R.id.play_utterance)
-          .setOnClickListener(view -> playAt(transcript, utterance.startMs()));
+          .setOnClickListener(view -> playback.playAt(transcript.recording(), utterance.startMs()));
       card.findViewById(R.id.seek_back)
-          .setOnClickListener(view -> seek(transcript, utterance.startMs(), -5000));
+          .setOnClickListener(
+              view -> playback.seek(transcript.recording(), utterance.startMs(), -5000));
       card.findViewById(R.id.seek_forward)
-          .setOnClickListener(view -> seek(transcript, utterance.startMs(), 5000));
+          .setOnClickListener(
+              view -> playback.seek(transcript.recording(), utterance.startMs(), 5000));
       items.addView(card);
     }
   }
@@ -129,41 +127,6 @@ public final class TranscriptView {
               if (!name.isEmpty()) controller.renameSpeaker(speaker.id(), name);
             })
         .show();
-  }
-
-  private boolean preparePlayer(Transcript transcript) {
-    if (player != null && transcript.recording().id().equals(playerRecordingId)) return true;
-    release();
-    try {
-      player =
-          MediaPlayer.create(
-              items.getContext(), Uri.parse(transcript.recording().audioUri().toString()));
-      if (player == null) throw new IllegalStateException();
-      playerRecordingId = transcript.recording().id();
-      return true;
-    } catch (Exception exception) {
-      release();
-      controller.notifyMessage(items.getContext().getString(R.string.audio_unavailable));
-      return false;
-    }
-  }
-
-  private void playAt(Transcript transcript, long startMs) {
-    if (!preparePlayer(transcript)) return;
-    if (player.isPlaying() && playingStart == startMs) {
-      player.pause();
-    } else {
-      player.seekTo((int) Math.min(startMs, Integer.MAX_VALUE));
-      player.start();
-      playingStart = startMs;
-    }
-  }
-
-  private void seek(Transcript transcript, long startMs, long offsetMs) {
-    if (!preparePlayer(transcript)) return;
-    long current = player.isPlaying() ? player.getCurrentPosition() : startMs;
-    long target = Math.max(0, Math.min(player.getDuration(), current + offsetMs));
-    player.seekTo((int) target);
   }
 
   private static String time(long milliseconds) {
