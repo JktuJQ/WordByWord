@@ -4,8 +4,7 @@
     <string name="app_tagline">Разговоры, к которым можно вернуться</string>
     <string name="library">Слово в слово</string>
     <string name="library_description">Ваши разговоры и стенограммы</string>
-    <string name="demo_notice">Аудио остаётся на устройстве</string>
-    <string name="demo_explanation">Распознавание ещё не подключено. Встроенный пример показывает интерфейс на вымышленных репликах без аудио. Данные хранятся только до закрытия процесса приложения.</string>
+    <string name="privacy_notice">Аудио остаётся на устройстве</string>
     <string name="empty_title">Добавьте первую запись</string>
     <string name="empty_description">Загрузите аудиофайл, чтобы получить стенограмму разговора.</string>
     <string name="search">Поиск записей</string>
@@ -55,7 +54,6 @@
     <string name="imported_status">Готово к обработке</string>
     <string name="cancelled_status">Обработка отменена</string>
     <string name="import_audio">Загрузить аудиофайл</string>
-    <string name="open_demo">Посмотреть пример стенограммы</string>
     <string name="recording_shortcut">Или записать разговор с микрофона</string>
     <string name="benefit_speakers">◉ Разделение по говорящим</string>
     <string name="benefit_timestamps">◷ Временные метки для каждой реплики</string>
@@ -63,24 +61,21 @@
     <string name="back_to_library">← Все записи</string>
     <string name="export_json">Экспортировать JSON</string>
     <string name="start_processing">Обработать</string>
-    <string name="prepare_demo">Подготовить пример</string>
     <string name="open_transcript">Открыть стенограмму</string>
     <string name="retry">Повторить</string>
     <string name="cancel">Отменить</string>
     <string name="cancelling">Отменяем…</string>
     <string name="transcript_empty">В записи не обнаружено речи.</string>
     <string name="unknown_speaker">Неизвестный участник</string>
-    <string name="demo_transcript">Демонстрационная стенограмма · без аудио</string>
     <string name="recording_summary">%1$d реплик · %2$d участников</string>
-    <string name="demo_badge">Пример · %1$s</string>
     <string name="imported_badge">Аудиофайл</string>
-    <string name="import_failed">Не удалось открыть аудиофайл. Проверьте доступ и попробуйте снова.</string>
+    <string name="import_failed">Не удалось импортировать аудиофайл. Проверьте доступ к нему и свободное место на устройстве.</string>
     <string name="picker_unavailable">На устройстве нет приложения для выбора файлов.</string>
     <string name="export_unavailable">Стенограмма недоступна. Откройте её и повторите экспорт.</string>
     <string name="export_success">JSON сохранён в выбранный файл.</string>
     <string name="export_failed">Не удалось сохранить JSON. Файл мог остаться неполным — повторите экспорт.</string>
     <string name="exporting">Сохраняем JSON…</string>
     <string name="export_cancelled">Экспорт отменён.</string>
-    <string name="importing">Открываем аудиофайл…</string>
+    <string name="importing">Импортируем аудиофайл…</string>
     <string name="time_range">%1$s — %2$s</string>
 </resources>

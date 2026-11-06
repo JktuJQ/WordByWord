@@ -39,18 +39,17 @@ public final class TranscriptView {
   }
 
   public void render(Transcript transcript) {
-    if (playerRecordingId != null && !playerRecordingId.equals(transcript.recording().id())) release();
+    if (playerRecordingId != null && !playerRecordingId.equals(transcript.recording().id()))
+      release();
     text(R.id.screen_title, transcript.recording().title());
     text(
         R.id.screen_description,
-        "demo".equals(transcript.recording().audioUri().getScheme())
-            ? items.getContext().getString(R.string.demo_transcript)
-            : items
-                .getContext()
-                .getString(
-                    R.string.recording_summary,
-                    transcript.utterances().size(),
-                    transcript.speakers().size()));
+        items
+            .getContext()
+            .getString(
+                R.string.recording_summary,
+                transcript.utterances().size(),
+                transcript.speakers().size()));
     if (transcript.utterances().isEmpty()) {
       var empty = new TextView(items.getContext());
       empty.setText(R.string.transcript_empty);
@@ -133,14 +132,12 @@ public final class TranscriptView {
   }
 
   private boolean preparePlayer(Transcript transcript) {
-    if ("demo".equals(transcript.recording().audioUri().getScheme())) {
-      controller.notifyMessage(items.getContext().getString(R.string.audio_unavailable));
-      return false;
-    }
     if (player != null && transcript.recording().id().equals(playerRecordingId)) return true;
     release();
     try {
-      player = MediaPlayer.create(items.getContext(), Uri.parse(transcript.recording().audioUri().toString()));
+      player =
+          MediaPlayer.create(
+              items.getContext(), Uri.parse(transcript.recording().audioUri().toString()));
       if (player == null) throw new IllegalStateException();
       playerRecordingId = transcript.recording().id();
       return true;

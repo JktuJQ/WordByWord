@@ -1,6 +1,7 @@
 package dev.wordbyword.app.core.audio;
 
 import java.io.BufferedOutputStream;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -75,7 +76,7 @@ final class FilePcmAudio implements PcmAudio {
     }
   }
 
-  static final class Writer implements java.io.Closeable {
+  static final class Writer implements Closeable {
     private final File file;
     private final OutputStream out;
     private long sampleCount;

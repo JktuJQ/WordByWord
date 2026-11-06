@@ -3,8 +3,8 @@ package dev.wordbyword.app.ui.document;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
-import android.os.Bundle;
 import android.net.Uri;
+import android.os.Bundle;
 import dev.wordbyword.app.R;
 import dev.wordbyword.app.ui.AppController;
 
@@ -41,7 +41,7 @@ public final class DocumentPicker {
   }
 
   public void importRecordedAudio(Uri uri, String title) {
-    documents.importAudio(uri, title);
+    documents.importRecordedAudio(uri, title);
   }
 
   public void pickExportFile() {
