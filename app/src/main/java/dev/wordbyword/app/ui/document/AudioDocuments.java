@@ -25,10 +25,14 @@ public final class AudioDocuments {
   }
 
   public void importAudio(Uri uri) {
-    importAudio(uri, null);
+    importAudio(uri, null, false);
   }
 
-  public void importAudio(Uri uri, String preferredTitle) {
+  public void importRecordedAudio(Uri uri, String title) {
+    importAudio(uri, title, true);
+  }
+
+  private void importAudio(Uri uri, String preferredTitle, boolean recorded) {
     message(R.string.importing);
     app.worker()
         .execute(
@@ -60,7 +64,9 @@ public final class AudioDocuments {
                         URI.create(uri.toString()),
                         title,
                         OptionalLong.empty());
-                main.post(() -> app.controller().add(recording));
+                Recording saved = app.repository().saveRecording(recording);
+                if (recorded) removeRecordingDraft(uri);
+                main.post(() -> app.controller().add(saved));
               } catch (Exception exception) {
                 main.post(() -> message(R.string.import_failed));
               }
@@ -84,6 +90,18 @@ public final class AudioDocuments {
                 main.post(() -> message(R.string.export_failed));
               }
             });
+  }
+
+  private void removeRecordingDraft(Uri uri) {
+    if (!"file".equals(uri.getScheme()) || uri.getPath() == null) return;
+    try {
+      var source = new java.io.File(uri.getPath()).getCanonicalFile();
+      var drafts = new java.io.File(app.getFilesDir(), "recordings").getCanonicalFile();
+      if (drafts.equals(source.getParentFile()))
+        java.nio.file.Files.deleteIfExists(source.toPath());
+    } catch (IOException exception) {
+      android.util.Log.w("AudioDocuments", "Unable to remove saved recording draft", exception);
+    }
   }
 
   private void message(int id) {

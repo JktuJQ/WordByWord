@@ -115,8 +115,62 @@ public class AppControllerTest {
     controller.select(recording.id());
     controller.renameSpeaker("one", "Анна");
     worker.remove().run();
-    assertEquals("Анна", controller.state().selected().transcript().speakers().get(0).displayName());
-    assertEquals("Анна", repository.find(recording.id()).orElseThrow().speakers().get(0).displayName());
+    assertEquals(
+        "Анна", controller.state().selected().transcript().speakers().get(0).displayName());
+    assertEquals(
+        "Анна", repository.find(recording.id()).orElseThrow().speakers().get(0).displayName());
     assertEquals(2, controller.state().selected().transcript().utterances().size());
+  }
+
+  @Test
+  public void loadRestoresReadyAndUnprocessedEntriesWithoutRunningPipeline() {
+    var worker = new ArrayDeque<Runnable>();
+    var repository = new DemoBackend();
+    var ready = DemoBackend.recording();
+    var imported = new Recording("pending", ready.audioUri(), "Импорт", ready.durationMs());
+    repository.save(new Transcript(ready, List.of(), List.of()));
+    repository.saveRecording(imported);
+    var controller =
+        new AppController(
+            repository,
+            (input, context) -> {
+              throw new AssertionError("Unexpected processing");
+            },
+            worker::add,
+            Runnable::run);
+    controller.load();
+    assertTrue(controller.state().items().isEmpty());
+    worker.remove().run();
+    assertEquals(AppState.Status.READY, controller.state().find(ready.id()).status());
+    assertEquals(AppState.Status.IMPORTED, controller.state().find(imported.id()).status());
+    controller.select(ready.id());
+    assertNotNull(controller.state().selected().transcript());
+  }
+
+  @Test
+  public void pendingDeleteBlocksProcessingAndNeverResurrectsEntry() {
+    var worker = new ArrayDeque<Runnable>();
+    var repository = new DemoBackend();
+    var recording = DemoBackend.recording();
+    repository.saveRecording(recording);
+    var controller =
+        new AppController(
+            repository,
+            (input, context) -> {
+              throw new AssertionError("Deleted recording processed");
+            },
+            worker::add,
+            Runnable::run);
+    controller.add(recording);
+    controller.delete(java.util.Set.of(recording.id()));
+    controller.start(recording.id());
+    assertTrue(controller.state().busy());
+    assertEquals(1, worker.size());
+    worker.remove().run();
+    assertFalse(controller.state().busy());
+    assertTrue(controller.state().items().isEmpty());
+    controller.load();
+    worker.remove().run();
+    assertTrue(controller.state().items().isEmpty());
   }
 }
