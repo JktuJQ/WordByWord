@@ -40,21 +40,27 @@ public final class AsrDeviceCheck extends Instrumentation {
       var app = (WordByWordApplication) getTargetContext().getApplicationContext();
       JSONArray runs = new JSONArray();
       report.put("runs", runs);
-      if (!"cancel".equals(arguments.getString("only"))) {
-        for (String name :
-            new String[] {"rec_0055.flac", "rec_0273.flac", "silence.wav", "short.wav"})
+      if ("benchmark".equals(arguments.getString("only"))) {
+        for (String name : arguments.getString("files").split(","))
           runs.put(run(app, name, false, false));
-      }
-      runs.put(run(app, "rec_0055.flac", true, false));
-      if (!"cancel".equals(arguments.getString("only"))) {
-        File encoder =
-            new File(app.getExternalFilesDir(null), "models/gigaam-v2/encoder.int8.onnx");
-        File hidden = new File(encoder.getParentFile(), "encoder.saved");
-        if (!encoder.renameTo(hidden)) throw new IllegalStateException("Cannot hide encoder");
-        try {
-          runs.put(run(app, "rec_0055.flac", false, true));
-        } finally {
-          if (!hidden.renameTo(encoder)) throw new IllegalStateException("Cannot restore encoder");
+      } else {
+        if (!"cancel".equals(arguments.getString("only"))) {
+          for (String name :
+              new String[] {"rec_0055.flac", "rec_0273.flac", "silence.wav", "short.wav"})
+            runs.put(run(app, name, false, false));
+        }
+        runs.put(run(app, "rec_0055.flac", true, false));
+        if (!"cancel".equals(arguments.getString("only"))) {
+          File encoder =
+              new File(app.getExternalFilesDir(null), "models/gigaam-v2/encoder.int8.onnx");
+          File hidden = new File(encoder.getParentFile(), "encoder.saved");
+          if (!encoder.renameTo(hidden)) throw new IllegalStateException("Cannot hide encoder");
+          try {
+            runs.put(run(app, "rec_0055.flac", false, true));
+          } finally {
+            if (!hidden.renameTo(encoder))
+              throw new IllegalStateException("Cannot restore encoder");
+          }
         }
       }
       File[] remaining = app.getCacheDir().listFiles((dir, name) -> name.endsWith(".pcm"));
@@ -153,6 +159,8 @@ public final class AsrDeviceCheck extends Instrumentation {
         "proc_status",
         new String(
             Files.readAllBytes(new File("/proc/self/status").toPath()), StandardCharsets.UTF_8));
+    if ("benchmark".equals(arguments.getString("only")))
+      runOnMainSync(() -> app.controller().removeVisible(java.util.Set.of(id)));
     return result;
   }
 }
