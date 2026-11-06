@@ -1,0 +1,55 @@
+name: Задача
+description: Функция, общий компонент, исследование или инфраструктурная работа
+body:
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Область
+      options:
+        - MVP
+        - Расширение после MVP
+        - Инфраструктура и процесс
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: Проблема и ожидаемый результат
+      description: Что нужно получить и кому это поможет?
+    validations:
+      required: true
+  - type: textarea
+    id: boundaries
+    attributes:
+      label: Границы работы
+      description: Что входит в задачу и что остаётся за её пределами?
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Зависимости и существующие интерфейсы
+      description: Ссылки на Issues, PR, общие типы и контракты. Если зависимостей нет, укажите это явно.
+      placeholder: "Зависит от #1. Использует интерфейс ...; изменение контракта согласуется с ..."
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Критерии готовности
+      description: Наблюдаемый результат, по которому можно принять задачу.
+      placeholder: "- [ ] Пользователь может ...\n- [ ] После перезапуска ..."
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Способ проверки
+      description: Команды, сценарий, тестовые данные и устройство, если оно требуется.
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        Перед началом назначьте одного ответственного в Assignees и выберите статус в Project.
+        Реализацию ведите в отдельной ветке; в PR укажите эту Issue, проверки и ограничения.
