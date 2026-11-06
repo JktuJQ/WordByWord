@@ -4,7 +4,10 @@ import android.app.Application;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
-import dev.wordbyword.app.core.processing.ProcessingException;
+import dev.wordbyword.app.core.audio.AndroidAudioPreparer;
+import dev.wordbyword.app.core.recognition.SherpaSpeechRecognizer;
+import dev.wordbyword.app.processing.LocalTranscriptionPipeline;
+import java.io.File;
 import dev.wordbyword.app.core.processing.TranscriptionPipeline;
 import dev.wordbyword.app.core.storage.TranscriptRepository;
 import dev.wordbyword.app.storage.FileTranscriptRepository;
@@ -20,10 +23,10 @@ public final class WordByWordApplication extends Application {
   @Override
   public void onCreate() {
     super.onCreate();
-    TranscriptionPipeline pipeline =
-        (recording, context) -> {
-          throw new ProcessingException("Конвейер распознавания ещё не подключён");
-        };
+    var models = new File(getExternalFilesDir(null), "models/gigaam-v2");
+    models.mkdirs();
+    TranscriptionPipeline pipeline = new LocalTranscriptionPipeline(
+        new AndroidAudioPreparer(this), new SherpaSpeechRecognizer(models));
     var handler = new Handler(Looper.getMainLooper());
     repository =
         new FileTranscriptRepository(
