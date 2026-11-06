@@ -8,6 +8,7 @@ import dev.wordbyword.app.core.recording.Recording;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.OptionalLong;
 import org.junit.Test;
@@ -51,15 +52,34 @@ public class TranscriptTest {
     var second =
         new Transcript(
             recording("2"), List.of(new Transcript.Speaker("a", "Борис")), List.of(utterance));
-    var renamed =
-        new Transcript(
-            first.recording(),
-            List.of(new Transcript.Speaker("a", "Анна Петрова")),
-            first.utterances());
+    var renamed = new TranscriptEditor(first).renameSpeaker("a", "  Анна Петрова  ").build();
+    assertThrows(
+        IllegalArgumentException.class, () -> new TranscriptEditor(first).renameSpeaker("a", " "));
+    assertThrows(
+        NoSuchElementException.class,
+        () -> new TranscriptEditor(first).renameSpeaker("missing", "Имя"));
 
     assertEquals(first.utterances(), renamed.utterances());
     assertEquals("Анна", first.speakers().get(0).displayName());
     assertEquals("Борис", second.speakers().get(0).displayName());
     assertEquals("Анна Петрова", renamed.speakers().get(0).displayName());
+  }
+
+  @Test
+  public void editorBatchesChangesAndBuildsIndependentSnapshots() {
+    var original =
+        new Transcript(
+            recording("1"),
+            List.of(new Transcript.Speaker("a", "Первый"), new Transcript.Speaker("b", "Второй")),
+            List.of());
+    var editor = new TranscriptEditor(original).renameSpeaker("a", "Анна");
+    var intermediate = editor.build();
+    var result = editor.renameSpeaker("b", "Борис").renameSpeaker("a", "Аня").build();
+    assertEquals(
+        List.of(new Transcript.Speaker("a", "Аня"), new Transcript.Speaker("b", "Борис")),
+        result.speakers());
+    assertEquals("Анна", intermediate.speakers().get(0).displayName());
+    assertEquals("Второй", intermediate.speakers().get(1).displayName());
+    assertEquals("Первый", original.speakers().get(0).displayName());
   }
 }

@@ -4,15 +4,18 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.OpenableColumns;
+import android.util.Log;
 import dev.wordbyword.app.R;
 import dev.wordbyword.app.WordByWordApplication;
 import dev.wordbyword.app.core.recording.Recording;
 import dev.wordbyword.app.core.transcript.Transcript;
 import dev.wordbyword.app.export.TranscriptJsonExporter;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.OptionalLong;
 import java.util.UUID;
 
@@ -25,10 +28,14 @@ public final class AudioDocuments {
   }
 
   public void importAudio(Uri uri) {
-    importAudio(uri, null);
+    importAudio(uri, null, false);
   }
 
-  public void importAudio(Uri uri, String preferredTitle) {
+  public void importRecordedAudio(Uri uri, String title) {
+    importAudio(uri, title, true);
+  }
+
+  private void importAudio(Uri uri, String preferredTitle, boolean recorded) {
     message(R.string.importing);
     app.worker()
         .execute(
@@ -60,7 +67,9 @@ public final class AudioDocuments {
                         URI.create(uri.toString()),
                         title,
                         OptionalLong.empty());
-                main.post(() -> app.controller().add(recording));
+                Recording saved = app.repository().saveRecording(recording);
+                if (recorded) removeRecordingDraft(uri);
+                main.post(() -> app.controller().add(saved));
               } catch (Exception exception) {
                 main.post(() -> message(R.string.import_failed));
               }
@@ -84,6 +93,17 @@ public final class AudioDocuments {
                 main.post(() -> message(R.string.export_failed));
               }
             });
+  }
+
+  private void removeRecordingDraft(Uri uri) {
+    if (!"file".equals(uri.getScheme()) || uri.getPath() == null) return;
+    try {
+      var source = new File(uri.getPath()).getCanonicalFile();
+      var drafts = new File(app.getFilesDir(), "recordings").getCanonicalFile();
+      if (drafts.equals(source.getParentFile())) Files.deleteIfExists(source.toPath());
+    } catch (IOException exception) {
+      Log.w("AudioDocuments", "Unable to remove saved recording draft", exception);
+    }
   }
 
   private void message(int id) {

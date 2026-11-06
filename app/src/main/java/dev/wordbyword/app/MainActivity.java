@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.window.OnBackInvokedDispatcher;
-import dev.wordbyword.app.demo.DemoBackend;
 import dev.wordbyword.app.ui.AppController;
 import dev.wordbyword.app.ui.document.AudioDocuments;
 import dev.wordbyword.app.ui.document.DocumentPicker;
@@ -37,7 +36,6 @@ public final class MainActivity extends Activity {
             documents::pickAudio,
             this::openRecorder,
             documents::pickExportFile,
-            () -> controller.open(DemoBackend.recording()),
             savedInstanceState);
     WindowInsetsHandler.apply(root);
     if (Build.VERSION.SDK_INT >= 33) {
