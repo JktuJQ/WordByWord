@@ -1,0 +1,26 @@
+plugins {
+    id 'com.android.application' version '8.13.2'
+}
+
+android {
+    namespace 'dev.wordbyword.asrprobe'
+    compileSdk 36
+    buildToolsVersion '36.0.0'
+    defaultConfig {
+        applicationId 'dev.wordbyword.asrprobe'
+        minSdk 26
+        targetSdk 36
+        versionCode 1
+        versionName '0.1'
+        ndk { abiFilters 'x86_64', 'arm64-v8a' }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation files('vendor/sherpa-onnx-2.0.1.aar')
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.2.0'
+}
