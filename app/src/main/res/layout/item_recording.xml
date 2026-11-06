@@ -1,15 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="wrap_content"
-    android:layout_marginTop="16dp" android:padding="20dp" android:orientation="vertical" android:background="@drawable/card">
-    <TextView android:id="@+id/recording_kind" android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:textColor="@color/accent" android:textSize="12sp" android:textStyle="bold" />
-    <TextView android:id="@+id/recording_title" android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:layout_marginTop="8dp" android:textColor="@color/ink" android:textSize="20sp" android:textStyle="bold" />
+    android:layout_marginTop="12dp" android:padding="16dp" android:orientation="vertical"
+    android:background="@drawable/card">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:gravity="center_vertical" android:orientation="horizontal">
+        <CheckBox android:id="@+id/recording_selected" android:layout_width="48dp"
+            android:layout_height="48dp" android:buttonTint="@color/accent"
+            android:visibility="gone" />
+        <TextView android:id="@+id/recording_title" android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:ellipsize="end" android:maxLines="2"
+            android:textColor="@color/ink" android:textSize="16sp" android:textStyle="bold" />
+        <TextView android:id="@+id/recording_status" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:background="@drawable/notice"
+            android:paddingHorizontal="8dp" android:paddingVertical="5dp"
+            android:textColor="@color/accent" android:textSize="11sp" />
+    </LinearLayout>
+    <TextView android:id="@+id/recording_kind" style="@style/BodyText"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="5dp" android:textSize="12sp" />
     <TextView android:id="@+id/recording_detail" style="@style/BodyText"
-        android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" />
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="9dp" android:textSize="12sp" />
     <ProgressBar android:id="@+id/recording_progress" style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:max="100" android:visibility="gone" />
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="10dp" android:max="100" android:progressTint="@color/accent"
+        android:visibility="gone" />
     <Button android:id="@+id/recording_action" style="@style/SecondaryButton"
-        android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" />
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_gravity="end" android:layout_marginTop="8dp" />
 </LinearLayout>

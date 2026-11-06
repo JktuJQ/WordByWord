@@ -8,6 +8,7 @@ import dev.wordbyword.app.core.transcript.Transcript;
 import dev.wordbyword.app.demo.DemoBackend;
 import java.util.ArrayDeque;
 import java.util.List;
+import java.util.Optional;
 import java.util.OptionalDouble;
 import org.junit.Test;
 
@@ -92,5 +93,30 @@ public class AppControllerTest {
     assertNull(controller.state().selected());
     controller.start(recording.id());
     assertEquals(1, worker.size());
+  }
+
+  @Test
+  public void renamingSpeakerUpdatesAllVisibleUtterancesAfterSave() {
+    var worker = new ArrayDeque<Runnable>();
+    var repository = new DemoBackend();
+    var recording = DemoBackend.recording();
+    var transcript =
+        new Transcript(
+            recording,
+            List.of(new Transcript.Speaker("one", "Участник 1")),
+            List.of(
+                new Transcript.Utterance(Optional.of("one"), "Привет", 0, 1000),
+                new Transcript.Utterance(Optional.of("one"), "До встречи", 2000, 3000)));
+    var controller =
+        new AppController(repository, (input, context) -> transcript, worker::add, Runnable::run);
+    controller.add(recording);
+    controller.start(recording.id());
+    worker.remove().run();
+    controller.select(recording.id());
+    controller.renameSpeaker("one", "Анна");
+    worker.remove().run();
+    assertEquals("Анна", controller.state().selected().transcript().speakers().get(0).displayName());
+    assertEquals("Анна", repository.find(recording.id()).orElseThrow().speakers().get(0).displayName());
+    assertEquals(2, controller.state().selected().transcript().utterances().size());
   }
 }
