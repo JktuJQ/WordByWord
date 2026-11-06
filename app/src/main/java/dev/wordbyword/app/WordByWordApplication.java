@@ -4,8 +4,9 @@ import android.app.Application;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import dev.wordbyword.app.core.processing.ProcessingException;
+import dev.wordbyword.app.core.processing.TranscriptionPipeline;
 import dev.wordbyword.app.core.storage.TranscriptRepository;
-import dev.wordbyword.app.demo.DemoBackend;
 import dev.wordbyword.app.storage.FileTranscriptRepository;
 import dev.wordbyword.app.ui.AppController;
 import java.util.concurrent.ExecutorService;
@@ -19,7 +20,10 @@ public final class WordByWordApplication extends Application {
   @Override
   public void onCreate() {
     super.onCreate();
-    var backend = new DemoBackend();
+    TranscriptionPipeline pipeline =
+        (recording, context) -> {
+          throw new ProcessingException("Конвейер распознавания ещё не подключён");
+        };
     var handler = new Handler(Looper.getMainLooper());
     repository =
         new FileTranscriptRepository(
@@ -28,7 +32,8 @@ public final class WordByWordApplication extends Application {
             exception ->
                 handler.post(
                     () -> controller.notifyMessage("Некоторые записи повреждены и не загружены")));
-    controller = new AppController(repository, backend, worker, runnable -> handler.post(runnable));
+    controller =
+        new AppController(repository, pipeline, worker, runnable -> handler.post(runnable));
     controller.load();
   }
 

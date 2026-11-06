@@ -11,7 +11,6 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -46,7 +45,6 @@ public final class MainView {
       Runnable importAudio,
       Runnable recordAudio,
       Runnable exportJson,
-      Runnable openDemo,
       Bundle savedState) {
     this.activity = activity;
     this.root = root;
@@ -62,7 +60,6 @@ public final class MainView {
     }
     root.findViewById(R.id.back).setOnClickListener(view -> controller.showLibrary());
     root.findViewById(R.id.import_audio).setOnClickListener(view -> showSources());
-    root.findViewById(R.id.demo).setOnClickListener(view -> openDemo.run());
     root.findViewById(R.id.record_shortcut).setOnClickListener(view -> recordAudio.run());
     root.findViewById(R.id.export_json).setOnClickListener(view -> exportJson.run());
     root.findViewById(R.id.search_toggle).setOnClickListener(view -> toggleSearch());
@@ -128,7 +125,6 @@ public final class MainView {
         .setText(selecting ? R.string.stop_selecting : R.string.select_records);
     ((TextView) root.findViewById(R.id.selected_count))
         .setText(activity.getString(R.string.selected_count, selectedIds.size()));
-    root.findViewById(R.id.demo).setEnabled(!state.busy());
     root.findViewById(R.id.delete_selected).setEnabled(!state.busy() && !selectedIds.isEmpty());
     root.findViewById(R.id.share_selected).setEnabled(!selectedIds.isEmpty());
     text(R.id.message, state.message());
@@ -143,10 +139,14 @@ public final class MainView {
     text(R.id.screen_title, activity.getString(R.string.library));
     text(
         R.id.screen_description,
-        searching ? activity.getString(R.string.search) : activity.getString(R.string.library_description));
+        searching
+            ? activity.getString(R.string.search)
+            : activity.getString(R.string.library_description));
     int matches = 0;
     for (var item : state.items()) {
-      if (item.recording().title().toLowerCase(Locale.ROOT)
+      if (item.recording()
+          .title()
+          .toLowerCase(Locale.ROOT)
           .contains(searchQuery.toLowerCase(Locale.ROOT))) {
         recordingView.render(item, state, selecting, selectedIds, this::toggleSelected);
         matches++;
@@ -179,13 +179,15 @@ public final class MainView {
   private void showSources() {
     Dialog dialog = new Dialog(activity);
     View sheet = activity.getLayoutInflater().inflate(R.layout.source_sheet, null);
-    sheet.findViewById(R.id.source_file)
+    sheet
+        .findViewById(R.id.source_file)
         .setOnClickListener(
             view -> {
               dialog.dismiss();
               importAudio.run();
             });
-    sheet.findViewById(R.id.source_microphone)
+    sheet
+        .findViewById(R.id.source_microphone)
         .setOnClickListener(
             view -> {
               dialog.dismiss();
@@ -216,7 +218,8 @@ public final class MainView {
     Intent share = new Intent(Intent.ACTION_SEND);
     share.setType("text/plain");
     share.putExtra(Intent.EXTRA_TEXT, text.toString());
-    activity.startActivity(Intent.createChooser(share, activity.getString(R.string.share_selected)));
+    activity.startActivity(
+        Intent.createChooser(share, activity.getString(R.string.share_selected)));
   }
 
   private void confirmDelete() {

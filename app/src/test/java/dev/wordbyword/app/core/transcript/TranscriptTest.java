@@ -8,6 +8,7 @@ import dev.wordbyword.app.core.recording.Recording;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.OptionalLong;
 import org.junit.Test;
@@ -51,11 +52,9 @@ public class TranscriptTest {
     var second =
         new Transcript(
             recording("2"), List.of(new Transcript.Speaker("a", "Борис")), List.of(utterance));
-    var renamed =
-        new Transcript(
-            first.recording(),
-            List.of(new Transcript.Speaker("a", "Анна Петрова")),
-            first.utterances());
+    var renamed = first.withSpeakerName("a", "  Анна Петрова  ");
+    assertThrows(IllegalArgumentException.class, () -> first.withSpeakerName("a", " "));
+    assertThrows(NoSuchElementException.class, () -> first.withSpeakerName("missing", "Имя"));
 
     assertEquals(first.utterances(), renamed.utterances());
     assertEquals("Анна", first.speakers().get(0).displayName());

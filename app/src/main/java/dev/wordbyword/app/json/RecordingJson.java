@@ -1,53 +1,36 @@
-package dev.wordbyword.app.storage;
+package dev.wordbyword.app.json;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.Strictness;
 import dev.wordbyword.app.core.recording.Recording;
 import dev.wordbyword.app.core.transcript.Transcript;
-import dev.wordbyword.app.json.UtteranceJson;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.OptionalLong;
 
-final class RecordingJson {
-  record Entry(Recording recording, Transcript transcript) {}
+public final class RecordingJson {
+  public record Entry(Recording recording, Transcript transcript) {}
 
-  private static final Gson JSON = new GsonBuilder().serializeNulls().create();
+  private static final Gson JSON =
+      new GsonBuilder().serializeNulls().setStrictness(Strictness.STRICT).create();
 
   private RecordingJson() {}
 
-  static void write(Path target, Recording recording, Transcript transcript) throws IOException {
-    JsonObject document;
+  public static void write(Writer writer, Recording recording, Transcript transcript)
+      throws IOException {
     try {
-      document = encode(recording, transcript);
+      JsonObject document = encode(recording, transcript);
+      decode(document);
+      JSON.toJson(document, writer);
     } catch (RuntimeException exception) {
-      throw new IOException("Invalid recording metadata", exception);
-    }
-    decode(document);
-    Path temporary = Files.createTempFile(target.getParent(), ".metadata-", ".tmp");
-    try {
-      try (var writer = Files.newBufferedWriter(temporary, StandardCharsets.UTF_8)) {
-        JSON.toJson(document, writer);
-      }
-      try (var channel =
-          java.nio.channels.FileChannel.open(temporary, java.nio.file.StandardOpenOption.WRITE)) {
-        channel.force(true);
-      }
-      Files.move(
-          temporary, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-    } catch (com.google.gson.JsonIOException exception) {
-      throw new IOException("Cannot write recording metadata", exception);
-    } finally {
-      Files.deleteIfExists(temporary);
+      throw new IOException("Cannot encode recording metadata", exception);
     }
   }
 
@@ -77,14 +60,9 @@ final class RecordingJson {
     return document;
   }
 
-  static Entry read(Path path) throws IOException {
-    try (var reader = Files.newBufferedReader(path, StandardCharsets.UTF_8);
-        var json = new com.google.gson.stream.JsonReader(reader)) {
-      json.setStrictness(com.google.gson.Strictness.STRICT);
-      var document = JsonParser.parseReader(json).getAsJsonObject();
-      if (json.peek() != com.google.gson.stream.JsonToken.END_DOCUMENT)
-        throw new IOException("Trailing recording metadata");
-      return decode(document);
+  public static Entry read(Reader reader) throws IOException {
+    try {
+      return decode(JSON.fromJson(reader, JsonObject.class));
     } catch (RuntimeException exception) {
       throw new IOException("Invalid recording metadata", exception);
     }
