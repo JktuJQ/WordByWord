@@ -3,6 +3,7 @@ package dev.wordbyword.app;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.window.OnBackInvokedDispatcher;
@@ -14,6 +15,7 @@ import dev.wordbyword.app.ui.view.MainView;
 import dev.wordbyword.app.ui.view.WindowInsetsHandler;
 
 public final class MainActivity extends Activity {
+  private static final int RECORD_AUDIO_UI = 102;
   private AppController controller;
   private DocumentPicker documents;
   private MainView screen;
@@ -29,11 +31,14 @@ public final class MainActivity extends Activity {
     var root = findViewById(R.id.root);
     screen =
         new MainView(
+            this,
             root,
             controller,
             documents::pickAudio,
+            this::openRecorder,
             documents::pickExportFile,
-            () -> controller.open(DemoBackend.recording()));
+            () -> controller.open(DemoBackend.recording()),
+            savedInstanceState);
     WindowInsetsHandler.apply(root);
     if (Build.VERSION.SDK_INT >= 33) {
       getOnBackInvokedDispatcher()
@@ -50,12 +55,14 @@ public final class MainActivity extends Activity {
   @Override
   protected void onStop() {
     controller.detach();
+    screen.release();
     super.onStop();
   }
 
   @Override
   protected void onSaveInstanceState(Bundle state) {
     documents.saveState(state);
+    screen.saveState(state);
     super.onSaveInstanceState(state);
   }
 
@@ -69,11 +76,25 @@ public final class MainActivity extends Activity {
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
-    documents.onActivityResult(requestCode, resultCode, data);
+    if (requestCode == RECORD_AUDIO_UI) {
+      if (resultCode == RESULT_OK && data != null) {
+        Uri uri = data.getData();
+        if (uri != null) {
+          documents.importRecordedAudio(uri, data.getStringExtra("recordingTitle"));
+        }
+      }
+    } else {
+      documents.onActivityResult(requestCode, resultCode, data);
+    }
+  }
+
+  private void openRecorder() {
+    startActivityForResult(new Intent(this, RecordingActivity.class), RECORD_AUDIO_UI);
   }
 
   private void goBack() {
     if (controller.state().selectedId() != null) controller.showLibrary();
+    else if (screen.handleBack()) return;
     else finish();
   }
 }

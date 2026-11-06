@@ -11,11 +11,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalDouble;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 public final class AppController {
   private final ProcessingRunner processing;
+  private final TranscriptRepository repository;
+  private final Executor worker;
+  private final Executor ui;
   private final Map<String, Item> items = new LinkedHashMap<>();
   private Consumer<AppState> listener;
   private String selectedId;
@@ -26,6 +30,9 @@ public final class AppController {
       TranscriptionPipeline pipeline,
       Executor worker,
       Executor ui) {
+    this.repository = repository;
+    this.worker = worker;
+    this.ui = ui;
     processing = new ProcessingRunner(repository, pipeline, worker, ui);
   }
 
@@ -72,6 +79,39 @@ public final class AppController {
   public void notifyMessage(String text) {
     message = text;
     emit();
+  }
+
+  public void removeVisible(Set<String> recordingIds) {
+    if (processing.isBusy()) return;
+    recordingIds.forEach(items::remove);
+    if (recordingIds.contains(selectedId)) selectedId = null;
+    emit();
+  }
+
+  public void renameSpeaker(String speakerId, String displayName) {
+    String recordingId = selectedId;
+    if (recordingId == null || speakerId == null || displayName == null || displayName.isBlank()) {
+      return;
+    }
+    worker.execute(
+        () -> {
+          try {
+            repository.renameSpeaker(recordingId, speakerId, displayName.trim());
+            Transcript updated = repository.find(recordingId).orElseThrow();
+            ui.execute(
+                () -> {
+                  Item old = items.get(recordingId);
+                  if (old != null) {
+                    items.put(
+                        recordingId,
+                        new Item(old.recording(), old.status(), old.detail(), old.progress(), updated));
+                    emit();
+                  }
+                });
+          } catch (Exception exception) {
+            ui.execute(() -> notifyMessage("Не удалось сохранить имя участника"));
+          }
+        });
   }
 
   public void open(Recording recording) {
