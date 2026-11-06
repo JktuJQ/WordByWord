@@ -1,3 +1,6 @@
 /work/
 /android-results.json
+/results.json
+/hypotheses/
+*.class
 __pycache__/

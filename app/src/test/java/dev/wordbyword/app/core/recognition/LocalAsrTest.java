@@ -28,8 +28,8 @@ public final class LocalAsrTest {
     var windows =
         SherpaSpeechRecognizer.addContext(
             List.of(
-                new SherpaSpeechRecognizer.Window(100, 16000),
-                new SherpaSpeechRecognizer.Window(17000, 30000)),
+                new SherpaSpeechRecognizer.SpeechInterval(100, 16000),
+                new SherpaSpeechRecognizer.SpeechInterval(17000, 30000)),
             31000);
     assertEquals(0, windows.get(0).start());
     assertEquals(16500, windows.get(0).end());
@@ -48,10 +48,7 @@ public final class LocalAsrTest {
                 new RecognitionResult(
                     "привет",
                     List.of(new RecognitionResult.Segment("привет", 100, 900)),
-                    RecognitionResult.Timing.SEGMENT),
-            (recording, context) -> {
-              throw new AssertionError("Unexpected demo");
-            });
+                    RecognitionResult.Timing.SEGMENT));
     var result = pipeline.transcribe(recording(), CONTEXT);
     assertEquals("привет", result.utterances().get(0).text());
     assertTrue(result.utterances().get(0).speakerId().isEmpty());
@@ -68,9 +65,6 @@ public final class LocalAsrTest {
             (uri, context) -> audio,
             (pcm, context) -> {
               throw new CancellationException();
-            },
-            (recording, context) -> {
-              throw new AssertionError("Unexpected demo");
             });
     assertThrows(CancellationException.class, () -> pipeline.transcribe(recording(), CONTEXT));
     assertTrue(audio.closed);

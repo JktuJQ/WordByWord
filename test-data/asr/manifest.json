@@ -336,5 +336,8 @@
       "source_sha256": "812435b8c17893de355cd6e877575804ab797d44b2a29717b495605be92aa742",
       "sha256": "5ed68a4b933fe8e9e9f54bad5b34dce271cc3c02de839114f36f2e56f6465719"
     }
-  ]
+  ],
+  "source": "https://huggingface.co/datasets/PolyAI/minds14",
+  "attribution": "PolyAI, Daniela Gerz et al., Multilingual and Cross-Lingual Intent Detection from Spoken Data (2021), CC-BY-4.0",
+  "changes": "30 evenly spaced examples; mu-law decoded to PCM16 mono at original 8 kHz; WAV files packed in audio.zip"
 }

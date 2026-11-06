@@ -16,22 +16,18 @@ import java.util.stream.Collectors;
 public final class LocalTranscriptionPipeline implements TranscriptionPipeline {
   private final AudioPreparer audioPreparer;
   private final SpeechRecognizer recognizer;
-  private final TranscriptionPipeline demo;
 
-  public LocalTranscriptionPipeline(
-      AudioPreparer audioPreparer, SpeechRecognizer recognizer, TranscriptionPipeline demo) {
+  public LocalTranscriptionPipeline(AudioPreparer audioPreparer, SpeechRecognizer recognizer) {
     this.audioPreparer = audioPreparer;
     this.recognizer = recognizer;
-    this.demo = demo;
   }
 
   @Override
   public Transcript transcribe(Recording recording, ProcessingContext context)
       throws ProcessingException {
-    if ("demo".equals(recording.audioUri().getScheme())) return demo.transcribe(recording, context);
     context.throwIfCancelled();
     try (var audio = audioPreparer.prepare(recording.audioUri(), context)) {
-      var result = recognizer.recognize(audio, context);
+      var result = recognizer.transcribe(audio, context);
       context.throwIfCancelled();
       var duration =
           audio.sampleCount().isPresent()
