@@ -5,6 +5,7 @@ import dev.wordbyword.app.core.transcript.Transcript;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.UnaryOperator;
 
 public interface TranscriptRepository {
   List<Recording> listRecordings() throws IOException;
@@ -17,5 +18,6 @@ public interface TranscriptRepository {
 
   void delete(String recordingId) throws IOException;
 
-  void renameSpeaker(String recordingId, String speakerId, String displayName) throws IOException;
+  Transcript update(String recordingId, UnaryOperator<Transcript> transformation)
+      throws IOException;
 }

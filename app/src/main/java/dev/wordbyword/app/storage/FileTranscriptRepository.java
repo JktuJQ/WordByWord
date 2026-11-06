@@ -21,9 +21,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -129,10 +131,13 @@ public final class FileTranscriptRepository implements TranscriptRepository {
   }
 
   @Override
-  public synchronized void renameSpeaker(String recordingId, String speakerId, String displayName)
-      throws IOException {
+  public synchronized Transcript update(
+      String recordingId, UnaryOperator<Transcript> transformation) throws IOException {
     Transcript transcript = find(recordingId).orElseThrow(NoSuchElementException::new);
-    save(transcript.withSpeakerName(speakerId, displayName));
+    Transcript updated = Objects.requireNonNull(transformation.apply(transcript));
+    if (!recordingId.equals(updated.recording().id()))
+      throw new IllegalArgumentException("Cannot change recording ID");
+    return save(updated);
   }
 
   @Override

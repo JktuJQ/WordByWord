@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.wordbyword.app.core.recording.Recording;
 import dev.wordbyword.app.core.transcript.Transcript;
+import dev.wordbyword.app.core.transcript.TranscriptEditor;
 import dev.wordbyword.app.export.TranscriptJsonExporter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.OptionalLong;
 import org.junit.Rule;
@@ -61,7 +63,10 @@ public class FileTranscriptRepositoryTest {
   public void transcriptAndRenameSurviveRestartAndStayWithinRecording() throws Exception {
     var first = repository().save(transcript(recording("first")));
     var second = repository().save(transcript(recording("second")));
-    repository().renameSpeaker(first.recording().id(), "a", "Анна");
+    repository()
+        .update(
+            first.recording().id(),
+            value -> new TranscriptEditor(value).renameSpeaker("a", "Анна").build());
     var loaded = repository().find("first").orElseThrow();
     assertEquals("Анна", loaded.speakers().get(0).displayName());
     assertEquals(first.utterances(), loaded.utterances());
@@ -271,7 +276,8 @@ public class FileTranscriptRepositoryTest {
     var restored = repository().find("legacy").orElseThrow();
     assertEquals(saved.utterances().get(0), restored.utterances().get(0));
     assertTrue(restored.utterances().get(1).speakerId().isEmpty());
-    repository().renameSpeaker("legacy", "a", "Анна");
+    repository()
+        .update("legacy", value -> new TranscriptEditor(value).renameSpeaker("a", "Анна").build());
     var upgraded =
         JsonParser.parseString(new String(Files.readAllBytes(metadata), StandardCharsets.UTF_8))
             .getAsJsonObject();
@@ -279,5 +285,56 @@ public class FileTranscriptRepositoryTest {
     assertTrue(upgraded.has("transcript"));
     assertFalse(upgraded.has("utterances"));
     assertEquals(restored.utterances(), repository().find("legacy").orElseThrow().utterances());
+  }
+
+  @Test
+  public void failedBatchDoesNotPersistAnyEdits() throws Exception {
+    var saved = repository().save(transcript(recording("batch")));
+    assertThrows(
+        NoSuchElementException.class,
+        () ->
+            repository()
+                .update(
+                    "batch",
+                    value ->
+                        new TranscriptEditor(value)
+                            .renameSpeaker("a", "Анна")
+                            .renameSpeaker("missing", "Борис")
+                            .build()));
+    assertEquals(saved, repository().find("batch").orElseThrow());
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            repository()
+                .update(
+                    "batch",
+                    value ->
+                        new Transcript(
+                            new Recording(
+                                "other",
+                                value.recording().audioUri(),
+                                "Other",
+                                OptionalLong.empty()),
+                            value.speakers(),
+                            value.utterances())));
+    assertEquals(saved, repository().find("batch").orElseThrow());
+    assertThrows(
+        NoSuchElementException.class, () -> repository().update("missing", value -> value));
+  }
+
+  @Test
+  public void batchUpdateUsesLatestSavedTranscript() throws Exception {
+    var saved = repository().save(transcript(recording("batch")));
+    var repo = repository();
+    repo.update("batch", value -> new TranscriptEditor(value).renameSpeaker("a", "Анна").build());
+    var updated =
+        repo.update(
+            "batch",
+            value -> {
+              assertEquals("Анна", value.speakers().get(0).displayName());
+              return new TranscriptEditor(value).renameSpeaker("a", "Аня").build();
+            });
+    assertEquals(updated, repository().find("batch").orElseThrow());
+    assertEquals(saved.utterances(), updated.utterances());
   }
 }
