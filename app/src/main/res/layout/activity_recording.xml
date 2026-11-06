@@ -25,9 +25,8 @@
     <LinearLayout android:id="@+id/recording_active" android:layout_width="match_parent"
         android:layout_height="0dp" android:layout_weight="1" android:gravity="center"
         android:orientation="vertical">
-        <TextView android:layout_width="210dp" android:layout_height="210dp"
-            android:gravity="center" android:background="@drawable/recording_orb"
-            android:text="●" android:textColor="@color/surface" android:textSize="92sp" />
+        <dev.wordbyword.app.VoiceOrbView android:id="@+id/recording_orb"
+            android:layout_width="210dp" android:layout_height="210dp" />
         <TextView android:id="@+id/recording_timer" android:layout_width="match_parent"
             android:layout_height="wrap_content" android:layout_marginTop="32dp"
             android:gravity="center" android:text="00:00" android:textColor="@color/ink"
