@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.OptionalDouble;
 import java.util.concurrent.CancellationException;
+import java.util.stream.Collectors;
 
 public final class SherpaSpeechRecognizer implements SpeechRecognizer {
   private static final int RATE = PcmAudio.SAMPLE_RATE_HZ;
@@ -143,9 +144,7 @@ public final class SherpaSpeechRecognizer implements SpeechRecognizer {
       String text =
           String.join(
               " ",
-              result.stream()
-                  .map(RecognitionResult.Segment::text)
-                  .collect(java.util.stream.Collectors.toList()));
+              result.stream().map(RecognitionResult.Segment::text).collect(Collectors.toList()));
       return new RecognitionResult(text, result, RecognitionResult.Timing.SEGMENT);
     } finally {
       recognizer.release();
