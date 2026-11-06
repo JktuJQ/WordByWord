@@ -128,6 +128,7 @@ public final class AppController {
     worker.execute(
         () -> {
           try {
+            repository.saveRecording(item.recording());
             Transcript result =
                 pipeline.transcribe(
                     item.recording(),
