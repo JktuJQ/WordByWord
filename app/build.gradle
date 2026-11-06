@@ -26,44 +26,7 @@ android {
     }
 }
 
-def sherpaAar = layout.buildDirectory.file('sherpa/sherpa-onnx-2.0.1.aar')
-tasks.register('prepareSherpaOnnx') {
-    outputs.file(sherpaAar)
-    doLast {
-        def target = sherpaAar.get().asFile
-        def expected = 'a8d09d1d32f3eb8520482c6d3d43fae674681c5b050385967c70a3c2c9bf0ee7'
-        def hash = { file ->
-            def digest = java.security.MessageDigest.getInstance('SHA-256')
-            file.withInputStream { stream ->
-                byte[] buffer = new byte[65536]
-                int count
-                while ((count = stream.read(buffer)) != -1) digest.update(buffer, 0, count)
-            }
-            digest.digest().encodeHex().toString()
-        }
-        if (target.isFile() && hash(target) == expected) return
-        def local = rootProject.file('local-models/sherpa-onnx-2.0.1.aar')
-        if (local.isFile() && hash(local) == expected) {
-            target.parentFile.mkdirs()
-            java.nio.file.Files.copy(local.toPath(), target.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
-            return
-        }
-        if (gradle.startParameter.offline) throw new GradleException('Missing sherpa-onnx AAR; run once without --offline')
-        target.parentFile.mkdirs()
-        def connection = new URI('https://github.com/k2-fsa/sherpa-onnx/releases/download/v2.0.1/sherpa-onnx-2.0.1.aar').toURL().openConnection()
-        connection.connectTimeout = 30000
-        connection.readTimeout = 60000
-        connection.inputStream.withCloseable { input -> target.withOutputStream { it << input } }
-        if (hash(target) != expected) {
-            target.delete()
-            throw new GradleException('sherpa-onnx AAR checksum mismatch')
-        }
-    }
-}
-
 dependencies {
-    implementation files(sherpaAar).builtBy('prepareSherpaOnnx')
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.2.0'
     implementation 'com.google.code.gson:gson:2.15.0'
     implementation files('vendor/sherpa-onnx-2.0.1.aar')
     implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.2.0'

@@ -5,6 +5,5 @@ import dev.wordbyword.app.core.processing.ProcessingContext;
 import dev.wordbyword.app.core.processing.ProcessingException;
 
 public interface SpeechRecognizer {
-  RecognitionResult transcribe(PcmAudio audio, ProcessingContext context)
-      throws ProcessingException;
+  RecognitionResult transcribe(PcmAudio audio, ProcessingContext context) throws ProcessingException;
 }
