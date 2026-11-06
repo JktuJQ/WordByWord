@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.os.Bundle;
+import android.net.Uri;
 import dev.wordbyword.app.R;
 import dev.wordbyword.app.ui.AppController;
 
@@ -37,6 +38,10 @@ public final class DocumentPicker {
     } catch (ActivityNotFoundException exception) {
       controller.notifyMessage(activity.getString(R.string.picker_unavailable));
     }
+  }
+
+  public void importRecordedAudio(Uri uri, String title) {
+    documents.importAudio(uri, title);
   }
 
   public void pickExportFile() {
