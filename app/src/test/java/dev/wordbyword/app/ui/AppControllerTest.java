@@ -87,6 +87,7 @@ public class AppControllerTest {
     assertEquals(AppController.Status.ERROR, item.status());
     assertEquals("Модель недоступна", item.detail());
     assertTrue(repository.find(recording.id()).isEmpty());
+    assertEquals(List.of(recording), repository.listRecordings());
     assertFalse(controller.state().busy());
     controller.select(recording.id());
     assertNull(controller.state().selected());

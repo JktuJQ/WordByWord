@@ -16,6 +16,7 @@ import java.util.OptionalDouble;
 import java.util.OptionalLong;
 
 public final class DemoBackend implements TranscriptRepository, TranscriptionPipeline {
+  private final Map<String, Recording> recordings = new LinkedHashMap<>();
   private final Map<String, Transcript> transcripts = new LinkedHashMap<>();
 
   public static Recording recording() {
@@ -69,9 +70,7 @@ public final class DemoBackend implements TranscriptRepository, TranscriptionPip
 
   @Override
   public synchronized List<Recording> listRecordings() {
-    return transcripts.values().stream()
-        .map(Transcript::recording)
-        .collect(java.util.stream.Collectors.toList());
+    return List.copyOf(recordings.values());
   }
 
   @Override
@@ -80,7 +79,14 @@ public final class DemoBackend implements TranscriptRepository, TranscriptionPip
   }
 
   @Override
+  public synchronized Recording saveRecording(Recording recording) {
+    recordings.put(recording.id(), recording);
+    return recording;
+  }
+
+  @Override
   public synchronized Transcript save(Transcript transcript) {
+    saveRecording(transcript.recording());
     transcripts.put(transcript.recording().id(), transcript);
     return transcript;
   }
