@@ -1,0 +1,82 @@
+package dev.wordbyword.app.ui;
+
+import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
+import android.provider.OpenableColumns;
+import dev.wordbyword.app.R;
+import dev.wordbyword.app.WordByWordApplication;
+import dev.wordbyword.app.core.recording.Recording;
+import dev.wordbyword.app.core.transcript.Transcript;
+import dev.wordbyword.app.export.TranscriptJsonExporter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.OptionalLong;
+import java.util.UUID;
+
+public final class AudioDocuments {
+  private final WordByWordApplication app;
+  private final Handler main = new Handler(Looper.getMainLooper());
+
+  public AudioDocuments(WordByWordApplication app) {
+    this.app = app;
+  }
+
+  public void importAudio(Uri uri) {
+    message(R.string.importing);
+    app.worker()
+        .execute(
+            () -> {
+              try {
+                var resolver = app.getContentResolver();
+                String title = app.getString(R.string.imported_badge);
+                try (var cursor =
+                    resolver.query(
+                        uri, new String[] {OpenableColumns.DISPLAY_NAME}, null, null, null)) {
+                  if (cursor != null && cursor.moveToFirst() && !cursor.isNull(0)) {
+                    title = cursor.getString(0);
+                  }
+                }
+                try (var input = resolver.openInputStream(uri)) {
+                  if (input == null || input.read() == -1) {
+                    throw new IOException("Empty file");
+                  }
+                }
+                Recording recording =
+                    new Recording(
+                        UUID.randomUUID().toString(),
+                        URI.create(uri.toString()),
+                        title,
+                        OptionalLong.empty());
+                main.post(() -> app.controller().add(recording));
+              } catch (Exception exception) {
+                main.post(() -> message(R.string.import_failed));
+              }
+            });
+  }
+
+  public void exportJson(Uri uri, Transcript transcript) {
+    message(R.string.exporting);
+    app.worker()
+        .execute(
+            () -> {
+              try (var stream = app.getContentResolver().openOutputStream(uri, "wt")) {
+                if (stream == null) {
+                  throw new IOException("Unable to open output");
+                }
+                try (var writer = new OutputStreamWriter(stream, StandardCharsets.UTF_8)) {
+                  TranscriptJsonExporter.write(transcript, writer);
+                }
+                main.post(() -> message(R.string.export_success));
+              } catch (Exception exception) {
+                main.post(() -> message(R.string.export_failed));
+              }
+            });
+  }
+
+  private void message(int id) {
+    app.controller().notifyMessage(app.getString(id));
+  }
+}

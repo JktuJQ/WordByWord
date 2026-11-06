@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:layout_marginTop="16dp" android:padding="20dp" android:orientation="vertical" android:background="@drawable/card">
+    <TextView android:id="@+id/recording_kind" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:textColor="@color/accent" android:textSize="12sp" android:textStyle="bold" />
+    <TextView android:id="@+id/recording_title" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="8dp" android:textColor="@color/ink" android:textSize="20sp" android:textStyle="bold" />
+    <TextView android:id="@+id/recording_detail" style="@style/BodyText"
+        android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" />
+    <ProgressBar android:id="@+id/recording_progress" style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:max="100" android:visibility="gone" />
+    <Button android:id="@+id/recording_action" style="@style/SecondaryButton"
+        android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" />
+</LinearLayout>
