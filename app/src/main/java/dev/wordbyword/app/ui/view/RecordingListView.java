@@ -30,12 +30,7 @@ public final class RecordingListView {
       Consumer<String> toggleSelection) {
     View card =
         LayoutInflater.from(items.getContext()).inflate(R.layout.item_recording, items, false);
-    boolean demo = "demo".equals(item.recording().audioUri().getScheme());
-    ((TextView) card.findViewById(R.id.recording_kind))
-        .setText(
-            demo
-                ? items.getContext().getString(R.string.demo_badge, "00:18")
-                : items.getContext().getString(R.string.imported_badge));
+    ((TextView) card.findViewById(R.id.recording_kind)).setText(R.string.imported_badge);
     ((TextView) card.findViewById(R.id.recording_title)).setText(item.recording().title());
     ((TextView) card.findViewById(R.id.recording_detail)).setText(item.detail());
     TextView status = card.findViewById(R.id.recording_status);
@@ -76,9 +71,7 @@ public final class RecordingListView {
       if (!selecting) card.setOnClickListener(view -> controller.select(item.recording().id()));
     } else {
       action.setText(
-          item.status() == AppState.Status.IMPORTED
-              ? (demo ? R.string.prepare_demo : R.string.start_processing)
-              : R.string.retry);
+          item.status() == AppState.Status.IMPORTED ? R.string.start_processing : R.string.retry);
       action.setEnabled(!state.busy());
       action.setOnClickListener(view -> controller.start(item.recording().id()));
     }

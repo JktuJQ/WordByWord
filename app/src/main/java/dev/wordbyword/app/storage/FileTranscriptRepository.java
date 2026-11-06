@@ -3,17 +3,23 @@ package dev.wordbyword.app.storage;
 import dev.wordbyword.app.core.recording.Recording;
 import dev.wordbyword.app.core.storage.TranscriptRepository;
 import dev.wordbyword.app.core.transcript.Transcript;
+import dev.wordbyword.app.json.RecordingJson;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
@@ -88,23 +94,19 @@ public final class FileTranscriptRepository implements TranscriptRepository {
     }
     Path staging = Files.createTempDirectory(root, ".pending-");
     try {
-      URI audioUri = recording.audioUri();
-      if (!"demo".equals(audioUri.getScheme())) {
-        try (var input = source.open(audioUri)) {
-          if (input == null) throw new IOException("Audio source is unavailable");
-          Path audio = staging.resolve("audio");
-          Files.copy(input, audio);
-          try (var channel =
-              java.nio.channels.FileChannel.open(audio, java.nio.file.StandardOpenOption.WRITE)) {
-            channel.force(true);
-          }
-          if (Files.size(audio) == 0) throw new IOException("Audio source is empty");
+      try (var input = source.open(recording.audioUri())) {
+        if (input == null) throw new IOException("Audio source is unavailable");
+        Path audio = staging.resolve("audio");
+        Files.copy(input, audio);
+        try (var channel = FileChannel.open(audio, StandardOpenOption.WRITE)) {
+          channel.force(true);
         }
-        audioUri = directory.resolve("audio").toUri();
+        if (Files.size(audio) == 0) throw new IOException("Audio source is empty");
       }
+      URI audioUri = directory.resolve("audio").toUri();
       var saved =
           new Recording(recording.id(), audioUri, recording.title(), recording.durationMs());
-      RecordingJson.write(staging.resolve("recording.json"), saved, null);
+      write(staging.resolve("recording.json"), saved, null);
       Files.move(staging, directory, StandardCopyOption.ATOMIC_MOVE);
       return saved;
     } finally {
@@ -122,29 +124,15 @@ public final class FileTranscriptRepository implements TranscriptRepository {
             transcript.recording().title(),
             transcript.recording().durationMs());
     var saved = new Transcript(savedRecording, transcript.speakers(), transcript.utterances());
-    RecordingJson.write(
-        directory(savedRecording.id()).resolve("recording.json"), savedRecording, saved);
+    write(directory(savedRecording.id()).resolve("recording.json"), savedRecording, saved);
     return saved;
   }
 
   @Override
   public synchronized void renameSpeaker(String recordingId, String speakerId, String displayName)
       throws IOException {
-    if (displayName == null || displayName.isBlank())
-      throw new IllegalArgumentException("Empty name");
     Transcript transcript = find(recordingId).orElseThrow(NoSuchElementException::new);
-    if (transcript.speakers().stream().noneMatch(speaker -> speaker.id().equals(speakerId))) {
-      throw new NoSuchElementException(speakerId);
-    }
-    var speakers =
-        transcript.speakers().stream()
-            .map(
-                speaker ->
-                    speaker.id().equals(speakerId)
-                        ? new Transcript.Speaker(speakerId, displayName.trim())
-                        : speaker)
-            .collect(Collectors.toList());
-    save(new Transcript(transcript.recording(), speakers, transcript.utterances()));
+    save(transcript.withSpeakerName(speakerId, displayName));
   }
 
   @Override
@@ -157,18 +145,20 @@ public final class FileTranscriptRepository implements TranscriptRepository {
   }
 
   private RecordingJson.Entry read(Path directory) throws IOException {
-    var entry = RecordingJson.read(directory.resolve("recording.json"));
+    RecordingJson.Entry entry;
+    try (var reader =
+        Files.newBufferedReader(directory.resolve("recording.json"), StandardCharsets.UTF_8)) {
+      entry = RecordingJson.read(reader);
+    }
     if (!directory.equals(directory(entry.recording().id())))
       throw new IOException("Recording ID mismatch");
-    var recording = entry.recording();
-    if (!"demo".equals(recording.audioUri().getScheme())) {
-      recording =
-          new Recording(
-              recording.id(),
-              directory.resolve("audio").toUri(),
-              recording.title(),
-              recording.durationMs());
-    }
+    var original = entry.recording();
+    var recording =
+        new Recording(
+            original.id(),
+            directory.resolve("audio").toUri(),
+            original.title(),
+            original.durationMs());
     var transcript = entry.transcript();
     return new RecordingJson.Entry(
         recording,
@@ -177,15 +167,30 @@ public final class FileTranscriptRepository implements TranscriptRepository {
             : new Transcript(recording, transcript.speakers(), transcript.utterances()));
   }
 
+  private static void write(Path target, Recording recording, Transcript transcript)
+      throws IOException {
+    Path temporary = Files.createTempFile(target.getParent(), ".metadata-", ".tmp");
+    try {
+      try (var writer = Files.newBufferedWriter(temporary, StandardCharsets.UTF_8)) {
+        RecordingJson.write(writer, recording, transcript);
+      }
+      try (var channel = FileChannel.open(temporary, StandardOpenOption.WRITE)) {
+        channel.force(true);
+      }
+      Files.move(
+          temporary, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+    } finally {
+      Files.deleteIfExists(temporary);
+    }
+  }
+
   private Path directory(String id) {
     if (id == null || id.isBlank()) throw new IllegalArgumentException("Empty recording ID");
     try {
       byte[] digest =
-          MessageDigest.getInstance("SHA-256")
-              .digest(id.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+          MessageDigest.getInstance("SHA-256").digest(id.getBytes(StandardCharsets.UTF_8));
       var name = new StringBuilder();
-      for (byte value : digest)
-        name.append(String.format(java.util.Locale.ROOT, "%02x", value & 255));
+      for (byte value : digest) name.append(String.format(Locale.ROOT, "%02x", value & 255));
       return root.resolve(name.toString());
     } catch (NoSuchAlgorithmException exception) {
       throw new IllegalStateException(exception);
@@ -193,9 +198,8 @@ public final class FileTranscriptRepository implements TranscriptRepository {
   }
 
   private static void requireAudio(Recording recording) throws IOException {
-    if (!"demo".equals(recording.audioUri().getScheme())
-        && (!Files.isRegularFile(java.nio.file.Paths.get(recording.audioUri()))
-            || Files.size(java.nio.file.Paths.get(recording.audioUri())) == 0)) {
+    if (!Files.isRegularFile(Paths.get(recording.audioUri()))
+        || Files.size(Paths.get(recording.audioUri())) == 0) {
       throw new IOException("Saved audio is missing or empty");
     }
   }

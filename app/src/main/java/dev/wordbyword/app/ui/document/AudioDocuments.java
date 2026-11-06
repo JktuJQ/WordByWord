@@ -4,15 +4,18 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.OpenableColumns;
+import android.util.Log;
 import dev.wordbyword.app.R;
 import dev.wordbyword.app.WordByWordApplication;
 import dev.wordbyword.app.core.recording.Recording;
 import dev.wordbyword.app.core.transcript.Transcript;
 import dev.wordbyword.app.export.TranscriptJsonExporter;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.OptionalLong;
 import java.util.UUID;
 
@@ -95,12 +98,11 @@ public final class AudioDocuments {
   private void removeRecordingDraft(Uri uri) {
     if (!"file".equals(uri.getScheme()) || uri.getPath() == null) return;
     try {
-      var source = new java.io.File(uri.getPath()).getCanonicalFile();
-      var drafts = new java.io.File(app.getFilesDir(), "recordings").getCanonicalFile();
-      if (drafts.equals(source.getParentFile()))
-        java.nio.file.Files.deleteIfExists(source.toPath());
+      var source = new File(uri.getPath()).getCanonicalFile();
+      var drafts = new File(app.getFilesDir(), "recordings").getCanonicalFile();
+      if (drafts.equals(source.getParentFile())) Files.deleteIfExists(source.toPath());
     } catch (IOException exception) {
-      android.util.Log.w("AudioDocuments", "Unable to remove saved recording draft", exception);
+      Log.w("AudioDocuments", "Unable to remove saved recording draft", exception);
     }
   }
 

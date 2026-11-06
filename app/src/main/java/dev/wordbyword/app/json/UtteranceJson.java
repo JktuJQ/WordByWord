@@ -2,6 +2,7 @@ package dev.wordbyword.app.json;
 
 import com.google.gson.JsonObject;
 import dev.wordbyword.app.core.transcript.Transcript;
+import java.util.Objects;
 import java.util.Optional;
 
 public final class UtteranceJson {
@@ -13,7 +14,7 @@ public final class UtteranceJson {
     entry.addProperty("speaker_id", speakerId);
     entry.addProperty("start_ms", utterance.startMs());
     entry.addProperty("end_ms", utterance.endMs());
-    entry.addProperty("text", java.util.Objects.requireNonNull(utterance.text(), "text"));
+    entry.addProperty("text", Objects.requireNonNull(utterance.text(), "text"));
     return entry;
   }
 

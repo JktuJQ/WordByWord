@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 
 public final class AppController {
   private final ProcessingRunner processing;
-  private final LibraryActions library;
+  private final LibraryService library;
   private final Set<String> deleting = new HashSet<>();
   private final Map<String, Item> items = new LinkedHashMap<>();
   private Consumer<AppState> listener;
@@ -30,7 +30,7 @@ public final class AppController {
       TranscriptionPipeline pipeline,
       Executor worker,
       Executor ui) {
-    library = new LibraryActions(repository, worker, ui);
+    library = new LibraryService(repository, worker, ui);
     processing = new ProcessingRunner(repository, pipeline, worker, ui);
   }
 
@@ -124,13 +124,6 @@ public final class AppController {
           }
         },
         this::notifyMessage);
-  }
-
-  public void open(Recording recording) {
-    add(recording);
-    Item item = items.get(recording.id());
-    if (item.status() == Status.READY) select(recording.id());
-    else start(recording.id());
   }
 
   public void start(String recordingId) {

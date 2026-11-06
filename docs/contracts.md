@@ -107,3 +107,5 @@ repository.renameSpeaker(saved.recording().id(), "a", "Анна");
 
 Проверки в Nix devShell: `./gradlew testDebugUnitTest assembleDebug lintDebug`.
 JUnit подключён только к JVM-тестам, не к приложению.
+
+Переименование имени в модели выполняет `Transcript.withSpeakerName`; `TranscriptRepository.renameSpeaker` отвечает за атомарное чтение, изменение и сохранение конкретной записи. JSON-кодеки находятся в пакете `json`, файловые операции принадлежат репозиторию.

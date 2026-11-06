@@ -5,19 +5,43 @@ import static org.junit.Assert.*;
 import dev.wordbyword.app.core.processing.ProcessingException;
 import dev.wordbyword.app.core.recording.Recording;
 import dev.wordbyword.app.core.transcript.Transcript;
-import dev.wordbyword.app.demo.DemoBackend;
+import dev.wordbyword.app.storage.FileTranscriptRepository;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
+import java.util.OptionalLong;
+import java.util.Set;
+import java.util.UUID;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 public class AppControllerTest {
+  @Rule public TemporaryFolder temporary = new TemporaryFolder();
+
+  private FileTranscriptRepository repository() {
+    return new FileTranscriptRepository(
+        temporary.getRoot().toPath().resolve("library"),
+        uri -> Files.newInputStream(Paths.get(uri)));
+  }
+
+  private Recording recording() throws Exception {
+    var source = temporary.newFile().toPath();
+    Files.write(source, new byte[] {1, 2, 3, 4});
+    return repository()
+        .saveRecording(
+            new Recording(
+                UUID.randomUUID().toString(), source.toUri(), "Запись", OptionalLong.of(18000)));
+  }
+
   @Test
-  public void successfulTaskCanBeOpenedAndSurvivesListenerReplacement() {
+  public void successfulTaskCanBeOpenedAndSurvivesListenerReplacement() throws Exception {
     var worker = new ArrayDeque<Runnable>();
-    var repository = new DemoBackend();
-    var recording = DemoBackend.recording();
+    var repository = repository();
+    var recording = recording();
     var result = new Transcript(recording, List.of(), List.of());
     var controller =
         new AppController(
@@ -45,10 +69,10 @@ public class AppControllerTest {
   }
 
   @Test
-  public void cancelledTaskNeverSavesEvenIfPipelineIgnoresCancellation() {
+  public void cancelledTaskNeverSavesEvenIfPipelineIgnoresCancellation() throws Exception {
     var worker = new ArrayDeque<Runnable>();
-    var repository = new DemoBackend();
-    Recording recording = DemoBackend.recording();
+    var repository = repository();
+    Recording recording = recording();
     var controller =
         new AppController(
             repository,
@@ -68,10 +92,10 @@ public class AppControllerTest {
   }
 
   @Test
-  public void failedTaskKeepsRecordingForRetryAndDoesNotSave() {
+  public void failedTaskKeepsRecordingForRetryAndDoesNotSave() throws Exception {
     var worker = new ArrayDeque<Runnable>();
-    var repository = new DemoBackend();
-    var recording = DemoBackend.recording();
+    var repository = repository();
+    var recording = recording();
     var controller =
         new AppController(
             repository,
@@ -96,10 +120,10 @@ public class AppControllerTest {
   }
 
   @Test
-  public void renamingSpeakerUpdatesAllVisibleUtterancesAfterSave() {
+  public void renamingSpeakerUpdatesAllVisibleUtterancesAfterSave() throws Exception {
     var worker = new ArrayDeque<Runnable>();
-    var repository = new DemoBackend();
-    var recording = DemoBackend.recording();
+    var repository = repository();
+    var recording = recording();
     var transcript =
         new Transcript(
             recording,
@@ -123,10 +147,10 @@ public class AppControllerTest {
   }
 
   @Test
-  public void loadRestoresReadyAndUnprocessedEntriesWithoutRunningPipeline() {
+  public void loadRestoresReadyAndUnprocessedEntriesWithoutRunningPipeline() throws Exception {
     var worker = new ArrayDeque<Runnable>();
-    var repository = new DemoBackend();
-    var ready = DemoBackend.recording();
+    var repository = repository();
+    var ready = recording();
     var imported = new Recording("pending", ready.audioUri(), "Импорт", ready.durationMs());
     repository.save(new Transcript(ready, List.of(), List.of()));
     repository.saveRecording(imported);
@@ -148,10 +172,10 @@ public class AppControllerTest {
   }
 
   @Test
-  public void pendingDeleteBlocksProcessingAndNeverResurrectsEntry() {
+  public void pendingDeleteBlocksProcessingAndNeverResurrectsEntry() throws Exception {
     var worker = new ArrayDeque<Runnable>();
-    var repository = new DemoBackend();
-    var recording = DemoBackend.recording();
+    var repository = repository();
+    var recording = recording();
     repository.saveRecording(recording);
     var controller =
         new AppController(
@@ -162,7 +186,7 @@ public class AppControllerTest {
             worker::add,
             Runnable::run);
     controller.add(recording);
-    controller.delete(java.util.Set.of(recording.id()));
+    controller.delete(Set.of(recording.id()));
     controller.start(recording.id());
     assertTrue(controller.state().busy());
     assertEquals(1, worker.size());

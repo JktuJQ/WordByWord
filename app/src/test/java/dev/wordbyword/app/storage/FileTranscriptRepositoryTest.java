@@ -10,7 +10,6 @@ import dev.wordbyword.app.export.TranscriptJsonExporter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -170,12 +169,10 @@ public class FileTranscriptRepositoryTest {
   }
 
   @Test
-  public void silenceAndVirtualDemoRemainDistinctFromUnprocessedImport() throws Exception {
-    var demo =
-        new Recording("demo", URI.create("demo://conversation"), "Пример", OptionalLong.empty());
-    repository().save(new Transcript(demo, List.of(), List.of()));
-    assertEquals(List.of(), repository().find("demo").orElseThrow().utterances());
-    assertEquals(List.of(demo), repository().listRecordings());
+  public void silenceRemainsDistinctFromUnprocessedImport() throws Exception {
+    var saved = repository().save(new Transcript(recording("silence"), List.of(), List.of()));
+    assertEquals(List.of(), repository().find("silence").orElseThrow().utterances());
+    assertEquals(List.of(saved.recording()), repository().listRecordings());
   }
 
   @Test

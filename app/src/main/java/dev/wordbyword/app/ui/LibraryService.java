@@ -14,12 +14,12 @@ import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-final class LibraryActions {
+final class LibraryService {
   private final TranscriptRepository repository;
   private final Executor worker;
   private final Executor ui;
 
-  LibraryActions(TranscriptRepository repository, Executor worker, Executor ui) {
+  LibraryService(TranscriptRepository repository, Executor worker, Executor ui) {
     this.repository = repository;
     this.worker = worker;
     this.ui = ui;
