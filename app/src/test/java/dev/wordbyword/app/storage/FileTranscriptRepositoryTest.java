@@ -2,11 +2,16 @@ package dev.wordbyword.app.storage;
 
 import static org.junit.Assert.*;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import dev.wordbyword.app.core.recording.Recording;
 import dev.wordbyword.app.core.transcript.Transcript;
+import dev.wordbyword.app.export.TranscriptJsonExporter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -119,7 +124,7 @@ public class FileTranscriptRepositoryTest {
     Recording broken = repository().saveRecording(recording("broken"));
     Recording healthy = repository().saveRecording(recording("healthy"));
     Path metadata = Paths.get(broken.audioUri()).getParent().resolve("recording.json");
-    Files.write(metadata, "{broken".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    Files.write(metadata, "{broken".getBytes(StandardCharsets.UTF_8));
     assertEquals(List.of(healthy), repository().listRecordings());
     assertThrows(IOException.class, () -> repository().find("broken"));
     assertTrue(Files.exists(metadata));
@@ -151,7 +156,7 @@ public class FileTranscriptRepositoryTest {
     Path pending = Files.createDirectory(root().resolve(".pending-interrupted"));
     Files.write(pending.resolve("audio"), new byte[] {1});
     Path unfinished = Paths.get(saved.audioUri()).getParent().resolve(".metadata-interrupted.tmp");
-    Files.write(unfinished, "unfinished".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    Files.write(unfinished, "unfinished".getBytes(StandardCharsets.UTF_8));
     assertEquals(List.of(saved), repository().listRecordings());
     assertFalse(Files.exists(pending));
     assertFalse(Files.exists(unfinished));
@@ -177,17 +182,14 @@ public class FileTranscriptRepositoryTest {
   public void unsupportedVersionAndFractionalTimesAreRejectedWithoutRewriting() throws Exception {
     var saved = repository().save(transcript(recording("first")));
     Path metadata = Paths.get(saved.recording().audioUri()).getParent().resolve("recording.json");
-    String original =
-        new String(Files.readAllBytes(metadata), java.nio.charset.StandardCharsets.UTF_8);
+    String original = new String(Files.readAllBytes(metadata), StandardCharsets.UTF_8);
     for (String invalid :
         List.of(
-            original.replace("\"version\":1", "\"version\":2"),
+            original.replace("\"version\":2", "\"version\":999"),
             original.replace("\"start_ms\":100", "\"start_ms\":100.5"))) {
-      Files.write(metadata, invalid.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+      Files.write(metadata, invalid.getBytes(StandardCharsets.UTF_8));
       assertThrows(IOException.class, () -> repository().find("first"));
-      assertEquals(
-          invalid,
-          new String(Files.readAllBytes(metadata), java.nio.charset.StandardCharsets.UTF_8));
+      assertEquals(invalid, new String(Files.readAllBytes(metadata), StandardCharsets.UTF_8));
     }
   }
 
@@ -200,5 +202,85 @@ public class FileTranscriptRepositoryTest {
     assertEquals(owned.audioUri(), result.recording().audioUri());
     assertEquals(
         OptionalLong.of(1000), repository().find("first").orElseThrow().recording().durationMs());
+  }
+
+  @Test
+  public void storedUtterancesUseTheSameSchemaAsExport() throws Exception {
+    var saved = repository().save(transcript(recording("schema")));
+    Path metadata = Paths.get(saved.recording().audioUri()).getParent().resolve("recording.json");
+    var stored =
+        JsonParser.parseString(new String(Files.readAllBytes(metadata), StandardCharsets.UTF_8))
+            .getAsJsonObject();
+    var writer = new StringWriter();
+    TranscriptJsonExporter.write(saved, writer);
+    var exported = JsonParser.parseString(writer.toString()).getAsJsonObject();
+    assertEquals(2, stored.get("version").getAsInt());
+    assertFalse(stored.has("utterances"));
+    assertEquals(exported.get("transcript"), stored.get("transcript"));
+  }
+
+  @Test
+  public void unknownSpeakerStaysNullInStorageAndGetsExportLabelOnlyAtExport() throws Exception {
+    var saved =
+        repository()
+            .save(
+                new Transcript(
+                    recording("unknown"),
+                    List.of(),
+                    List.of(new Transcript.Utterance(Optional.empty(), "Речь", 0, 100))));
+    Path metadata = Paths.get(saved.recording().audioUri()).getParent().resolve("recording.json");
+    var stored =
+        JsonParser.parseString(new String(Files.readAllBytes(metadata), StandardCharsets.UTF_8))
+            .getAsJsonObject();
+    assertTrue(
+        stored
+            .getAsJsonArray("transcript")
+            .get(0)
+            .getAsJsonObject()
+            .get("speaker_id")
+            .isJsonNull());
+    assertEquals(saved, repository().find("unknown").orElseThrow());
+    var writer = new StringWriter();
+    TranscriptJsonExporter.write(saved, writer);
+    var exported = JsonParser.parseString(writer.toString()).getAsJsonObject();
+    assertEquals(
+        "unknown",
+        exported
+            .getAsJsonArray("transcript")
+            .get(0)
+            .getAsJsonObject()
+            .get("speaker_id")
+            .getAsString());
+    assertTrue(
+        repository().find("unknown").orElseThrow().utterances().get(0).speakerId().isEmpty());
+  }
+
+  @Test
+  public void legacyStorageIsReadableAndUpgradedOnNextSave() throws Exception {
+    var saved = repository().save(transcript(recording("legacy")));
+    Path metadata = Paths.get(saved.recording().audioUri()).getParent().resolve("recording.json");
+    var legacy =
+        JsonParser.parseString(new String(Files.readAllBytes(metadata), StandardCharsets.UTF_8))
+            .getAsJsonObject();
+    legacy.addProperty("version", 1);
+    var utterances = legacy.remove("transcript").getAsJsonArray();
+    var unknown = new JsonObject();
+    unknown.addProperty("text", "Без участника");
+    unknown.addProperty("start_ms", 900);
+    unknown.addProperty("end_ms", 1000);
+    utterances.add(unknown);
+    legacy.add("utterances", utterances);
+    Files.write(metadata, legacy.toString().getBytes(StandardCharsets.UTF_8));
+    var restored = repository().find("legacy").orElseThrow();
+    assertEquals(saved.utterances().get(0), restored.utterances().get(0));
+    assertTrue(restored.utterances().get(1).speakerId().isEmpty());
+    repository().renameSpeaker("legacy", "a", "Анна");
+    var upgraded =
+        JsonParser.parseString(new String(Files.readAllBytes(metadata), StandardCharsets.UTF_8))
+            .getAsJsonObject();
+    assertEquals(2, upgraded.get("version").getAsInt());
+    assertTrue(upgraded.has("transcript"));
+    assertFalse(upgraded.has("utterances"));
+    assertEquals(restored.utterances(), repository().find("legacy").orElseThrow().utterances());
   }
 }

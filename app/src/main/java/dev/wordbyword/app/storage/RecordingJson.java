@@ -1,11 +1,13 @@
 package dev.wordbyword.app.storage;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.wordbyword.app.core.recording.Recording;
 import dev.wordbyword.app.core.transcript.Transcript;
+import dev.wordbyword.app.json.UtteranceJson;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -14,19 +16,44 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.OptionalLong;
 
 final class RecordingJson {
   record Entry(Recording recording, Transcript transcript) {}
 
-  private static final Gson JSON = new Gson();
+  private static final Gson JSON = new GsonBuilder().serializeNulls().create();
 
   private RecordingJson() {}
 
   static void write(Path target, Recording recording, Transcript transcript) throws IOException {
+    JsonObject document;
+    try {
+      document = encode(recording, transcript);
+    } catch (RuntimeException exception) {
+      throw new IOException("Invalid recording metadata", exception);
+    }
+    decode(document);
+    Path temporary = Files.createTempFile(target.getParent(), ".metadata-", ".tmp");
+    try {
+      try (var writer = Files.newBufferedWriter(temporary, StandardCharsets.UTF_8)) {
+        JSON.toJson(document, writer);
+      }
+      try (var channel =
+          java.nio.channels.FileChannel.open(temporary, java.nio.file.StandardOpenOption.WRITE)) {
+        channel.force(true);
+      }
+      Files.move(
+          temporary, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+    } catch (com.google.gson.JsonIOException exception) {
+      throw new IOException("Cannot write recording metadata", exception);
+    } finally {
+      Files.deleteIfExists(temporary);
+    }
+  }
+
+  private static JsonObject encode(Recording recording, Transcript transcript) {
     var document = new JsonObject();
-    document.addProperty("version", 1);
+    document.addProperty("version", 2);
     document.addProperty("id", recording.id());
     document.addProperty("audio_uri", recording.audioUri().toString());
     document.addProperty("title", recording.title());
@@ -43,30 +70,11 @@ final class RecordingJson {
       document.add("speakers", speakers);
       var utterances = new JsonArray();
       for (var utterance : transcript.utterances()) {
-        var entry = new JsonObject();
-        utterance.speakerId().ifPresent(id -> entry.addProperty("speaker_id", id));
-        entry.addProperty("text", utterance.text());
-        entry.addProperty("start_ms", utterance.startMs());
-        entry.addProperty("end_ms", utterance.endMs());
-        utterances.add(entry);
+        utterances.add(UtteranceJson.toJson(utterance, utterance.speakerId().orElse(null)));
       }
-      document.add("utterances", utterances);
+      document.add("transcript", utterances);
     }
-    decode(document);
-    Path temporary = Files.createTempFile(target.getParent(), ".metadata-", ".tmp");
-    try {
-      try (var writer = Files.newBufferedWriter(temporary, StandardCharsets.UTF_8)) {
-        JSON.toJson(document, writer);
-      }
-      try (var channel =
-          java.nio.channels.FileChannel.open(temporary, java.nio.file.StandardOpenOption.WRITE)) {
-        channel.force(true);
-      }
-      Files.move(
-          temporary, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-    } finally {
-      Files.deleteIfExists(temporary);
-    }
+    return document;
   }
 
   static Entry read(Path path) throws IOException {
@@ -90,7 +98,8 @@ final class RecordingJson {
 
   private static Entry decode(JsonObject document) throws IOException {
     try {
-      if (number(document, "version") != 1)
+      long version = number(document, "version");
+      if (version != 1 && version != 2)
         throw new IllegalArgumentException("Unsupported storage version");
       String id = document.get("id").getAsString();
       String title = document.get("title").getAsString();
@@ -102,7 +111,8 @@ final class RecordingJson {
       if (id.isBlank() || !uri.isAbsolute() || (duration.isPresent() && duration.getAsLong() < 0))
         throw new IllegalArgumentException("Invalid recording");
       var recording = new Recording(id, uri, title, duration);
-      if (!document.has("utterances") && !document.has("speakers"))
+      String transcriptKey = version == 1 ? "utterances" : "transcript";
+      if (!document.has(transcriptKey) && !document.has("speakers"))
         return new Entry(recording, null);
       var speakers = new ArrayList<Transcript.Speaker>();
       var ids = new HashSet<String>();
@@ -115,21 +125,12 @@ final class RecordingJson {
         speakers.add(new Transcript.Speaker(speakerId, name));
       }
       var utterances = new ArrayList<Transcript.Utterance>();
-      for (var element : document.getAsJsonArray("utterances")) {
-        var utterance = element.getAsJsonObject();
-        Optional<String> speakerId =
-            utterance.has("speaker_id")
-                ? Optional.of(utterance.get("speaker_id").getAsString())
-                : Optional.empty();
-        long start = number(utterance, "start_ms");
-        long end = number(utterance, "end_ms");
-        if (start < 0
-            || end < start
-            || (duration.isPresent() && end > duration.getAsLong())
-            || (speakerId.isPresent() && !ids.contains(speakerId.get())))
+      for (var element : document.getAsJsonArray(transcriptKey)) {
+        var utterance = UtteranceJson.fromJson(element.getAsJsonObject());
+        if ((duration.isPresent() && utterance.endMs() > duration.getAsLong())
+            || (utterance.speakerId().isPresent() && !ids.contains(utterance.speakerId().get())))
           throw new IllegalArgumentException("Invalid utterance");
-        utterances.add(
-            new Transcript.Utterance(speakerId, utterance.get("text").getAsString(), start, end));
+        utterances.add(utterance);
       }
       return new Entry(recording, new Transcript(recording, speakers, utterances));
     } catch (RuntimeException exception) {
