@@ -1,12 +1,14 @@
 package dev.wordbyword.evaluation;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.Normalizer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -86,7 +88,7 @@ public final class ScoreAsr {
       String text;
       if (row.has("hypothesis")) text = row.get("hypothesis").getAsString();
       else {
-        var parts = new java.util.ArrayList<String>();
+        var parts = new ArrayList<String>();
         for (var segment : row.getAsJsonArray("segments"))
           parts.add(segment.getAsJsonObject().get("text").getAsString());
         text = String.join(" ", parts);
@@ -151,7 +153,7 @@ public final class ScoreAsr {
     var result = score(manifest, hypotheses);
     Files.write(
         Path.of(args[2]),
-        (new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(result) + "\n")
+        (new GsonBuilder().setPrettyPrinting().create().toJson(result) + "\n")
             .getBytes(StandardCharsets.UTF_8));
     System.out.printf(
         Locale.ROOT,

@@ -76,4 +76,4 @@ gh run download <run-id> --repo JktuJQ/WordByWord
 этим изменением не настраивается; при его включении имя check для выбора —
 `Android build and checks`.
 
-Скорер WER `ScoreAsr` находится в `app/src/test/java/dev/wordbyword/evaluation` вместе с тестовыми Java-исходниками и не включается в APK. Датасет и manifest остаются в `test-data/asr`. Это позволяет Gradle и JDT LS использовать одинаковую структуру исходников. Для ручного запуска скорера нужен существующий Gson в classpath.
+Скореры WER/DER и их JVM-тесты собраны в отдельном модуле `evaluation` и не включаются в Android APK. CI запускает `:evaluation:test` и сохраняет его отчёты. Датасеты и команды оценки описаны в [evaluation/README.md](../evaluation/README.md).
