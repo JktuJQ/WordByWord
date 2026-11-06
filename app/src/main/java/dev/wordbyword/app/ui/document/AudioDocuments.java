@@ -25,6 +25,10 @@ public final class AudioDocuments {
   }
 
   public void importAudio(Uri uri) {
+    importAudio(uri, null);
+  }
+
+  public void importAudio(Uri uri, String preferredTitle) {
     message(R.string.importing);
     app.worker()
         .execute(
@@ -32,17 +36,23 @@ public final class AudioDocuments {
               try {
                 var resolver = app.getContentResolver();
                 String title = app.getString(R.string.imported_badge);
-                try (var cursor =
-                    resolver.query(
-                        uri, new String[] {OpenableColumns.DISPLAY_NAME}, null, null, null)) {
-                  if (cursor != null && cursor.moveToFirst() && !cursor.isNull(0)) {
-                    title = cursor.getString(0);
+                try {
+                  try (var cursor =
+                      resolver.query(
+                          uri, new String[] {OpenableColumns.DISPLAY_NAME}, null, null, null)) {
+                    if (cursor != null && cursor.moveToFirst() && !cursor.isNull(0)) {
+                      title = cursor.getString(0);
+                    }
                   }
+                } catch (RuntimeException ignored) {
                 }
                 try (var input = resolver.openInputStream(uri)) {
                   if (input == null || input.read() == -1) {
                     throw new IOException("Empty file");
                   }
+                }
+                if (preferredTitle != null && !preferredTitle.isBlank()) {
+                  title = preferredTitle.trim();
                 }
                 Recording recording =
                     new Recording(
