@@ -228,7 +228,7 @@ public final class MainView {
         .setPositiveButton(
             R.string.delete_selected,
             (dialog, which) -> {
-              controller.removeVisible(Set.copyOf(selectedIds));
+              controller.delete(Set.copyOf(selectedIds));
               toggleSelecting();
             })
         .show();

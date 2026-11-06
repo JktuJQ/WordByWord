@@ -7,6 +7,7 @@ import dev.wordbyword.app.core.transcript.Transcript;
 import dev.wordbyword.app.processing.ProcessingRunner;
 import dev.wordbyword.app.ui.AppState.Item;
 import dev.wordbyword.app.ui.AppState.Status;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,9 +18,8 @@ import java.util.function.Consumer;
 
 public final class AppController {
   private final ProcessingRunner processing;
-  private final TranscriptRepository repository;
-  private final Executor worker;
-  private final Executor ui;
+  private final LibraryActions library;
+  private final Set<String> deleting = new HashSet<>();
   private final Map<String, Item> items = new LinkedHashMap<>();
   private Consumer<AppState> listener;
   private String selectedId;
@@ -30,9 +30,7 @@ public final class AppController {
       TranscriptionPipeline pipeline,
       Executor worker,
       Executor ui) {
-    this.repository = repository;
-    this.worker = worker;
-    this.ui = ui;
+    library = new LibraryActions(repository, worker, ui);
     processing = new ProcessingRunner(repository, pipeline, worker, ui);
   }
 
@@ -40,7 +38,7 @@ public final class AppController {
     return new AppState(
         List.copyOf(items.values()),
         selectedId,
-        processing.isBusy(),
+        processing.isBusy() || !deleting.isEmpty(),
         processing.isCancelling(),
         message);
   }
@@ -81,37 +79,51 @@ public final class AppController {
     emit();
   }
 
-  public void removeVisible(Set<String> recordingIds) {
-    if (processing.isBusy()) return;
-    recordingIds.forEach(items::remove);
-    if (recordingIds.contains(selectedId)) selectedId = null;
+  public void load() {
+    library.load(
+        loaded -> {
+          for (Item item : loaded) items.putIfAbsent(item.recording().id(), item);
+          emit();
+        },
+        this::notifyMessage);
+  }
+
+  public void delete(Set<String> recordingIds) {
+    if (processing.isBusy() || !deleting.isEmpty()) return;
+    deleting.addAll(recordingIds);
     emit();
+    library.delete(
+        Set.copyOf(recordingIds),
+        id -> {
+          deleting.remove(id);
+          items.remove(id);
+          if (id.equals(selectedId)) selectedId = null;
+          emit();
+        },
+        (id, error) -> {
+          deleting.remove(id);
+          notifyMessage(error);
+        });
   }
 
   public void renameSpeaker(String speakerId, String displayName) {
     String recordingId = selectedId;
-    if (recordingId == null || speakerId == null || displayName == null || displayName.isBlank()) {
+    if (recordingId == null || speakerId == null || displayName == null || displayName.isBlank())
       return;
-    }
-    worker.execute(
-        () -> {
-          try {
-            repository.renameSpeaker(recordingId, speakerId, displayName.trim());
-            Transcript updated = repository.find(recordingId).orElseThrow();
-            ui.execute(
-                () -> {
-                  Item old = items.get(recordingId);
-                  if (old != null) {
-                    items.put(
-                        recordingId,
-                        new Item(old.recording(), old.status(), old.detail(), old.progress(), updated));
-                    emit();
-                  }
-                });
-          } catch (Exception exception) {
-            ui.execute(() -> notifyMessage("Не удалось сохранить имя участника"));
+    library.rename(
+        recordingId,
+        speakerId,
+        displayName.trim(),
+        updated -> {
+          Item old = items.get(recordingId);
+          if (old != null) {
+            items.put(
+                recordingId,
+                new Item(updated.recording(), old.status(), old.detail(), old.progress(), updated));
+            emit();
           }
-        });
+        },
+        this::notifyMessage);
   }
 
   public void open(Recording recording) {
@@ -123,7 +135,8 @@ public final class AppController {
 
   public void start(String recordingId) {
     Item item = items.get(recordingId);
-    if (processing.isBusy() || item == null || item.status() == Status.READY) return;
+    if (processing.isBusy() || !deleting.isEmpty() || item == null || item.status() == Status.READY)
+      return;
     message = "";
     processing.start(
         item.recording(),

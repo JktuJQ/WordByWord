@@ -1,9 +1,12 @@
 package dev.wordbyword.app;
 
 import android.app.Application;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import dev.wordbyword.app.core.storage.TranscriptRepository;
 import dev.wordbyword.app.demo.DemoBackend;
+import dev.wordbyword.app.storage.FileTranscriptRepository;
 import dev.wordbyword.app.ui.AppController;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -11,17 +14,30 @@ import java.util.concurrent.Executors;
 public final class WordByWordApplication extends Application {
   private final ExecutorService worker = Executors.newSingleThreadExecutor();
   private AppController controller;
+  private TranscriptRepository repository;
 
   @Override
   public void onCreate() {
     super.onCreate();
     var backend = new DemoBackend();
     var handler = new Handler(Looper.getMainLooper());
-    controller = new AppController(backend, backend, worker, runnable -> handler.post(runnable));
+    repository =
+        new FileTranscriptRepository(
+            getFilesDir().toPath().resolve("library"),
+            uri -> getContentResolver().openInputStream(Uri.parse(uri.toString())),
+            exception ->
+                handler.post(
+                    () -> controller.notifyMessage("Некоторые записи повреждены и не загружены")));
+    controller = new AppController(repository, backend, worker, runnable -> handler.post(runnable));
+    controller.load();
   }
 
   public AppController controller() {
     return controller;
+  }
+
+  public TranscriptRepository repository() {
+    return repository;
   }
 
   public ExecutorService worker() {

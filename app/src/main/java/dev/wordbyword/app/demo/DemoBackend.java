@@ -92,6 +92,12 @@ public final class DemoBackend implements TranscriptRepository, TranscriptionPip
   }
 
   @Override
+  public synchronized void delete(String recordingId) {
+    recordings.remove(recordingId);
+    transcripts.remove(recordingId);
+  }
+
+  @Override
   public synchronized void renameSpeaker(String recordingId, String speakerId, String displayName) {
     Transcript transcript = find(recordingId).orElseThrow(NoSuchElementException::new);
     if (transcript.speakers().stream().noneMatch(speaker -> speaker.id().equals(speakerId))) {

@@ -15,5 +15,7 @@ public interface TranscriptRepository {
 
   Transcript save(Transcript transcript) throws IOException;
 
+  void delete(String recordingId) throws IOException;
+
   void renameSpeaker(String recordingId, String speakerId, String displayName) throws IOException;
 }
