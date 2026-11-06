@@ -34,12 +34,14 @@ public final class SherpaOnnxSpeakerDiarizer implements SpeakerDiarizer {
   @Override
   public List<Segment> diarize(PcmAudio audio, ProcessingContext processingContext)
       throws ProcessingException {
-    float[] samples = readAllSamples(audio);
+    processingContext.throwIfCancelled();
+    float[] samples = readAllSamples(audio, processingContext);
+    processingContext.throwIfCancelled();
 
     OfflineSpeakerDiarization diarization;
     try {
       diarization = new OfflineSpeakerDiarization(context.getAssets(), buildConfig());
-    } catch (RuntimeException exception) {
+    } catch (RuntimeException | LinkageError exception) {
       throw new ProcessingException("Не удалось загрузить модели диаризации", exception);
     }
 
@@ -59,10 +61,11 @@ public final class SherpaOnnxSpeakerDiarizer implements SpeakerDiarizer {
       OfflineSpeakerDiarizationSegment[] segments;
       try {
         segments = diarization.process(samples);
-      } catch (RuntimeException exception) {
+      } catch (RuntimeException | LinkageError exception) {
         throw new ProcessingException("Ошибка диаризации записи", exception);
       }
 
+      processingContext.throwIfCancelled();
       List<Segment> result = new ArrayList<>(segments.length);
       for (OfflineSpeakerDiarizationSegment segment : segments) {
         result.add(toSegment(segment.getStart(), segment.getEnd(), segment.getSpeaker()));
@@ -85,19 +88,30 @@ public final class SherpaOnnxSpeakerDiarizer implements SpeakerDiarizer {
         segmentation, embedding, clustering, MIN_DURATION_ON, MIN_DURATION_OFF);
   }
 
-  private static float[] readAllSamples(PcmAudio audio) throws ProcessingException {
-    int initialCapacity =
-        audio.sampleCount().isPresent() ? (int) audio.sampleCount().getAsLong() : 16_000 * 60;
-    float[] buffer = new float[Math.max(initialCapacity, 1)];
+  static float[] readAllSamples(PcmAudio audio, ProcessingContext context)
+      throws ProcessingException {
+    context.throwIfCancelled();
+    long expected = audio.sampleCount().orElse(PcmAudio.SAMPLE_RATE_HZ);
+    int maximum = Integer.MAX_VALUE - 8;
+    if (expected < 0 || expected > maximum)
+      throw new ProcessingException("Аудио слишком велико или содержит неверное число сэмплов");
+    float[] buffer = new float[(int) Math.max(expected, 1)];
+    float[] probe = new float[1];
     int total = 0;
     try (PcmAudio.Reader reader = audio.openReader()) {
       while (true) {
-        if (total == buffer.length) {
-          buffer = Arrays.copyOf(buffer, buffer.length * 2);
-        }
-        int read = reader.read(buffer, total, buffer.length - total);
-        if (read == -1) {
-          break;
+        context.throwIfCancelled();
+        boolean full = total == buffer.length;
+        int length = full ? 1 : Math.min(PcmAudio.SAMPLE_RATE_HZ, buffer.length - total);
+        int read = reader.read(full ? probe : buffer, full ? 0 : total, length);
+        context.throwIfCancelled();
+        if (read == -1) break;
+        if (read <= 0 || read > length) throw new IOException("Invalid PCM reader result");
+        if (full) {
+          if (total == maximum) throw new IOException("PCM exceeds maximum array size");
+          int capacity = (int) Math.min(maximum, (long) buffer.length * 2);
+          buffer = Arrays.copyOf(buffer, capacity);
+          buffer[total] = probe[0];
         }
         total += read;
       }
@@ -105,6 +119,7 @@ public final class SherpaOnnxSpeakerDiarizer implements SpeakerDiarizer {
       throw new ProcessingException(
           "Не удалось прочитать подготовленное аудио для диаризации", exception);
     }
+    context.throwIfCancelled();
     return total == buffer.length ? buffer : Arrays.copyOf(buffer, total);
   }
 

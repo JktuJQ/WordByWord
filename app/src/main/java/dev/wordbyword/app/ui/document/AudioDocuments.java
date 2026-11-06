@@ -51,12 +51,8 @@ public final class AudioDocuments {
                       title = cursor.getString(0);
                     }
                   }
-                } catch (RuntimeException ignored) {
-                }
-                try (var input = resolver.openInputStream(uri)) {
-                  if (input == null || input.read() == -1) {
-                    throw new IOException("Empty file");
-                  }
+                } catch (RuntimeException exception) {
+                  Log.w("AudioDocuments", "Cannot read imported document title", exception);
                 }
                 if (preferredTitle != null && !preferredTitle.isBlank()) {
                   title = preferredTitle.trim();
@@ -70,7 +66,8 @@ public final class AudioDocuments {
                 Recording saved = app.repository().saveRecording(recording);
                 if (recorded) removeRecordingDraft(uri);
                 main.post(() -> app.controller().add(saved));
-              } catch (Exception exception) {
+              } catch (IOException | RuntimeException exception) {
+                Log.w("AudioDocuments", "Cannot import audio", exception);
                 main.post(() -> message(R.string.import_failed));
               }
             });
@@ -89,7 +86,8 @@ public final class AudioDocuments {
                   TranscriptJsonExporter.write(transcript, writer);
                 }
                 main.post(() -> message(R.string.export_success));
-              } catch (Exception exception) {
+              } catch (IOException | RuntimeException exception) {
+                Log.w("AudioDocuments", "Cannot export transcript", exception);
                 main.post(() -> message(R.string.export_failed));
               }
             });

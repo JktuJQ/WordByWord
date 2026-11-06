@@ -14,25 +14,27 @@
   **Не тестирует `SherpaOnnxSpeakerDiarizer`** — только корректность формул скорера.
   Запуск: `javac ScoreDiarization.java ScoreDiarizationTest.java && java -cp . ScoreDiarizationTest .`
 - `evaluate.sh` — прогоняет **нашу настоящую диаризацию** (`SherpaOnnxSpeakerDiarizer`
-  через `DiarizerCheckActivity`) на подключённом устройстве/эмуляторе и печатает DER
+  через отдельный instrumentation APK) на подключённом устройстве/эмуляторе и печатает DER
   по каждой записи. Это и есть реальная проверка качества, а не просто скорера.
 
 ## Как получить метрики по-настоящему
 
 ```sh
-./gradlew assembleDebug           # если APK ещё не собран
+./gradlew assembleDebug assembleDebugAndroidTest
 adb devices                        # эмулятор или телефон должен быть виден
 test-data/diarization/evaluate.sh                  # все записи по умолчанию (rec_0055 rec_0273)
 test-data/diarization/evaluate.sh rec_0055          # только одна запись
 ```
 
 Скрипт: ставит APK, копирует `.flac` в приватное хранилище приложения,
-запускает `DiarizerCheckActivity` с `--es recording_id <id>` (активность
-пишет гипотезу в `<cacheDir>/<id>.hyp.rttm`), ждёт файл, вытягивает его через
-`adb exec-out run-as ... cat`, сравнивает со `.rttm`-эталоном через
-`ScoreDiarization` и печатает DER/missed/false alarm/confusion/RTF.
+запускает `DiarizationEvaluation` через `am instrument` из отдельного test APK.
+Тест пишет гипотезу в `<cacheDir>/<id>.hyp.rttm`, скрипт извлекает её через
+`adb exec-out run-as ... cat`, сравнивает с эталоном через `ScoreDiarization`
+и печатает DER/missed/false alarm/confusion/RTF. Ошибка теста или таймаут завершают
+скрипт с ненулевым кодом. Проверочных Activity в обычном APK нет.
+Можно задать пути `APK` и `TEST_APK`; устройство выбирается через `ANDROID_SERIAL`.
 
-Не часть CI — в проекте нет androidTest/эмулятора в CI (см. `docs/ci.md`).
+Не часть CI — в CI не запускается instrumentation на устройстве (см. `docs/ci.md`).
 Это ручной/разработческий прогон, как и `experiments/asr-probe/probe.py run`
 для ASR (#2).
 
@@ -47,10 +49,8 @@ test-data/diarization/evaluate.sh rec_0055          # только одна за
 путаница говорящих (confusion) на отдельных участках. Подробный разбор и
 принятые ограничения — карточка «Диаризация» в `AGENTS.md`.
 
-## Задел на ASR
+## Проверка после рефакторинга
 
-Когда появится проверочная активность для ASR (#5), для неё имеет смысл
-такой же паттерн: активность пишет гипотезу в файл в приватном хранилище,
-рядом — независимый от Android скорер (WER) и `evaluate.sh`-скрипт с тем же
-циклом «push → run → pull → score». Не обязательно общий код с этим файлом —
-достаточно того же паттерна.
+Основной и instrumentation APK нужно собрать отдельно от запуска эмулятора.
+Исторические результаты выше получены прежним диагностическим экраном;
+новый instrumentation-запуск требует отдельной проверки на устройстве.
