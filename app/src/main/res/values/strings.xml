@@ -1,4 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">WordByWord</string>
+    <string name="app_name">Слово в слово</string>
+    <string name="app_tagline">Разговоры, к которым можно вернуться</string>
+    <string name="library">Ваши записи</string>
+    <string name="library_description">Импортируйте аудио, чтобы собрать разговор в стенограмму.</string>
+    <string name="demo_notice">Предварительная версия · деморежим</string>
+    <string name="demo_explanation">Распознавание ещё не подключено. Встроенный пример показывает интерфейс на вымышленных репликах без аудио. Данные хранятся только до закрытия процесса приложения.</string>
+    <string name="empty_title">Здесь будет история разговоров</string>
+    <string name="empty_description">Выберите аудиофайл или начните со встроенного примера.</string>
+    <string name="import_audio">Загрузить аудиофайл</string>
+    <string name="open_demo">Открыть пример</string>
+    <string name="back_to_library">← Все записи</string>
+    <string name="export_json">Экспортировать JSON</string>
+    <string name="start_processing">Обработать</string>
+    <string name="prepare_demo">Подготовить пример</string>
+    <string name="open_transcript">Открыть стенограмму</string>
+    <string name="retry">Повторить</string>
+    <string name="cancel">Отменить</string>
+    <string name="cancelling">Отменяем…</string>
+    <string name="transcript_empty">В записи не обнаружено речи.</string>
+    <string name="unknown_speaker">Неизвестный участник</string>
+    <string name="demo_transcript">Демонстрационная стенограмма · без аудио</string>
+    <string name="recording_summary">%1$d реплик · %2$d участников</string>
+    <string name="demo_badge">Пример · %1$s</string>
+    <string name="imported_badge">Аудиофайл</string>
+    <string name="import_failed">Не удалось открыть аудиофайл. Проверьте доступ и попробуйте снова.</string>
+    <string name="picker_unavailable">На устройстве нет приложения для выбора файлов.</string>
+    <string name="export_unavailable">Стенограмма недоступна. Откройте её и повторите экспорт.</string>
+    <string name="export_success">JSON сохранён в выбранный файл.</string>
+    <string name="export_failed">Не удалось сохранить JSON. Файл мог остаться неполным — повторите экспорт.</string>
+    <string name="exporting">Сохраняем JSON…</string>
+    <string name="export_cancelled">Экспорт отменён.</string>
+    <string name="importing">Открываем аудиофайл…</string>
+    <string name="time_range">%1$s — %2$s</string>
 </resources>
