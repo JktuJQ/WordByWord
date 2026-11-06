@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:layout_marginTop="16dp" android:background="@drawable/card"
+    android:orientation="vertical" android:padding="12dp">
+    <TextView android:id="@+id/playback_position" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:gravity="center"
+        android:text="@string/playback_initial_position" android:textColor="@color/ink"
+        android:textSize="13sp" />
+    <SeekBar android:id="@+id/playback_seekbar" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:layout_marginTop="4dp"
+        android:contentDescription="@string/playback_position_description"
+        android:progressTint="@color/accent" android:thumbTint="@color/accent" />
+</LinearLayout>
