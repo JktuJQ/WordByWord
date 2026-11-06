@@ -5,13 +5,13 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import dev.wordbyword.app.core.audio.AndroidAudioPreparer;
-import dev.wordbyword.app.core.recognition.SherpaSpeechRecognizer;
-import dev.wordbyword.app.processing.LocalTranscriptionPipeline;
-import java.io.File;
 import dev.wordbyword.app.core.processing.TranscriptionPipeline;
+import dev.wordbyword.app.core.recognition.SherpaSpeechRecognizer;
 import dev.wordbyword.app.core.storage.TranscriptRepository;
+import dev.wordbyword.app.processing.LocalTranscriptionPipeline;
 import dev.wordbyword.app.storage.FileTranscriptRepository;
 import dev.wordbyword.app.ui.AppController;
+import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -25,8 +25,9 @@ public final class WordByWordApplication extends Application {
     super.onCreate();
     var models = new File(getExternalFilesDir(null), "models/gigaam-v2");
     models.mkdirs();
-    TranscriptionPipeline pipeline = new LocalTranscriptionPipeline(
-        new AndroidAudioPreparer(this), new SherpaSpeechRecognizer(models));
+    TranscriptionPipeline pipeline =
+        new LocalTranscriptionPipeline(
+            new AndroidAudioPreparer(this), new SherpaSpeechRecognizer(models));
     var handler = new Handler(Looper.getMainLooper());
     repository =
         new FileTranscriptRepository(

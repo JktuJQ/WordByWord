@@ -25,3 +25,5 @@ keystore.properties
 /app/vendor/
 /app/src/main/assets/diarization/
 /local-models/
+
+/docs/asr-results.json

@@ -16,8 +16,9 @@ android {
         ndk {
             abiFilters 'arm64-v8a', 'x86_64'
         }
-        testInstrumentationRunner = 'dev.wordbyword.app.AsrDeviceCheck'
     }
+
+    sourceSets { test.java.srcDir rootProject.file('test-data/asr') }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
