@@ -13,6 +13,9 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = '0.1.0'
+        ndk {
+            abiFilters 'arm64-v8a', 'x86_64'
+        }
     }
 
     compileOptions {
@@ -23,8 +26,94 @@ android {
 
 dependencies {
     implementation 'com.google.code.gson:gson:2.15.0'
+    implementation files('vendor/sherpa-onnx-2.0.1.aar')
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.2.0'
     compileOnly files(androidComponents.sdkComponents.sdkDirectory.map {
         it.file("build-tools/${android.buildToolsVersion}/core-lambda-stubs.jar")
     })
     testImplementation 'junit:junit:4.13.2'
+}
+
+def diarizationVendorDir = file('vendor')
+def diarizationAssetsDir = file('src/main/assets/diarization')
+def diarizationDownloadDir = layout.buildDirectory.dir('diarization-downloads').get().asFile
+
+def diarizationArtifacts = [
+    aar: [
+        url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/v2.0.1/sherpa-onnx-2.0.1.aar',
+        sha256: 'a8d09d1d32f3eb8520482c6d3d43fae674681c5b050385967c70a3c2c9bf0ee7',
+        fileName: 'sherpa-onnx-2.0.1.aar'
+    ],
+    segmentationArchive: [
+        url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-segmentation-models/sherpa-onnx-pyannote-segmentation-3-0.tar.bz2',
+        sha256: '24615ee884c897d9d2ba09bb4d30da6bb1b15e685065962db5b02e76e4996488',
+        fileName: 'sherpa-onnx-pyannote-segmentation-3-0.tar.bz2'
+    ],
+    embedding: [
+        url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/3dspeaker_speech_eres2net_base_sv_zh-cn_3dspeaker_16k.onnx',
+        sha256: '1a331345f04805badbb495c775a6ddffcdd1a732567d5ec8b3d5749e3c7a5e4b',
+        fileName: '3dspeaker_speech_eres2net_base_sv_zh-cn_3dspeaker_16k.onnx'
+    ]
+]
+
+def sha256Of(File source) {
+    def digest = java.security.MessageDigest.getInstance('SHA-256')
+    source.eachByte(8192) { buffer, length -> digest.update(buffer, 0, length) }
+    return digest.digest().collect { String.format('%02x', it) }.join()
+}
+
+tasks.register('prepareDiarizationModels') {
+    def vendorAar = new File(diarizationVendorDir, 'sherpa-onnx-2.0.1.aar')
+    def segmentationOnnx = new File(diarizationAssetsDir, 'segmentation.int8.onnx')
+    def embeddingOnnx = new File(diarizationAssetsDir, 'embedding.onnx')
+
+    onlyIf { !(vendorAar.exists() && segmentationOnnx.exists() && embeddingOnnx.exists()) }
+
+    doLast {
+        diarizationDownloadDir.mkdirs()
+        diarizationVendorDir.mkdirs()
+        diarizationAssetsDir.mkdirs()
+
+        diarizationArtifacts.each { key, artifact ->
+            def downloaded = new File(diarizationDownloadDir, artifact.fileName)
+            if (!downloaded.exists() || sha256Of(downloaded) != artifact.sha256) {
+                logger.lifecycle("Downloading ${artifact.fileName}")
+                ant.get(src: artifact.url, dest: downloaded, verbose: false)
+            }
+            def actualSha256 = sha256Of(downloaded)
+            if (actualSha256 != artifact.sha256) {
+                throw new GradleException(
+                    "Checksum mismatch for ${artifact.fileName}: expected ${artifact.sha256}, got ${actualSha256}")
+            }
+        }
+
+        copy {
+            from(diarizationDownloadDir) {
+                include diarizationArtifacts.aar.fileName
+            }
+            into diarizationVendorDir
+        }
+
+        copy {
+            from(tarTree(resources.bzip2(
+                new File(diarizationDownloadDir, diarizationArtifacts.segmentationArchive.fileName)))) {
+                include 'sherpa-onnx-pyannote-segmentation-3-0/model.int8.onnx'
+                eachFile { details -> details.path = 'segmentation.int8.onnx' }
+                includeEmptyDirs = false
+            }
+            into diarizationAssetsDir
+        }
+
+        copy {
+            from(diarizationDownloadDir) {
+                include diarizationArtifacts.embedding.fileName
+                rename { 'embedding.onnx' }
+            }
+            into diarizationAssetsDir
+        }
+    }
+}
+
+tasks.named('preBuild').configure {
+    dependsOn('prepareDiarizationModels')
 }

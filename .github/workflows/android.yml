@@ -41,6 +41,12 @@ jobs:
         with:
           cache-provider: basic
 
+      - name: Cache diarization model downloads
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        with:
+          path: app/build/diarization-downloads
+          key: diarization-models-${{ hashFiles('app/build.gradle') }}
+
       - name: Build, test and lint
         run: ./gradlew --no-daemon --stacktrace --continue testDebugUnitTest assembleDebug lintDebug
 
