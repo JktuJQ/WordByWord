@@ -11,18 +11,9 @@
         <TextView android:id="@+id/timing" android:layout_width="0dp" android:layout_height="wrap_content"
             android:layout_weight="1" android:paddingStart="8dp"
             android:textColor="@color/muted" android:textSize="11sp" />
-        <TextView android:id="@+id/seek_back" android:layout_width="36dp" android:layout_height="40dp"
-            android:gravity="center" android:text="↶" android:textColor="@color/accent"
-            android:contentDescription="@string/seek_back" android:textSize="20sp" />
-        <TextView android:id="@+id/play_utterance" android:layout_width="36dp" android:layout_height="40dp"
-            android:gravity="center" android:text="▶" android:textColor="@color/accent"
-            android:contentDescription="@string/play_utterance" android:textSize="17sp" />
-        <TextView android:id="@+id/seek_forward" android:layout_width="36dp" android:layout_height="40dp"
-            android:gravity="center" android:text="↷" android:textColor="@color/accent"
-            android:contentDescription="@string/seek_forward" android:textSize="20sp" />
     </LinearLayout>
     <TextView android:id="@+id/utterance_text" android:layout_width="match_parent"
         android:layout_height="wrap_content" android:layout_marginTop="8dp"
         android:textColor="@color/ink" android:textSize="16sp"
-        android:lineSpacingExtra="4dp" android:textIsSelectable="true" />
+        android:lineSpacingExtra="4dp" />
 </LinearLayout>

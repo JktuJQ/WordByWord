@@ -114,6 +114,7 @@ public final class MainView {
       renderedScreen = screen;
     }
     setVisible(R.id.back, detail);
+    setVisible(R.id.transcript_playback, detail);
     setVisible(R.id.library_actions, !detail && !searching && !selecting);
     setVisible(R.id.selection_actions, !detail && selecting);
     setVisible(R.id.search_toggle, !detail && !selecting);

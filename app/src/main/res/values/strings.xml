@@ -23,6 +23,10 @@
     <string name="name_hint">Имя участника</string>
     <string name="save_name">Сохранить</string>
     <string name="audio_unavailable">Для этой стенограммы нет воспроизводимого аудио.</string>
+    <string name="pause_utterance">Приостановить воспроизведение</string>
+    <string name="playback_initial_position">00:00 / 00:00</string>
+    <string name="playback_position_format">%1$s / %2$s</string>
+    <string name="playback_position_description">Позиция воспроизведения</string>
     <string name="recording_screen_title">Запись разговора</string>
     <string name="recording_ready">Готово к записи</string>
     <string name="recording_live">Идёт запись</string>
