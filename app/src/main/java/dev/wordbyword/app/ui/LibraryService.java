@@ -3,6 +3,7 @@ package dev.wordbyword.app.ui;
 import dev.wordbyword.app.core.recording.Recording;
 import dev.wordbyword.app.core.storage.TranscriptRepository;
 import dev.wordbyword.app.core.transcript.Transcript;
+import dev.wordbyword.app.core.transcript.TranscriptEditor;
 import dev.wordbyword.app.ui.AppState.Item;
 import dev.wordbyword.app.ui.AppState.Status;
 import java.util.ArrayList;
@@ -63,10 +64,11 @@ final class LibraryService {
       Consumer<Transcript> success,
       Consumer<String> failure) {
     execute(
-        () -> {
-          repository.renameSpeaker(recordingId, speakerId, name);
-          return repository.find(recordingId).orElseThrow();
-        },
+        () ->
+            repository.update(
+                recordingId,
+                transcript ->
+                    new TranscriptEditor(transcript).renameSpeaker(speakerId, name).build()),
         success,
         failure,
         "Не удалось сохранить имя участника");
