@@ -1,0 +1,24 @@
+.direnv/
+.gradle/
+.idea/
+**/build/
+.cxx/
+.externalNativeBuild/
+.DS_Store
+Thumbs.db
+.classpath
+.project
+.settings/
+bin/
+local.properties
+*.iml
+*.class
+*.jks
+*.keystore
+hs_err_pid*
+nvim.log
+result
+result-*
+
+# Local signing configuration; Gradle Wrapper files remain tracked.
+keystore.properties
