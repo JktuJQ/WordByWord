@@ -43,13 +43,15 @@ public final class RecordingActivity extends Activity {
   private File audioFile;
   private long elapsedMs;
   private long startedAt;
+  private float orbScale = 1f;
   private final Runnable ticker =
       new Runnable() {
         @Override
         public void run() {
           if (state == State.RECORDING) {
             renderTimer();
-            handler.postDelayed(this, 250);
+            animateOrb();
+            handler.postDelayed(this, 120);
           }
         }
       };
@@ -142,6 +144,7 @@ public final class RecordingActivity extends Activity {
         elapsedMs += SystemClock.elapsedRealtime() - startedAt;
         state = State.PAUSED;
         handler.removeCallbacks(ticker);
+        resetOrb();
       } else if (state == State.PAUSED) {
         recorder.resume();
         startedAt = SystemClock.elapsedRealtime();
@@ -158,6 +161,7 @@ public final class RecordingActivity extends Activity {
     if (recorder == null || (state != State.RECORDING && state != State.PAUSED)) return;
     if (state == State.RECORDING) elapsedMs += SystemClock.elapsedRealtime() - startedAt;
     handler.removeCallbacks(ticker);
+    resetOrb();
     try {
       recorder.stop();
       state = State.COMPLETE;
@@ -282,6 +286,23 @@ public final class RecordingActivity extends Activity {
     long seconds = total / 1000;
     ((TextView) findViewById(R.id.recording_timer))
         .setText(String.format(Locale.ROOT, "%02d:%02d", seconds / 60, seconds % 60));
+  }
+
+  private void animateOrb() {
+    if (recorder == null) return;
+    int amplitude = recorder.getMaxAmplitude();
+    float level = Math.min(1f, amplitude / 12000f);
+    orbScale = orbScale * 0.65f + (1f + level * 0.22f) * 0.35f;
+    View orb = findViewById(R.id.recording_orb);
+    ((VoiceOrbView) orb).setLevel(level);
+    orb.animate().scaleX(orbScale).scaleY(orbScale).setDuration(120).start();
+  }
+
+  private void resetOrb() {
+    orbScale = 1f;
+    View orb = findViewById(R.id.recording_orb);
+    ((VoiceOrbView) orb).setLevel(0f);
+    orb.animate().scaleX(1f).scaleY(1f).setDuration(180).start();
   }
 
   private void releaseFailedRecorder() {
