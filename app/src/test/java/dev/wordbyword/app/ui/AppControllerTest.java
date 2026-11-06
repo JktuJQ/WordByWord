@@ -36,8 +36,7 @@ public class AppControllerTest {
     worker.remove().run();
     assertFalse(controller.state().busy());
     assertEquals(result, repository.find(recording.id()).orElseThrow());
-    controller.attach(
-        state -> assertEquals(AppController.Status.READY, state.items().get(0).status()));
+    controller.attach(state -> assertEquals(AppState.Status.READY, state.items().get(0).status()));
     controller.select(recording.id());
     assertEquals(result, controller.state().selected().transcript());
     controller.showLibrary();
@@ -61,10 +60,10 @@ public class AppControllerTest {
     assertTrue(controller.state().cancelling());
     worker.remove().run();
     assertTrue(repository.find(recording.id()).isEmpty());
-    assertEquals(AppController.Status.CANCELLED, controller.state().items().get(0).status());
+    assertEquals(AppState.Status.CANCELLED, controller.state().items().get(0).status());
     controller.start(recording.id());
     worker.remove().run();
-    assertEquals(AppController.Status.READY, controller.state().items().get(0).status());
+    assertEquals(AppState.Status.READY, controller.state().items().get(0).status());
   }
 
   @Test
@@ -84,7 +83,7 @@ public class AppControllerTest {
     controller.start(recording.id());
     worker.remove().run();
     var item = controller.state().items().get(0);
-    assertEquals(AppController.Status.ERROR, item.status());
+    assertEquals(AppState.Status.ERROR, item.status());
     assertEquals("Модель недоступна", item.detail());
     assertTrue(repository.find(recording.id()).isEmpty());
     assertEquals(List.of(recording), repository.listRecordings());
