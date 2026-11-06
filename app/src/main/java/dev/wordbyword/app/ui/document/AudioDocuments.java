@@ -1,4 +1,4 @@
-package dev.wordbyword.app.ui;
+package dev.wordbyword.app.ui.document;
 
 import android.net.Uri;
 import android.os.Handler;

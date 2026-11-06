@@ -1,86 +1,44 @@
 package dev.wordbyword.app.ui;
 
-import dev.wordbyword.app.core.processing.ProcessingContext;
 import dev.wordbyword.app.core.processing.TranscriptionPipeline;
 import dev.wordbyword.app.core.recording.Recording;
 import dev.wordbyword.app.core.storage.TranscriptRepository;
 import dev.wordbyword.app.core.transcript.Transcript;
+import dev.wordbyword.app.processing.ProcessingRunner;
+import dev.wordbyword.app.ui.AppState.Item;
+import dev.wordbyword.app.ui.AppState.Status;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalDouble;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public final class AppController {
-  public enum Status {
-    IMPORTED,
-    PROCESSING,
-    READY,
-    ERROR,
-    CANCELLED
-  }
-
-  public record Item(
-      Recording recording,
-      Status status,
-      String detail,
-      OptionalDouble progress,
-      Transcript transcript) {}
-
-  public record State(
-      List<Item> items, String selectedId, boolean busy, boolean cancelling, String message) {
-    public State {
-      items = List.copyOf(items);
-    }
-
-    public Item selected() {
-      return items.stream()
-          .filter(item -> item.recording().id().equals(selectedId))
-          .findFirst()
-          .orElse(null);
-    }
-  }
-
-  private enum TaskStatus {
-    RUNNING,
-    CANCELLED,
-    SAVING
-  }
-
-  private final TranscriptRepository repository;
-  private final TranscriptionPipeline pipeline;
-  private final Executor worker;
-  private final Executor ui;
+  private final ProcessingRunner processing;
   private final Map<String, Item> items = new LinkedHashMap<>();
-  private Consumer<State> listener;
+  private Consumer<AppState> listener;
   private String selectedId;
   private String message = "";
-  private AtomicReference<TaskStatus> task;
 
   public AppController(
       TranscriptRepository repository,
       TranscriptionPipeline pipeline,
       Executor worker,
       Executor ui) {
-    this.repository = repository;
-    this.pipeline = pipeline;
-    this.worker = worker;
-    this.ui = ui;
+    processing = new ProcessingRunner(repository, pipeline, worker, ui);
   }
 
-  public State state() {
-    return new State(
+  public AppState state() {
+    return new AppState(
         List.copyOf(items.values()),
         selectedId,
-        task != null,
-        task != null && task.get() == TaskStatus.CANCELLED,
+        processing.isBusy(),
+        processing.isCancelling(),
         message);
   }
 
-  public void attach(Consumer<State> listener) {
+  public void attach(Consumer<AppState> listener) {
     this.listener = listener;
     emit();
   }
@@ -116,80 +74,52 @@ public final class AppController {
     emit();
   }
 
+  public void open(Recording recording) {
+    add(recording);
+    Item item = items.get(recording.id());
+    if (item.status() == Status.READY) select(recording.id());
+    else start(recording.id());
+  }
+
   public void start(String recordingId) {
     Item item = items.get(recordingId);
-    if (task != null || item == null || item.status() == Status.READY) {
-      return;
-    }
-    var token = new AtomicReference<>(TaskStatus.RUNNING);
-    task = token;
+    if (processing.isBusy() || item == null || item.status() == Status.READY) return;
     message = "";
-    update(item.recording(), Status.PROCESSING, "Запуск", OptionalDouble.empty(), null);
-    worker.execute(
-        () -> {
-          try {
-            repository.saveRecording(item.recording());
-            Transcript result =
-                pipeline.transcribe(
-                    item.recording(),
-                    new ProcessingContext() {
-                      @Override
-                      public boolean isCancellationRequested() {
-                        return token.get() == TaskStatus.CANCELLED;
-                      }
+    processing.start(
+        item.recording(),
+        new ProcessingRunner.Listener() {
+          @Override
+          public void onProgress(String stage, OptionalDouble fraction) {
+            update(item.recording(), Status.PROCESSING, stage, fraction, null);
+          }
 
-                      @Override
-                      public void reportProgress(String stage, OptionalDouble fraction) {
-                        ui.execute(
-                            () -> {
-                              if (task == token && token.get() == TaskStatus.RUNNING) {
-                                update(item.recording(), Status.PROCESSING, stage, fraction, null);
-                              }
-                            });
-                      }
-                    });
-            if (!token.compareAndSet(TaskStatus.RUNNING, TaskStatus.SAVING)) {
-              throw new CancellationException();
-            }
-            Transcript saved = repository.save(result);
-            ui.execute(
-                () -> finish(token, saved.recording(), Status.READY, "Стенограмма готова", saved));
-          } catch (CancellationException exception) {
-            ui.execute(
-                () ->
-                    finish(token, item.recording(), Status.CANCELLED, "Обработка отменена", null));
-          } catch (Exception exception) {
-            ui.execute(
-                () ->
-                    finish(
-                        token,
-                        item.recording(),
-                        Status.ERROR,
-                        exception.getMessage() == null
-                            ? "Не удалось обработать запись"
-                            : exception.getMessage(),
-                        null));
+          @Override
+          public void onSuccess(Transcript transcript) {
+            finish(transcript.recording(), Status.READY, "Стенограмма готова", transcript);
+          }
+
+          @Override
+          public void onCancelled() {
+            finish(item.recording(), Status.CANCELLED, "Обработка отменена", null);
+          }
+
+          @Override
+          public void onFailure(Exception exception) {
+            String detail = exception.getMessage();
+            finish(
+                item.recording(),
+                Status.ERROR,
+                detail == null || detail.isBlank() ? "Не удалось обработать запись" : detail,
+                null);
           }
         });
   }
 
   public void cancel() {
-    if (task != null && task.compareAndSet(TaskStatus.RUNNING, TaskStatus.CANCELLED)) {
-      message = "Отменяем обработку…";
-      emit();
-    }
+    if (processing.cancel()) notifyMessage("Отменяем обработку…");
   }
 
-  private void finish(
-      AtomicReference<TaskStatus> token,
-      Recording recording,
-      Status status,
-      String detail,
-      Transcript transcript) {
-    if (task != token) {
-      return;
-    }
-    task = null;
+  private void finish(Recording recording, Status status, String detail, Transcript transcript) {
     message = "";
     update(recording, status, detail, OptionalDouble.empty(), transcript);
   }

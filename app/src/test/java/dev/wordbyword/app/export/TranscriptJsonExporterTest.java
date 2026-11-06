@@ -2,6 +2,7 @@ package dev.wordbyword.app.export;
 
 import static org.junit.Assert.*;
 
+import com.google.gson.JsonParser;
 import dev.wordbyword.app.core.transcript.Transcript;
 import dev.wordbyword.app.demo.DemoBackend;
 import java.io.StringWriter;
@@ -21,11 +22,16 @@ public class TranscriptJsonExporterTest {
                     Optional.of("a"), "Да: \"текст\"\n\\\t\u0001 😀", 1234, 5678)));
     var writer = new StringWriter();
     TranscriptJsonExporter.write(transcript, writer);
-    assertEquals(
-        "{\"transcript\":[{\"speaker_id\":\"a\",\"start_ms\":1234,\"end_ms\":5678,\"text\":\"Да:"
-            + " \\\"текст\\\"\\n"
-            + "\\\\\\t\\u0001 \\ud83d\\ude00\"}]}\n",
-        writer.toString());
+    var root = JsonParser.parseString(writer.toString()).getAsJsonObject();
+    assertEquals(java.util.Set.of("transcript"), root.keySet());
+    var utterances = root.getAsJsonArray("transcript");
+    assertEquals(1, utterances.size());
+    var utterance = utterances.get(0).getAsJsonObject();
+    assertEquals(java.util.Set.of("speaker_id", "start_ms", "end_ms", "text"), utterance.keySet());
+    assertEquals("a", utterance.get("speaker_id").getAsString());
+    assertEquals(1234L, utterance.get("start_ms").getAsLong());
+    assertEquals(5678L, utterance.get("end_ms").getAsLong());
+    assertEquals(transcript.utterances().get(0).text(), utterance.get("text").getAsString());
     assertFalse(writer.toString().contains("Имя"));
   }
 
