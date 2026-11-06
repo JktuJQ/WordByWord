@@ -263,7 +263,8 @@ public final class TranscriptView {
     for (int index = 0; index < cards.size(); index++) {
       CardRange range = cards.get(index);
       boolean active = playing && position >= range.startMs() && position < range.endMs();
-      range.card().setBackgroundResource(active ? R.drawable.notice : 0);
+      range.card().findViewById(R.id.utterance_text).setBackgroundResource(
+          active ? R.drawable.active_utterance : R.drawable.utterance_bubble);
       if (active) newActive = index;
     }
     playbackToggle.setText(playing ? "Ⅱ" : "▶");

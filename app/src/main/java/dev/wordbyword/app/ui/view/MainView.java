@@ -122,6 +122,7 @@ public final class MainView {
     setVisible(R.id.select_toggle, !detail && !searching && !state.items().isEmpty());
     setVisible(R.id.export_json, detail);
     setVisible(R.id.empty, !detail && state.items().isEmpty() && !searching);
+    setVisible(R.id.recent_title, !detail && !state.items().isEmpty() && !searching);
     ((TextView) root.findViewById(R.id.select_toggle))
         .setText(selecting ? R.string.stop_selecting : R.string.select_records);
     ((TextView) root.findViewById(R.id.selected_count))

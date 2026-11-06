@@ -2,10 +2,11 @@
 <resources>
     <string name="app_name">Слово в слово</string>
     <string name="app_tagline">Разговоры, к которым можно вернуться</string>
-    <string name="library">Слово в слово</string>
-    <string name="library_description">Ваши разговоры и стенограммы</string>
+    <string name="library">Аудио в текст</string>
+    <string name="library_description">Встречи, интервью, лекции — автоматическая транскрипция и анализ</string>
     <string name="privacy_notice">Аудио остаётся на устройстве</string>
     <string name="empty_title">Добавьте первую запись</string>
+    <string name="recent_recordings">Недавние записи</string>
     <string name="empty_description">Загрузите аудиофайл, чтобы получить стенограмму разговора.</string>
     <string name="search">Поиск записей</string>
     <string name="select_records">Выбрать</string>
@@ -58,7 +59,7 @@
     <string name="imported_status">Готово к обработке</string>
     <string name="cancelled_status">Обработка отменена</string>
     <string name="import_audio">Загрузить аудиофайл</string>
-    <string name="recording_shortcut">Или записать разговор с микрофона</string>
+    <string name="recording_shortcut">♩  Записать разговор</string>
     <string name="benefit_speakers">◉ Разделение по говорящим</string>
     <string name="benefit_timestamps">◷ Временные метки для каждой реплики</string>
     <string name="benefit_privacy">♧ Обработка на устройстве без отправки аудио</string>

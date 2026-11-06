@@ -26,11 +26,11 @@
         android:layout_height="0dp" android:layout_weight="1" android:gravity="center"
         android:orientation="vertical">
         <dev.wordbyword.app.VoiceOrbView android:id="@+id/recording_orb"
-            android:layout_width="210dp" android:layout_height="210dp" />
+            android:layout_width="300dp" android:layout_height="300dp" />
         <TextView android:id="@+id/recording_timer" android:layout_width="match_parent"
             android:layout_height="wrap_content" android:layout_marginTop="32dp"
             android:gravity="center" android:text="00:00" android:textColor="@color/ink"
-            android:textSize="44sp" android:textStyle="bold" />
+            android:textSize="48sp" />
         <TextView android:id="@+id/recording_hint" style="@style/BodyText"
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="12dp" android:gravity="center"

@@ -43,8 +43,8 @@ public final class VoiceOrbView extends View {
       else path.lineTo(x, y);
     }
     path.close();
-    paint.setShader(new LinearGradient(0, 0, getWidth(), getHeight(), Color.rgb(166, 151, 255),
-        Color.rgb(89, 71, 245), Shader.TileMode.CLAMP));
+    paint.setShader(new LinearGradient(0, 0, getWidth(), getHeight(), Color.rgb(255, 191, 75),
+        Color.rgb(255, 96, 0), Shader.TileMode.CLAMP));
     canvas.drawPath(path, paint);
   }
 }
