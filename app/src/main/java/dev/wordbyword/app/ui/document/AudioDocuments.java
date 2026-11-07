@@ -37,7 +37,7 @@ public final class AudioDocuments {
 
   private void importAudio(Uri uri, String preferredTitle, boolean recorded) {
     message(R.string.importing);
-    app.worker()
+    app.ioExecutor()
         .execute(
             () -> {
               try {
@@ -75,7 +75,7 @@ public final class AudioDocuments {
 
   public void exportJson(Uri uri, Transcript transcript) {
     message(R.string.exporting);
-    app.worker()
+    app.ioExecutor()
         .execute(
             () -> {
               try (var stream = app.getContentResolver().openOutputStream(uri, "wt")) {

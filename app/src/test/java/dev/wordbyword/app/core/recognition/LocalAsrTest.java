@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import dev.wordbyword.app.core.audio.PcmAudio;
 import dev.wordbyword.app.core.processing.ProcessingContext;
 import dev.wordbyword.app.core.recording.Recording;
+import dev.wordbyword.app.core.transcript.OverlapTranscriptAssembler;
 import dev.wordbyword.app.processing.LocalTranscriptionPipeline;
 import java.net.URI;
 import java.util.List;
@@ -48,7 +49,10 @@ public final class LocalAsrTest {
                 new RecognitionResult(
                     "привет",
                     List.of(new RecognitionResult.Segment("привет", 100, 900)),
-                    RecognitionResult.Timing.SEGMENT));
+                    RecognitionResult.Timing.SEGMENT),
+            (pcm, context) -> List.of(),
+            new OverlapTranscriptAssembler(),
+            Runnable::run);
     var result = pipeline.transcribe(recording(), CONTEXT);
     assertEquals("привет", result.utterances().get(0).text());
     assertTrue(result.utterances().get(0).speakerId().isEmpty());
@@ -65,7 +69,10 @@ public final class LocalAsrTest {
             (uri, context) -> audio,
             (pcm, context) -> {
               throw new CancellationException();
-            });
+            },
+            (pcm, context) -> List.of(),
+            new OverlapTranscriptAssembler(),
+            Runnable::run);
     assertThrows(CancellationException.class, () -> pipeline.transcribe(recording(), CONTEXT));
     assertTrue(audio.closed);
   }

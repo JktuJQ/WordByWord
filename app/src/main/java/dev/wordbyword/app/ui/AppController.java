@@ -28,10 +28,11 @@ public final class AppController {
   public AppController(
       TranscriptRepository repository,
       TranscriptionPipeline pipeline,
-      Executor worker,
+      Executor processingExecutor,
+      Executor ioExecutor,
       Executor ui) {
-    library = new LibraryService(repository, worker, ui);
-    processing = new ProcessingRunner(repository, pipeline, worker, ui);
+    library = new LibraryService(repository, ioExecutor, ui);
+    processing = new ProcessingRunner(repository, pipeline, processingExecutor, ui);
   }
 
   public AppState state() {
@@ -88,8 +89,19 @@ public final class AppController {
         this::notifyMessage);
   }
 
+  public boolean canDelete(Set<String> recordingIds) {
+    return !recordingIds.isEmpty()
+        && deleting.isEmpty()
+        && recordingIds.stream()
+            .allMatch(
+                id -> {
+                  Item item = items.get(id);
+                  return item != null && item.status() != Status.PROCESSING;
+                });
+  }
+
   public void delete(Set<String> recordingIds) {
-    if (processing.isBusy() || !deleting.isEmpty()) return;
+    if (!canDelete(recordingIds)) return;
     deleting.addAll(recordingIds);
     emit();
     library.delete(

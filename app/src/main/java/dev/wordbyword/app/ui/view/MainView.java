@@ -142,7 +142,7 @@ public final class MainView {
         .setText(selecting ? R.string.stop_selecting : R.string.select_records);
     ((TextView) root.findViewById(R.id.selected_count))
         .setText(activity.getString(R.string.selected_count, selectedIds.size()));
-    root.findViewById(R.id.delete_selected).setEnabled(!state.busy() && !selectedIds.isEmpty());
+    root.findViewById(R.id.delete_selected).setEnabled(controller.canDelete(selectedIds));
     root.findViewById(R.id.share_selected).setEnabled(!selectedIds.isEmpty());
     text(R.id.message, state.message());
     setVisible(R.id.message, !state.message().isBlank());
