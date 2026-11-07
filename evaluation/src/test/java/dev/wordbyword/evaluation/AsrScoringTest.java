@@ -1,8 +1,7 @@
-package dev.wordbyword.app.core.recognition;
+package dev.wordbyword.evaluation;
 
 import static org.junit.Assert.*;
 
-import dev.wordbyword.evaluation.ScoreAsr;
 import java.util.List;
 import org.junit.Test;
 
