@@ -23,6 +23,13 @@ Android SDK API 36 и Build Tools 36.0.0. Gradle берётся из `./gradlew`
 в PR восстанавливается без записи. Секреты и ключи подписи не требуются.
 Версии Actions зафиксированы commit SHA в YAML, без комментариев в коде.
 
+Перед сборкой CI скачивает AAR и модели диаризации (sherpa-onnx, пайаннот
+и 3D-Speaker — issue #6) через `app/prepare-diarization-models.py` и кеширует
+загруженные файлы отдельным ключом `actions/cache`, привязанным к хешу этого
+скрипта; сам AAR и модели в git не попадают (`app/vendor/`,
+`app/src/main/assets/diarization/` — в `.gitignore`), подробности —
+[docs/diarization-models.md](diarization-models.md).
+
 CI устанавливает только SDK-компоненты, нужные для текущей Java-сборки.
 Полное локальное окружение с NDK, эмулятором и инструментами остаётся в flake.
 При изменении `compileSdk` или `buildToolsVersion` нужно согласованно обновить
