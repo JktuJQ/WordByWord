@@ -3,7 +3,6 @@ package dev.wordbyword.app;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RadialGradient;
@@ -13,11 +12,9 @@ import android.view.View;
 
 public final class VoiceOrbView extends View {
   private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-  private final Path path = new Path();
   private final Path outline = new Path();
   private Shader glow;
   private Shader sphere;
-  private Shader ribbon;
   private float level;
   private float phase;
   private float target;
@@ -48,15 +45,7 @@ public final class VoiceOrbView extends View {
             new int[] {Color.rgb(255, 238, 180), Color.rgb(255, 170, 36), Color.rgb(255, 153, 0)},
             new float[] {0f, 0.42f, 1f},
             Shader.TileMode.CLAMP);
-    ribbon =
-        new LinearGradient(
-            cx,
-            cy - radius * 0.3f,
-            cx,
-            cy + radius,
-            new int[] {0xFFFFE34D, 0xFFFFA600, 0xFFFFD52A},
-            null,
-            Shader.TileMode.CLAMP);
+
   }
 
   @Override
@@ -97,24 +86,6 @@ public final class VoiceOrbView extends View {
         new float[] {0f, 0.42f, 1f}, Shader.TileMode.CLAMP);
     paint.setShader(sphere);
     canvas.drawPath(outline, paint);
-    canvas.save();
-    canvas.clipPath(outline);
-    path.reset();
-    float wave = (float) Math.sin(phase) * radius * 0.1f * level;
-    path.moveTo(cx - radius, cy + radius * 0.3f);
-    path.cubicTo(
-        cx - radius * 0.1f,
-        cy + radius + wave,
-        cx + radius * 0.1f,
-        cy - radius * 0.95f,
-        cx + radius,
-        cy - radius * 0.2f);
-    path.lineTo(cx + radius, cy + radius);
-    path.lineTo(cx - radius, cy + radius);
-    path.close();
-    paint.setShader(ribbon);
-    canvas.drawPath(path, paint);
-    canvas.restore();
     paint.setShader(null);
     if (isShown()) postInvalidateOnAnimation();
   }
