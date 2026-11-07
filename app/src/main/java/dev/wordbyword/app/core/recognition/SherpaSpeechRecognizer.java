@@ -1,5 +1,6 @@
 package dev.wordbyword.app.core.recognition;
 
+import android.content.res.AssetManager;
 import com.k2fsa.sherpa.onnx.OfflineModelConfig;
 import com.k2fsa.sherpa.onnx.OfflineRecognizer;
 import com.k2fsa.sherpa.onnx.OfflineRecognizerConfig;
@@ -11,8 +12,8 @@ import com.k2fsa.sherpa.onnx.VadModelConfig;
 import dev.wordbyword.app.core.audio.PcmAudio;
 import dev.wordbyword.app.core.processing.ProcessingContext;
 import dev.wordbyword.app.core.processing.ProcessingException;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,10 +23,11 @@ import java.util.stream.Collectors;
 
 public final class SherpaSpeechRecognizer implements SpeechRecognizer {
   private static final int RATE = PcmAudio.SAMPLE_RATE_HZ;
-  private final File models;
+  private static final String MODELS_ASSET_DIR = "asr";
+  private final AssetManager assets;
 
-  public SherpaSpeechRecognizer(File models) {
-    this.models = models;
+  public SherpaSpeechRecognizer(AssetManager assets) {
+    this.assets = assets;
   }
 
   @Override
@@ -55,7 +57,7 @@ public final class SherpaSpeechRecognizer implements SpeechRecognizer {
     silero.setMaxSpeechDuration(15f);
     var vadConfig = new VadModelConfig();
     vadConfig.setSileroVadModelConfig(silero);
-    Vad vad = new Vad(null, vadConfig);
+    Vad vad = new Vad(assets, vadConfig);
     try (var reader = audio.openReader()) {
       count = 0;
       long nextProgress = 0;
@@ -99,7 +101,7 @@ public final class SherpaSpeechRecognizer implements SpeechRecognizer {
     modelConfig.setNumThreads(2);
     var config = new OfflineRecognizerConfig();
     config.setModelConfig(modelConfig);
-    return new OfflineRecognizer(null, config);
+    return new OfflineRecognizer(assets, config);
   }
 
   private RecognitionResult transcribeSpeech(
@@ -152,12 +154,22 @@ public final class SherpaSpeechRecognizer implements SpeechRecognizer {
   }
 
   private String model(String name) throws IOException {
-    File file = new File(models, name);
-    if (!file.isFile() || file.length() == 0) {
+    String path = MODELS_ASSET_DIR + "/" + name;
+    InputStream probe;
+    try {
+      probe = assets.open(path);
+    } catch (IOException exception) {
       throw new IOException(
-          "Модели распознавания не установлены. Установите комплект моделей приложения.");
+          "Модель распознавания отсутствует в приложении: " + name, exception);
     }
-    return file.getAbsolutePath();
+    try {
+      if (probe.available() <= 0) {
+        throw new IOException("Модель распознавания повреждена в приложении: " + name);
+      }
+    } finally {
+      probe.close();
+    }
+    return path;
   }
 
   private static int readSamples(PcmAudio.Reader reader, float[] samples, ProcessingContext context)
