@@ -34,6 +34,10 @@ public final class RecordingListView {
     ((TextView) card.findViewById(R.id.recording_kind)).setText(R.string.imported_badge);
     ((TextView) card.findViewById(R.id.recording_title)).setText(item.recording().title());
     ((TextView) card.findViewById(R.id.recording_detail)).setText(item.detail());
+    View rename = card.findViewById(R.id.rename_recording);
+    rename.setVisibility(item.status() == AppState.Status.READY && !selecting ? View.VISIBLE : View.GONE);
+    rename.setOnClickListener(view -> GlassDialogs.rename(items.getContext(), "Название записи",
+        item.recording().title(), name -> controller.renameRecording(item.recording().id(), name)));
     TextView status = card.findViewById(R.id.recording_status);
     status.setTextColor(items.getContext().getColor(R.color.accent_text));
     status.setText(
@@ -78,10 +82,15 @@ public final class RecordingListView {
     if (item.transcript() != null) {
       long seconds = item.recording().durationMs().orElse(0) / 1000;
       metadata.setText(String.format(java.util.Locale.ROOT, "%02d:%02d · %s", seconds / 60, seconds % 60,
-          items.getContext().getString(R.string.recording_summary, item.transcript().utterances().size(), item.transcript().speakers().size())));
+          RecordingLabels.summary(item.transcript().utterances().size(), item.transcript().speakers().size())));
     }
     card.findViewById(R.id.recording_detail).setVisibility(item.status() == AppState.Status.READY || item.status() == AppState.Status.IMPORTED ? View.GONE : View.VISIBLE);
     if (processing) {
+      String label = item.detail();
+      if (!label.equals("Превращаем речь в текст") && !label.equals("Различаем голоса")
+          && !label.equals("Собираем всё воедино…")) label = "Превращаем речь в текст";
+      int percent = (int) Math.round(item.progress().orElse(0) * 100);
+      ((TextView) card.findViewById(R.id.recording_detail)).setText(label + " · " + percent + "%");
       action.setText(state.cancelling() ? R.string.cancelling : R.string.cancel);
       action.setEnabled(!state.cancelling());
       action.setOnClickListener(view -> controller.cancel());

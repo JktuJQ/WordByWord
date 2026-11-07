@@ -48,6 +48,26 @@ public class AppControllerTest {
   }
 
   @Test
+  public void renamedRecordingPersistsWithoutChangingTranscriptOrAudio() throws Exception {
+    var repository = repository();
+    var recording = recording();
+    var original = new Transcript(recording, List.of(new Transcript.Speaker("a", "Участник 1")),
+        List.of(new Transcript.Utterance(Optional.of("a"), "Привет", 0, 1000)));
+    repository.save(original);
+    var controller = new AppController(repository, (input, context) -> original,
+        Runnable::run, Runnable::run, Runnable::run);
+    controller.attach(state -> {});
+    controller.load();
+    controller.renameRecording(recording.id(), "  Встреча  ");
+    var saved = repository.find(recording.id()).orElseThrow();
+    assertEquals("Встреча", saved.recording().title());
+    assertEquals(recording.audioUri(), saved.recording().audioUri());
+    assertEquals(original.utterances(), saved.utterances());
+    assertEquals(original.speakers(), saved.speakers());
+    assertEquals("Встреча", controller.state().items().get(0).recording().title());
+  }
+
+  @Test
   public void dismissedMessageDoesNotReappearAfterNavigationOrListenerReplacement() {
     var controller = new AppController(repository(),
         (input, context) -> new Transcript(input, List.of(), List.of()), Runnable::run, Runnable::run, Runnable::run);

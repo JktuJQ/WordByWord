@@ -64,12 +64,7 @@ public final class TranscriptView {
     text(R.id.screen_title, transcript.recording().title());
     text(
         R.id.screen_description,
-        items
-            .getContext()
-            .getString(
-                R.string.recording_summary,
-                transcript.utterances().size(),
-                transcript.speakers().size()));
+        RecordingLabels.summary(transcript.utterances().size(), transcript.speakers().size()));
     cards.clear();
     activeCard = -1;
     positionSeekbar.setOnSeekBarChangeListener(
@@ -92,38 +87,6 @@ public final class TranscriptView {
       speakers.put(speaker.id(), speaker);
       colors.put(speaker.id(), index);
     }
-    LinearLayout speakerRow = new LinearLayout(items.getContext());
-    speakerRow.setOrientation(LinearLayout.HORIZONTAL);
-    speakerRow.setPadding(0, 12, 0, 12);
-    for (var speaker : transcript.speakers()) {
-      TextView chip = new TextView(items.getContext());
-      chip.setText(speaker.displayName());
-      chip.setSingleLine(true);
-      chip.setEllipsize(android.text.TextUtils.TruncateAt.END);
-      chip.setContentDescription(items.getContext().getString(R.string.rename_participant) + ": " + speaker.displayName());
-      chip.setTextColor(items.getContext().getColor(R.color.ink));
-      chip.setBackgroundResource(R.drawable.notice);
-      chip.setPadding(24, 12, 24, 12);
-      chip.setMinHeight((int) (48 * items.getResources().getDisplayMetrics().density));
-      chip.setGravity(android.view.Gravity.CENTER);
-      LinearLayout.LayoutParams params =
-          new LinearLayout.LayoutParams(
-              dp(152), dp(48));
-      params.setMargins(0, 0, 12, 0);
-      speakerRow.addView(chip, params);
-      chip.setOnClickListener(view -> rename(speaker));
-    }
-    android.widget.HorizontalScrollView speakerScroll = new android.widget.HorizontalScrollView(items.getContext());
-    speakerScroll.setHorizontalScrollBarEnabled(false);
-    speakerScroll.addView(speakerRow);
-    if (!transcript.speakers().isEmpty()) items.addView(speakerScroll);
-    TextView heading = new TextView(items.getContext());
-    heading.setText(R.string.transcript_heading);
-    heading.setTextSize(20);
-    heading.setTextColor(items.getContext().getColor(R.color.ink));
-    heading.setTypeface(null, android.graphics.Typeface.BOLD);
-    heading.setPadding(0, dp(24), 0, dp(8));
-    items.addView(heading);
     if (transcript.utterances().isEmpty()) {
       TextView empty = new TextView(items.getContext());
       empty.setText(R.string.transcript_empty);
@@ -141,7 +104,9 @@ public final class TranscriptView {
           participant == null
               ? items.getContext().getString(R.string.unknown_speaker)
               : participant.displayName());
-      if (participant != null) speaker.setOnClickListener(view -> rename(participant));
+      View edit = card.findViewById(R.id.rename_speaker);
+      edit.setVisibility(participant == null ? View.GONE : View.VISIBLE);
+      if (participant != null) edit.setOnClickListener(view -> rename(participant));
       int index = utterance.speakerId().map(id -> colors.getOrDefault(id, 0)).orElse(0);
       int speakerColor = items.getContext().getColor(index % 2 == 0 ? R.color.accent_text : R.color.secondary_speaker);
       speaker.setTextColor(speakerColor);
@@ -161,25 +126,8 @@ public final class TranscriptView {
   }
 
   private void rename(Transcript.Speaker speaker) {
-    Context context = items.getContext();
-    EditText input = new EditText(context);
-    input.setSingleLine(true);
-    input.setText(speaker.displayName());
-    input.setSelectAllOnFocus(true);
-    LinearLayout holder = new LinearLayout(context);
-    holder.setPadding(40, 0, 40, 0);
-    holder.addView(input);
-    new AlertDialog.Builder(context)
-        .setTitle(R.string.rename_participant)
-        .setView(holder)
-        .setNegativeButton(R.string.not_now, null)
-        .setPositiveButton(
-            R.string.save_name,
-            (dialog, which) -> {
-              String name = input.getText().toString().trim();
-              if (!name.isEmpty()) controller.renameSpeaker(speaker.id(), name);
-            })
-        .show();
+    GlassDialogs.rename(items.getContext(), "Имя участника", speaker.displayName(),
+        name -> controller.renameSpeaker(speaker.id(), name));
   }
 
   private void togglePlayback() {
