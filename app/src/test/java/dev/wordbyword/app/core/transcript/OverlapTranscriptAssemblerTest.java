@@ -1,6 +1,7 @@
 package dev.wordbyword.app.core.transcript;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import dev.wordbyword.app.core.diarization.SpeakerDiarizer;
@@ -12,6 +13,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.OptionalDouble;
 import java.util.OptionalLong;
+import java.util.concurrent.CancellationException;
 import org.junit.Test;
 
 public class OverlapTranscriptAssemblerTest {
@@ -163,5 +165,30 @@ public class OverlapTranscriptAssemblerTest {
 
     assertTrue(transcript.utterances().isEmpty());
     assertTrue(transcript.speakers().isEmpty());
+  }
+
+  @Test
+  public void cancellationDuringAssemblyDoesNotReturnPartialTranscript() {
+    var recognition =
+        new RecognitionResult(
+            "слово слово",
+            List.of(segment("слово", 0, 1000), segment("слово", 1000, 2000)),
+            RecognitionResult.Timing.SEGMENT);
+    var cancellation =
+        new ProcessingContext() {
+          int checks;
+
+          public boolean isCancellationRequested() {
+            return ++checks > 2;
+          }
+
+          public void reportProgress(String stage, OptionalDouble fraction) {}
+        };
+    assertThrows(
+        CancellationException.class,
+        () ->
+            assembler.assemble(
+                recording(OptionalLong.of(2000)), recognition,
+                List.of(speaker("A", 0, 1000), speaker("B", 1000, 2000)), cancellation));
   }
 }
