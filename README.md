@@ -51,9 +51,11 @@ AVD использует 4 ГБ RAM.
 
 ## Документация
 
-- [Выполнение обработки](docs/processing.md), [контракты](docs/contracts.md), [хранение](docs/storage.md).
-- [ASR и VAD](docs/asr-models.md), [диаризация](docs/diarization-models.md).
-- [Измерения и тестовые записи](evaluation/README.md), [требования хакатона](docs/hackathon.md).
+Все материалы собраны в [оглавлении docs](docs/README.md).
+
+- [Архитектура](docs/ARCHITECTURE.md) и [форматы данных](docs/PROTOCOL.md).
+- [Ограничения](docs/LIMITATIONS.md) и [результаты тестирования](docs/TEST_RESULTS.md).
+- [Сборка и приёмка](docs/build.md), [методика оценки](docs/testing/evaluation.md), [требования хакатона](docs/hackathon.md).
 
 Текущая сборка подписана debug-ключом.
 ASR возвращает таймкоды речевых фрагментов, а не отдельных слов.
