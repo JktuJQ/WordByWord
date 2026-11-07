@@ -53,7 +53,7 @@ public final class RecordingActivity extends Activity {
           if (state == State.RECORDING) {
             renderTimer();
             animateOrb();
-            handler.postDelayed(this, 120);
+            handler.postDelayed(this, 60);
           }
         }
       };
@@ -322,7 +322,7 @@ public final class RecordingActivity extends Activity {
   private void animateOrb() {
     if (recorder == null) return;
     int amplitude = recorder.getMaxAmplitude();
-    float level = amplitude <= 100 ? 0f : Math.min(1f, (float) (Math.log1p((amplitude - 100) / 140f) / Math.log1p(30)));
+    float level = amplitude <= 40 ? 0f : Math.min(1f, (float) (Math.log1p((amplitude - 40) / 100f) / Math.log1p(20)));
     ((HomeGlowLayout) findViewById(R.id.recording_root)).setVoiceLevel(level);
     orbScale = orbScale * 0.65f + (1f + level * 0.22f) * 0.35f;
     View orb = findViewById(R.id.recording_orb);

@@ -40,7 +40,7 @@
     <string name="recording_preview">Прослушать запись</string>
     <string name="recording_stop_preview">Остановить прослушивание</string>
     <string name="recording_name_hint">Название записи</string>
-    <string name="recording_transcribe">Расшифровать</string>
+    <string name="recording_transcribe">Сохранить</string>
     <string name="microphone_permission">Для записи разговора нужен доступ к микрофону.</string>
     <string name="microphone_settings">Открыть настройки</string>
     <string name="recording_failed">Не удалось записать аудио. Попробуйте ещё раз.</string>

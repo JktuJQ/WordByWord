@@ -76,8 +76,8 @@ public final class HomeGlowLayout extends LinearLayout {
     glow.setAlpha(voiceMode ? Math.round(voiceLevel * 230) : 255);
     if (voiceMode && voiceLevel == 0) return;
     if (voiceMode) {
-      float radius = getWidth() * (0.75f + voiceLevel * 0.65f);
-      float reach = getHeight() * (0.3f + voiceLevel * 0.65f);
+      float radius = getWidth() * (0.85f + voiceLevel * 0.85f);
+      float reach = getHeight() * (0.4f + voiceLevel * 0.65f);
       float centerY = getHeight() * 0.4f;
       float movement = (float) Math.sin(phase * 2) * getWidth() * 0.1f * voiceLevel;
       drawGlow(canvas, orange, getWidth() * 0.4f + movement, centerY, radius, reach);

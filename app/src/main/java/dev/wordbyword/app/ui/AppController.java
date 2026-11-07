@@ -55,9 +55,13 @@ public final class AppController {
   }
 
   public void add(Recording recording) {
-    items.putIfAbsent(
-        recording.id(),
-        new Item(recording, Status.IMPORTED, "Готово к запуску", OptionalDouble.empty(), null));
+    if (!items.containsKey(recording.id())) {
+      var previous = new java.util.LinkedHashMap<>(items);
+      items.clear();
+      items.put(recording.id(),
+          new Item(recording, Status.IMPORTED, "Готово к запуску", OptionalDouble.empty(), null));
+      items.putAll(previous);
+    }
     message = "";
     emit();
   }
@@ -211,7 +215,7 @@ public final class AppController {
   }
 
   public void cancel() {
-    if (processing.cancel()) notifyMessage("Отменяем обработку…");
+    if (processing.cancel()) emit();
   }
 
   private void finish(Recording recording, Status status, String detail, Transcript transcript) {

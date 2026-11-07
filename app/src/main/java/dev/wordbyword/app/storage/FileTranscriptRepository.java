@@ -52,12 +52,20 @@ public final class FileTranscriptRepository implements TranscriptRepository {
     this.readFailure = readFailure;
   }
 
+  private static long createdAt(Path directory) {
+    try {
+      return Files.readAttributes(directory, java.nio.file.attribute.BasicFileAttributes.class).creationTime().toMillis();
+    } catch (IOException exception) {
+      return 0;
+    }
+  }
+
   @Override
   public synchronized List<Recording> listRecordings() throws IOException {
     Files.createDirectories(root);
     var recordings = new ArrayList<Recording>();
     try (var paths = Files.list(root)) {
-      for (Path directory : paths.sorted().collect(Collectors.toList())) {
+      for (Path directory : paths.sorted(Comparator.comparingLong(FileTranscriptRepository::createdAt).reversed().thenComparing(Path::toString)).collect(Collectors.toList())) {
         if (directory.getFileName().toString().startsWith(".pending-")
             || directory.getFileName().toString().startsWith(".trash-")) {
           clean(directory);
