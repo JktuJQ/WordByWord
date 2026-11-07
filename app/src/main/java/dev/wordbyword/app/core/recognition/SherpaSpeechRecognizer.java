@@ -12,8 +12,8 @@ import com.k2fsa.sherpa.onnx.VadModelConfig;
 import dev.wordbyword.app.core.audio.PcmAudio;
 import dev.wordbyword.app.core.processing.ProcessingContext;
 import dev.wordbyword.app.core.processing.ProcessingException;
-import java.io.IOException;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,7 +41,11 @@ public final class SherpaSpeechRecognizer implements SpeechRecognizer {
   }
 
   private SherpaSpeechRecognizer(
-      AssetManager assets, File models, OfflineModelConfig modelConfig, float maxSpeechDuration, int contextMs) {
+      AssetManager assets,
+      File models,
+      OfflineModelConfig modelConfig,
+      float maxSpeechDuration,
+      int contextMs) {
     if (!Float.isFinite(maxSpeechDuration) || maxSpeechDuration <= 0 || contextMs < 0) {
       throw new IllegalArgumentException("Invalid VAD duration or context");
     }
@@ -49,7 +53,8 @@ public final class SherpaSpeechRecognizer implements SpeechRecognizer {
     this.models = models;
     this.modelConfig = modelConfig;
     this.maxSpeechDuration = maxSpeechDuration;
-    this.contextSamples = contextMs * (long) RATE / 1000;  }
+    this.contextSamples = contextMs * (long) RATE / 1000;
+  }
 
   @Override
   public RecognitionResult transcribe(PcmAudio audio, ProcessingContext context)
@@ -190,8 +195,7 @@ public final class SherpaSpeechRecognizer implements SpeechRecognizer {
     try {
       probe = assets.open(path);
     } catch (IOException exception) {
-      throw new IOException(
-          "Модель распознавания отсутствует в приложении: " + name, exception);
+      throw new IOException("Модель распознавания отсутствует в приложении: " + name, exception);
     }
     try {
       if (probe.available() <= 0) {
