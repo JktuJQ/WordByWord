@@ -40,7 +40,8 @@ android {
             assets.srcDirs = [
                 'src/testAndroid/assets',
                 '../evaluation/fixtures/diarization',
-                '../evaluation/fixtures/asr'
+                '../evaluation/fixtures/asr',
+                '../evaluation/fixtures/dialogs/audio'
             ]
         }
     }
