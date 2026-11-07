@@ -16,6 +16,7 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.util.OptionalDouble;
 import java.util.OptionalLong;
+import java.util.concurrent.Callable;
 
 public final class AndroidAudioPreparer implements AudioPreparer {
   private static final long DEQUEUE_TIMEOUT_US = 10_000;
@@ -38,11 +39,9 @@ public final class AndroidAudioPreparer implements AudioPreparer {
     FilePcmAudio.Writer writer = null;
     boolean succeeded = false;
     try {
-      try {
-        extractor.setDataSource(context, Uri.parse(source.toString()), null);
-      } catch (IOException | IllegalArgumentException exception) {
-        throw new ProcessingException("Не удалось открыть аудиофайл", exception);
-      }
+      wrap(
+          "Не удалось открыть аудиофайл",
+          () -> extractor.setDataSource(context, Uri.parse(source.toString()), null));
 
       int trackIndex = selectAudioTrack(extractor);
       MediaFormat trackFormat = extractor.getTrackFormat(trackIndex);
@@ -50,30 +49,24 @@ public final class AndroidAudioPreparer implements AudioPreparer {
       OptionalLong durationUs = readDuration(trackFormat);
 
       String mime = trackFormat.getString(MediaFormat.KEY_MIME);
-      try {
-        codec = MediaCodec.createDecoderByType(mime);
-        codec.configure(trackFormat, null, null, 0);
-        codec.start();
-      } catch (IOException | IllegalStateException exception) {
-        throw new ProcessingException(
-            "Не удалось запустить декодер для формата " + mime, exception);
-      }
+      codec =
+          wrap(
+              "Не удалось запустить декодер для формата " + mime,
+              () -> {
+                MediaCodec created = MediaCodec.createDecoderByType(mime);
+                created.configure(trackFormat, null, null, 0);
+                created.start();
+                return created;
+              });
 
-      try {
-        writer = new FilePcmAudio.Writer(context.getCacheDir());
-      } catch (IOException exception) {
-        throw new ProcessingException("Не удалось создать временный файл для PCM", exception);
-      }
+      writer =
+          wrap(
+              "Не удалось создать временный файл для PCM",
+              () -> new FilePcmAudio.Writer(context.getCacheDir()));
 
       decode(extractor, codec, writer, durationUs, processingContext);
 
-      PcmAudio result;
-      try {
-        result = writer.finish();
-      } catch (IOException exception) {
-        throw new ProcessingException(
-            "Не удалось завершить запись временного PCM-файла", exception);
-      }
+      PcmAudio result = wrap("Не удалось завершить запись временного PCM-файла", writer::finish);
       succeeded = true;
       return result;
     } finally {
@@ -88,6 +81,27 @@ public final class AndroidAudioPreparer implements AudioPreparer {
       if (writer != null && !succeeded) {
         writer.abort();
       }
+    }
+  }
+
+  private interface ThrowingRunnable {
+    void run() throws Exception;
+  }
+
+  private static void wrap(String message, ThrowingRunnable action) throws ProcessingException {
+    wrap(
+        message,
+        () -> {
+          action.run();
+          return null;
+        });
+  }
+
+  private static <T> T wrap(String message, Callable<T> action) throws ProcessingException {
+    try {
+      return action.call();
+    } catch (Exception exception) {
+      throw new ProcessingException(message, exception);
     }
   }
 
