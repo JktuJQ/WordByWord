@@ -36,10 +36,18 @@ Python и FFmpeg также не требуются.
 
 Задача `:app:packageDemoApk` записывает в `artifacts/apk/`:
 
-- APK с debug-подписью;
+- `wordbyword-0.1.0-debug.apk` с debug-подписью;
 - файл `.sha256` с контрольной суммой;
 - JSON с commit, состоянием исходников, ABI, параметрами сборки и хешами моделей.
 
+Проверка суммы из `artifacts/apk/`:
+
+```sh
+sha256sum -c wordbyword-0.1.0-debug.apk.sha256
+```
+
+В macOS используйте `shasum -a 256 -c wordbyword-0.1.0-debug.apk.sha256`.
+Бинарные файлы исключены из Git; GitHub не принимает обычные Git-файлы больше 100 МиБ, поэтому готовый APK следует публиковать отдельным артефактом с постоянной ссылкой.
 Повторная сборка той же версии заменяет эти файлы.
 Стандартный результат `assembleDebug` находится в `app/build/outputs/apk/debug/app-debug.apk`.
 Параллельная обработка включена по умолчанию.
@@ -101,8 +109,9 @@ adb -e shell am start -n dev.wordbyword.app/.MainActivity
 
 В отчёте укажите commit и SHA-256 APK, модель телефона, Android, RAM, файл и его длительность.
 Отдельно запишите время обработки, RTF, память и обнаруженные ошибки.
-Отчёты и JSON-гипотезы размещаются в `artifacts/test-results/`.
-Правила оценки описаны в [evaluation/README.md](../evaluation/README.md).
+Сводные результаты и требования к отчёту собраны в [TEST_RESULTS.md](TEST_RESULTS.md).
+Сырые локальные отчёты и JSON-гипотезы размещаются в `evaluation/results/` или `artifacts/test-results/`.
+Правила оценки описаны в [методике тестирования](testing/evaluation.md).
 
 `measure-on-device.sh` удаляет установленное приложение при выходе.
 Не запускайте его на устройстве с библиотекой, которую нужно сохранить.
