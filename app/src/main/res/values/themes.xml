@@ -15,6 +15,7 @@
         <item name="android:backgroundTint">@null</item>
         <item name="android:paddingHorizontal">24dp</item>
         <item name="android:stateListAnimator">@null</item>
+        <item name="android:elevation">2dp</item>
         <item name="android:textColor">@color/ink</item>
     </style>
     <style name="SecondaryButton" parent="ActionButton">
@@ -27,7 +28,7 @@
         <item name="android:lineSpacingExtra">3dp</item>
     </style>
     <style name="IconButton">
-        <item name="android:background">?android:attr/selectableItemBackgroundBorderless</item>
+        <item name="android:background">@drawable/icon_button</item>
         <item name="android:padding">12dp</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
@@ -37,6 +38,7 @@
         <item name="android:minWidth">0dp</item>
         <item name="android:backgroundTint">@null</item>
         <item name="android:stateListAnimator">@null</item>
+        <item name="android:elevation">2dp</item>
         <item name="android:textColor">@color/muted</item>
         <item name="android:textSize">12sp</item>
         <item name="android:gravity">center</item>

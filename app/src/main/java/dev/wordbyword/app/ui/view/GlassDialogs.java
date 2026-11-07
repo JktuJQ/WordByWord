@@ -12,7 +12,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
-import dev.wordbyword.app.HomeGlowLayout;
 import dev.wordbyword.app.R;
 import java.util.function.Consumer;
 
@@ -23,11 +22,11 @@ public final class GlassDialogs {
     return Math.round(size * context.getResources().getDisplayMetrics().density);
   }
 
-  private static HomeGlowLayout panel(Context context) {
-    HomeGlowLayout panel = new HomeGlowLayout(context, null);
+  private static LinearLayout panel(Context context) {
+    LinearLayout panel = new LinearLayout(context);
     panel.setOrientation(LinearLayout.VERTICAL);
     panel.setPadding(dp(context, 24), dp(context, 24), dp(context, 24), dp(context, 24));
-    panel.setBackgroundResource(R.drawable.card);
+    panel.setBackgroundResource(R.drawable.dialog_surface);
     panel.setClipToOutline(true);
     return panel;
   }
@@ -48,10 +47,15 @@ public final class GlassDialogs {
     show(context, title, null, initial, save, "Сохранить");
   }
 
-  private static void show(Context context, String title, String body, String initial,
-      Consumer<String> action, String actionLabel) {
+  private static void show(
+      Context context,
+      String title,
+      String body,
+      String initial,
+      Consumer<String> action,
+      String actionLabel) {
     Dialog dialog = new Dialog(context);
-    HomeGlowLayout panel = panel(context);
+    LinearLayout panel = panel(context);
     TextView heading = text(context, title, 26);
     heading.setTypeface(context.getResources().getFont(R.font.soyuz_grotesk));
     panel.addView(heading);
@@ -81,6 +85,7 @@ public final class GlassDialogs {
       button.setBackgroundTintList(null);
       button.setBackgroundResource(R.drawable.home_glass_primary);
       button.setStateListAnimator(null);
+      button.setElevation(dp(context, 2));
       LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, dp(context, 52), 1);
       if (button == accept) params.leftMargin = dp(context, 12);
       buttons.addView(button, params);
@@ -88,36 +93,47 @@ public final class GlassDialogs {
     cancel.setText("Отмена");
     accept.setText(actionLabel);
     cancel.setOnClickListener(view -> dialog.dismiss());
-    accept.setOnClickListener(view -> {
-      String value = input.getText().toString().trim();
-      if (initial != null && value.isEmpty()) {
-        input.setError("Введите название");
-        return;
-      }
-      dialog.dismiss();
-      action.accept(value);
-    });
+    accept.setOnClickListener(
+        view -> {
+          String value = input.getText().toString().trim();
+          if (initial != null && value.isEmpty()) {
+            input.setError("Введите название");
+            return;
+          }
+          dialog.dismiss();
+          action.accept(value);
+        });
     panel.addView(buttons);
     dialog.setContentView(panel);
     dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
     dialog.show();
-    dialog.getWindow().setLayout(context.getResources().getDisplayMetrics().widthPixels - dp(context, 40),
-        ViewGroup.LayoutParams.WRAP_CONTENT);
+    dialog
+        .getWindow()
+        .setLayout(
+            context.getResources().getDisplayMetrics().widthPixels - dp(context, 40),
+            ViewGroup.LayoutParams.WRAP_CONTENT);
   }
 
   public static PopupWindow message(View anchor, String value) {
     Context context = anchor.getContext();
-    HomeGlowLayout panel = panel(context);
+    LinearLayout panel = panel(context);
+    panel.setBackgroundResource(R.drawable.message_surface);
     panel.addView(text(context, value, 16));
-    PopupWindow popup = new PopupWindow(panel,
-        context.getResources().getDisplayMetrics().widthPixels - dp(context, 40), -2, false);
+    PopupWindow popup =
+        new PopupWindow(
+            panel,
+            context.getResources().getDisplayMetrics().widthPixels - dp(context, 40),
+            -2,
+            false);
     popup.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
     popup.setElevation(dp(context, 12));
-    anchor.post(() -> {
-      if (!anchor.isAttachedToWindow()) return;
-      popup.showAtLocation(anchor, Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, dp(context, 96));
-      anchor.postDelayed(popup::dismiss, 2800);
-    });
+    anchor.post(
+        () -> {
+          if (!anchor.isAttachedToWindow()) return;
+          popup.showAtLocation(
+              anchor, Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, dp(context, 96));
+          anchor.postDelayed(popup::dismiss, 2800);
+        });
     return popup;
   }
 }
