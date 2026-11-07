@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
- <color name="background">#FFF9F5</color><color name="surface">#FFFFFF</color>
- <color name="ink">#262321</color><color name="muted">#766D66</color>
- <color name="accent">#C64B08</color><color name="accent_soft">#FFE8D8</color>
- <color name="secondary_speaker">#386D65</color><color name="divider">#F0E5DC</color>
- <color name="error">#B33C36</color>
+    <color name="background">#FAFAFA</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="ink">#191C20</color>
+    <color name="muted">#646B74</color>
+    <color name="accent">#FF6A00</color>
+    <color name="accent_soft">#F0F1F3</color>
+    <color name="secondary_speaker">#246B60</color>
+    <color name="divider">#E3E6EA</color>
+    <color name="error">#B3261E</color>
+    <color name="active_surface">#E9ECEF</color>
+    <color name="active_muted">#646B74</color>
+    <color name="active_accent">#191C20</color>
+    <color name="accent_text">#191C20</color>
 </resources>

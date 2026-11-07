@@ -27,13 +27,15 @@ public final class RecordingListView {
       AppState state,
       boolean selecting,
       Set<String> selectedIds,
-      Consumer<String> toggleSelection) {
+      Consumer<String> toggleSelection,
+      Consumer<String> beginSelection) {
     View card =
         LayoutInflater.from(items.getContext()).inflate(R.layout.item_recording, items, false);
     ((TextView) card.findViewById(R.id.recording_kind)).setText(R.string.imported_badge);
     ((TextView) card.findViewById(R.id.recording_title)).setText(item.recording().title());
     ((TextView) card.findViewById(R.id.recording_detail)).setText(item.detail());
     TextView status = card.findViewById(R.id.recording_status);
+    status.setTextColor(items.getContext().getColor(R.color.accent_text));
     status.setText(
         switch (item.status()) {
           case PROCESSING -> R.string.processing_status;
@@ -49,6 +51,11 @@ public final class RecordingListView {
       errorBackground.setCornerRadius(16 * items.getResources().getDisplayMetrics().density);
       status.setBackground(errorBackground);
     }
+    card.setOnLongClickListener(view -> {
+      beginSelection.accept(item.recording().id());
+      return true;
+    });
+    card.setBackgroundResource(selectedIds.contains(item.recording().id()) ? R.drawable.selected_card : R.drawable.card);
     CheckBox selected = card.findViewById(R.id.recording_selected);
     selected.setVisibility(selecting ? View.VISIBLE : View.GONE);
     selected.setChecked(selectedIds.contains(item.recording().id()));
