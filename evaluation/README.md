@@ -6,6 +6,12 @@
 - `fixtures/diarization/` — аудио, метаданные и RTTM-эталоны. Происхождение, лицензии и атрибуция: [SOURCE.md](fixtures/diarization/SOURCE.md). Контрольные суммы проверяются из этой папки: `sha256sum -c SHA256SUMS`.
 - `fixtures/dialogs/` — три составленных разговора по 60–90 секунд из реальных голосов Dialogs (2/2/3 участника), тексты и предварительная разметка по границам клипов. Текст независимо на слух не проверен; RTTM требует уточнения речевых границ перед оценкой DER. Источник, ограничения и пересборка: [SOURCE.md](fixtures/dialogs/SOURCE.md).
 - `src/main/java/dev/wordbyword/evaluation/` — скореры WER/DER.
+
+ASR-набор расширен в #32: `manifest.json`/`audio.zip` содержат 120 MINDS-14
+(30 regression, 30 development, 60 evaluation). Эталоны MINDS местами неточны;
+они сохранены без исправлений по выводу модели. `fleurs-validation.json` и
+`fleurs-validation.zip` — отдельная проверка на 30 записях FLEURS validation,
+не полный официальный тест и не разговоры нескольких участников. Наборы оцениваются отдельно.
 - `src/test/java/dev/wordbyword/evaluation/` — тесты нормализации, формул и сопоставления участников.
 - `results/` — локальные гипотезы и отчёты, игнорируются Git.
 - `measure-on-device.sh` — собирает debug и androidTest APK, устанавливает их на подключённое устройство/эмулятор, получает гипотезы и сразу прогоняет оба скорера.
@@ -32,7 +38,28 @@
 
 Скореры оценивают готовые гипотезы и не доказывают качество моделей сами по себе отдельно от самого прогона на устройстве. Тест «эталон против себя» проверяет скорер.
 
+Для FLEURS можно передать Android-тесту `-e archive fleurs-validation.zip -e output asr-fleurs.json`.
+Четвёртый аргумент `scoreAsr` выбирает раздел MINDS: `regression`, `development` или `evaluation`.
+Время каждого клипа в Android-гипотезах включает подготовку аудио, VAD и загрузку ASR.
+
+Для сравнения на Linux есть `:app:benchmarkAsr`; нужны локальные JNI-библиотеки
+sherpa-onnx 2.0.1 (`-PasrNativeDir=/путь/к/lib`). На вход подаётся заранее подготовленный
+PCM16 LE, моно, 16 кГц; это исследование не заменяет Android-проверку. Например:
+
+```sh
+./gradlew :app:benchmarkAsr --args='evaluation/fixtures/asr/manifest.json evaluation/results/pcm local-models/gigaam-v2 pipeline development evaluation/results/asr-dev.json'
+```
+
+Вместо `pipeline` доступны `transducer` (NeMo RNNT/TDT) и `whisper` (int8 ONNX,
+язык `ru`). В папке модели нужен `silero_vad.onnx`. Необязательные два последних
+аргумента — максимальная длительность речи в секундах и контекст VAD в миллисекундах;
+по умолчанию 15 и 200, как в приложении. Отчёт содержит WER/CER, RTF, хеши и гипотезы.
+
 ## Измерения
+
+Правила нормализации и актуальное сравнение моделей: [docs/asr-quality.md](../docs/asr-quality.md).
+Основной WER теперь учитывает пунктуацию; `lexical_wer` показывает ошибки без неё.
+Приведённые ниже исторические результаты получены прежним скорером без пунктуации.
 
 Получены `measure-on-device.sh` на эмуляторе Android API 36 (google_apis, arm64-v8a) в Nix devShell — не на физическом телефоне, этот TODO остаётся открытым.
 
@@ -49,7 +76,7 @@ RTF в таблице приближённый: `measure-on-device.sh` запу�
 
 ### Распознавание речи
 
-Фикстура `fixtures/asr/manifest.json` — 30 клипов (датасет MINDS-14, русский и смешанный с английским).
+Исторический прогон до расширения #32: 30 клипов MINDS-14, русский и смешанный с английским.
 
 | Метрика | Значение |
 | --- | ---: |
