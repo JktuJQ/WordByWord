@@ -6,17 +6,21 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 public class FilePcmAudioTest {
+  @Rule public TemporaryFolder temporary = new TemporaryFolder();
+
   private static final float DELTA = 1e-6f;
 
   private FilePcmAudio write(float[] samples) throws IOException {
-    File directory = Files.createTempDirectory("file-pcm-audio-test").toFile();
-    FilePcmAudio.Writer writer = new FilePcmAudio.Writer(directory);
-    writer.write(samples, 0, samples.length);
-    return writer.finish();
+    File directory = temporary.newFolder();
+    try (var writer = new FilePcmAudio.Writer(directory)) {
+      writer.write(samples, 0, samples.length);
+      return writer.finish();
+    }
   }
 
   @Test

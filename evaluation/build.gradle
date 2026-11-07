@@ -1,0 +1,20 @@
+plugins {
+    id 'java'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 17
+}
+
+dependencies {
+    implementation 'com.google.code.gson:gson:2.15.0'
+    testImplementation 'junit:junit:4.13.2'
+}
+
+['scoreAsr': 'ScoreAsr', 'scoreDiarization': 'ScoreDiarization'].each { taskName, entryPoint ->
+    tasks.register(taskName, JavaExec) {
+        classpath = sourceSets.main.runtimeClasspath
+        mainClass = "dev.wordbyword.evaluation.${entryPoint}"
+        workingDir = rootProject.projectDir
+    }
+}
