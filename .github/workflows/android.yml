@@ -42,25 +42,10 @@ jobs:
           cache-provider: basic
 
       - name: Cache diarization model downloads
-        id: diarization-cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         with:
-          path: /tmp/diarization-downloads
-          key: diarization-models-${{ hashFiles('app/prepare-diarization-models.py') }}
-
-      - name: Download diarization models
-        if: steps.diarization-cache.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p /tmp/diarization-downloads
-          curl -sL -o /tmp/diarization-downloads/sherpa-onnx-2.0.1.aar \
-            https://github.com/k2-fsa/sherpa-onnx/releases/download/v2.0.1/sherpa-onnx-2.0.1.aar
-          curl -sL -o /tmp/diarization-downloads/sherpa-onnx-pyannote-segmentation-3-0.tar.bz2 \
-            https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-segmentation-models/sherpa-onnx-pyannote-segmentation-3-0.tar.bz2
-          curl -sL -o "/tmp/diarization-downloads/3dspeaker_speech_eres2net_base_sv_zh-cn_3dspeaker_16k.onnx" \
-            "https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/3dspeaker_speech_eres2net_base_sv_zh-cn_3dspeaker_16k.onnx"
-
-      - name: Prepare diarization models
-        run: python3 app/prepare-diarization-models.py /tmp/diarization-downloads
+          path: app/build/diarization-downloads
+          key: diarization-models-${{ hashFiles('app/build.gradle') }}
 
       - name: Build, test and lint
         run: ./gradlew --no-daemon --stacktrace --continue testDebugUnitTest assembleDebug lintDebug

@@ -13,7 +13,7 @@
 | `segmentation.int8.onnx` | [sherpa-onnx-pyannote-segmentation-3-0.tar.bz2](https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-segmentation-models/sherpa-onnx-pyannote-segmentation-3-0.tar.bz2), файл `model.int8.onnx` | MIT (CNRS, из архива — исходник [pyannote/segmentation-3.0](https://huggingface.co/pyannote/segmentation-3.0)) | Сегментация говорящих + VAD |
 | `embedding.onnx` | [3dspeaker_speech_eres2net_base_sv_zh-cn_3dspeaker_16k.onnx](https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/3dspeaker_speech_eres2net_base_sv_zh-cn_3dspeaker_16k.onnx) | Apache-2.0 ([3D-Speaker](https://github.com/alibaba-damo-academy/3D-Speaker), подтверждено через ModelScope) | Спикер-эмбеддинги |
 
-Контрольные суммы — в `prepare-diarization-models.py`.
+Контрольные суммы — в таске `prepareDiarizationModels` в `app/build.gradle`.
 
 ## Известное ограничение: язык обучения эмбеддинга
 
@@ -31,22 +31,25 @@
 тот же 3D-Speaker эмбеддинг). Качество на реальной русской речи не подтверждено
 отдельно — проверяется эмпирически на `test-data/diarization/` в рамках #6.
 
-## Подготовка (как в `experiments/asr-probe/probe.py prepare`)
+## Подготовка
 
 Модели и AAR не хранятся в git (`app/vendor/`, `app/src/main/assets/diarization/` —
-в `.gitignore`). Перед сборкой:
+в `.gitignore`). Их скачивание, проверку SHA-256 и раскладку делает сама сборка —
+Gradle-таска `prepareDiarizationModels` в `app/build.gradle`, навешенная на
+`preBuild`. Достаточно просто:
 
 ```sh
-mkdir /tmp/diarization-downloads
-curl -L -o /tmp/diarization-downloads/sherpa-onnx-2.0.1.aar \
-  https://github.com/k2-fsa/sherpa-onnx/releases/download/v2.0.1/sherpa-onnx-2.0.1.aar
-curl -L -o /tmp/diarization-downloads/sherpa-onnx-pyannote-segmentation-3-0.tar.bz2 \
-  https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-segmentation-models/sherpa-onnx-pyannote-segmentation-3-0.tar.bz2
-curl -L -o "/tmp/diarization-downloads/3dspeaker_speech_eres2net_base_sv_zh-cn_3dspeaker_16k.onnx" \
-  "https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/3dspeaker_speech_eres2net_base_sv_zh-cn_3dspeaker_16k.onnx"
-python3 app/prepare-diarization-models.py /tmp/diarization-downloads
+./gradlew assembleDebug
 ```
 
-После этого `./gradlew assembleDebug` упаковывает модели в APK (~41 МБ к размеру
-сборки) — готовая APK работает офлайн без докачки, как того требует
-[docs/hackathon.md](hackathon.md).
+При первом запуске (или если файлов нет на диске) таска скачает все три
+артефакта в `app/build/diarization-downloads/`, проверит контрольные суммы и
+разложит их в `app/vendor/` и `app/src/main/assets/diarization/`; при
+повторных запусках с уже готовыми файлами — не скачивает заново. Отдельного
+ручного шага или Python не требуется.
+
+После этого Gradle упаковывает модели в APK (~41 МБ к размеру сборки) —
+готовая APK работает офлайн без докачки, как того требует
+[docs/hackathon.md](hackathon.md). Скачивание происходит только на машине,
+которая собирает APK (CI или разработчик) — не на устройстве, куда APK
+устанавливается.
