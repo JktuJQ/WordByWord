@@ -1,65 +1,46 @@
-# Модели и runtime для распознавания речи (issue #5)
+# Распознавание речи
 
-Распознавание реализовано через `sherpa-onnx` v2.0.1: Silero VAD находит речевые
-интервалы, `OfflineRecognizer` (GigaAM v2 int8, nemo_transducer) распознаёт текст
-по каждому интервалу отдельно. Результат имеет `Timing.SEGMENT` — таймкоды
-относятся к речевым фрагментам, не к отдельным словам.
+Приложение использует sherpa-onnx 2.0.1, Silero VAD и GigaAM v3 RNNT int8 с пунктуацией.
+VAD находит речевые интервалы; ASR распознаёт каждый интервал с контекстом 200 мс, максимум речи — 15 с.
+ASR использует два CPU-потока.
+Результат имеет `Timing.SEGMENT`: таймкоды относятся к речевым фрагментам, а не словам.
 
-## Файлы
+## Источники
 
-| Файл | Источник | Лицензия | Назначение |
-| --- | --- | --- | --- |
-| `sherpa-onnx-2.0.1.aar` | [релиз v2.0.1](https://github.com/k2-fsa/sherpa-onnx/releases/download/v2.0.1/sherpa-onnx-2.0.1.aar) | Apache-2.0 | Android-биндинги sherpa-onnx (тот же файл, что уже скачивает `prepareDiarizationModels` для #6) |
-| `encoder.int8.onnx`, `decoder.onnx`, `joiner.onnx`, `tokens.txt` | [sherpa-onnx-nemo-transducer-giga-am-v2-russian-2025-04-19.tar.bz2](https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-nemo-transducer-giga-am-v2-russian-2025-04-19.tar.bz2) | MIT ([salute-developers/GigaAM](https://github.com/salute-developers/GigaAM); не проверяли LICENSE-файл байт в байт, но README репозитория и его зеркала указывают MIT) | ASR-модель GigaAM v2, русский язык |
-| `silero_vad.onnx` | [релиз asr-models](https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/silero_vad.onnx) | MIT ([snakers4/silero-vad](https://github.com/snakers4/silero-vad)) | Отсечение тишины перед распознаванием |
+| Компонент | Источник | Лицензия |
+| --- | --- | --- |
+| sherpa-onnx AAR/JNI | [релиз 2.0.1](https://github.com/k2-fsa/sherpa-onnx/releases/tag/v2.0.1) | Apache-2.0 |
+| GigaAM v3 RNNT, punctuation | [ONNX-архив sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-nemo-transducer-punct-giga-am-v3-russian-2025-12-16.tar.bz2), [исходная модель](https://github.com/salute-developers/GigaAM) | MIT; `LICENSE` из архива включён в assets |
+| Silero VAD | [ONNX-модель](https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/silero_vad.onnx), [репозиторий](https://github.com/snakers4/silero-vad) | MIT |
 
-Контрольные суммы — в таске `prepareAsrModels` в `app/build.gradle`.
+URL и SHA-256 закреплены в `prepareAsrModels` в `app/build.gradle`.
+Архив GigaAM занимает около 162 МиБ.
+В APK включаются `encoder.int8.onnx`, `decoder.onnx`, `joiner.onnx`, `tokens.txt`, `silero_vad.onnx` и лицензия GigaAM.
 
-## Подготовка
-
-Модели не хранятся в git (`app/src/main/assets/asr/` — в `.gitignore`, как и
-`app/src/main/assets/diarization/`). Их скачивание, проверку SHA-256 и раскладку
-делает сама сборка — Gradle-таска `prepareAsrModels`, навешенная на `preBuild`,
-тем же способом, что и `prepareDiarizationModels` для #6. Достаточно:
+## Подготовка моделей
 
 ```sh
 ./gradlew assembleDebug
 ```
 
-При первом запуске (или если файлов нет на диске) таска скачает архив GigaAM
-(≈165 МиБ) и `silero_vad.onnx` (≈629 КиБ) в `app/build/asr-downloads/`,
-проверит контрольные суммы и распакует нужные файлы в `app/src/main/assets/asr/`;
-при повторных запусках с уже готовыми файлами — не скачивает заново.
+`prepareAsrModels` скачивает и проверяет файлы в `app/build/asr-downloads/`, затем размещает модели в `app/src/main/assets/asr/`.
+Оба каталога исключены из Git.
+Контрольные суммы источников объявлены входами Gradle-задачи, подготовленные файлы — выходами.
+Смена версии или изменение выходного файла запускает подготовку заново; наличие файлов предыдущей модели не блокирует обновление.
 
-`SherpaSpeechRecognizer` и `Vad` читают модели прямо из `AssetManager`
-(`new OfflineRecognizer(assets, config)`, `new Vad(assets, vadConfig)`) —
-как и диаризация, без промежуточного копирования на диск устройства.
-Готовая APK работает офлайн сразу после установки, без `adb push` и без
-докачки на самом устройстве, как того требует [docs/hackathon.md](hackathon.md).
-Скачивание происходит только на машине, которая собирает APK (CI или
-разработчик).
+Модели читаются через `AssetManager`, без копирования в отдельный каталог телефона.
+Сеть нужна при первой сборке, но не при установке или обработке записи.
+APK содержит модели и работает офлайн сразу после установки.
 
-## История: было до этой автоматизации
+## Качество и ограничения
 
-До появления `prepareAsrModels` модели нужно было вручную копировать в
-`getExternalFilesDir(null)/models/gigaam-v2/` на устройстве (например через
-`adb push`) — без этого шага распознавание падало с понятной ошибкой
-(`ProcessingException`), но не работало вообще. `SherpaSpeechRecognizer`
-принимал `java.io.File` с этой папкой вместо `AssetManager`. Старый файл
-атрибуций `assets/asr-notices.txt` был удалён при рефакторинге интеграции
-без замены — этот документ его заменяет.
+Сравнение с GigaAM v2 и Parakeet, правила нормализации и условия измерений — в [asr-quality.md](asr-quality.md).
+Выбор v3 основан на Linux-прогонах; проверка на Sony Xperia 10 V остаётся обязательной перед сдачей.
+Отдельный постпроцессор пунктуации и генеративная LLM не используются.
+Пунктуация поступает из модели; на границах VAD-фрагментов возможны лишние точки и заглавные буквы.
+Текст ASR сохраняется без нормализации скорера.
 
-## Известные ограничения
+V3 использует BPE-токены, поэтому извлечение word-level таймкодов должно поддерживать субсловные токены, а не только отдельные символы.
+Интеграция word-level таймкодов ведётся в PR #44.
 
-Не предполагать word-level таймкоды: `Timing.SEGMENT`, границы — по VAD-окнам
-с добавленным контекстом (0,2 с с каждой стороны, не дальше середины до
-соседнего окна).
-
-Переизмерено (#29) после перехода на `AssetManager` инструментированным тестом
-`AsrHypothesisTest` на том же наборе MINDS-14 (30 фраз, 433 слова), что и в
-коммите `9785976`: WER 14,09% (61 ошибка), CER 8,70% — близко к прежним
-13,63%/8,21% (коммит `9785976`, до рефакторинга `SherpaSpeechRecognizer` и
-удалённой диагностической Activity), без расследования причины небольшого
-расхождения. Подробности и разбор по каждой фразе — `evaluation/README.md` и
-`evaluation/results/asr-report.json` после `evaluation/measure-on-device.sh`.
-Всё измерялось на эмуляторе, не на физическом целевом устройстве.
+Исторические результаты v2 в `evaluation/README.md` получены прежним скорером без пунктуации и не являются результатами новой модели.
