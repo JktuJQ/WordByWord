@@ -1,0 +1,617 @@
+{
+  "source_repo": "langswap/dialogs-ru-emotional-conversations",
+  "source_revision": "a74ff44d8d27ca3d21098ea3ed4d31a32923fbdd",
+  "sample_rate": 44100,
+  "gap_ms": 250,
+  "format": "PCM16 mono WAV",
+  "source_sha256": {
+    "metadata.csv": "894cfe4358c8fc0e49ee3df2f345448790ed3a32c2d1d873308cd157ce8e4721",
+    "LICENSE.md": "e136a6af001dd43a9002f20f39dd56d200afa9a6d408e28a625d90c9a0c22143",
+    "README.md": "160a80ed2efde335e1d332f7a0f66370dc933c4866a0d42b51ff97c8aa8d1436",
+    "wavs/masha_dima_part1_1.wav": "f0afe8d98b27c0ca9c55f6e0f9adbaff0d7f82e8928fbf0a766ff5597a9c3023",
+    "wavs/masha_dima_part1_2.wav": "5b64f335af077823b7ceedbb516f32eb12de8815481f0c7be773dc7dafe4f3d6",
+    "wavs/masha_dima_part1_3.wav": "175bf4eca3182ccb1e90560618f958823cd98c846947af5e8af66e8243e26644",
+    "wavs/masha_dima_part1_4.wav": "ba677b4e4470012c070e10a64359fefa870d036e17b0a7d8bb6c559e9a1aec17",
+    "wavs/masha_dima_part1_5.wav": "63b91de6375a13062aa91bd9fcfd40172d6b0959247dbc31169865907cfa8ba1",
+    "wavs/masha_dima_part1_6.wav": "0d534680863b8f272892790919c47c785118a3f766dc7ee6db969d81ac117af7",
+    "wavs/masha_dima_part1_7.wav": "679ef3de78cebd6643b0a19ea5a7556f67eb136bde74e82e927fa52b867e202f",
+    "wavs/masha_dima_part1_8.wav": "18f211561eaa923e5571ae927d6c7dc1aa743ded9712a379bb24791031c87a3b",
+    "wavs/masha_dima_part1_9.wav": "6536bec9060335cbf35d3a4b7833aa84ae3368dfa6d6c1d061adbc3b5f2dbdda",
+    "wavs/masha_dima_part1_10.wav": "c8aac1da7122e949a31f154ff7fd4dce8e7e206dd857ef77c9caf33298c7e4bd",
+    "wavs/masha_dima_part1_11.wav": "9999cd63f9bd8f0f4ff56eef015d3aeda5843c5ef552544a17cc9c3e536482f3",
+    "wavs/masha_dima_part1_12.wav": "0fab863708fd6eacdd6ce3b6e36039b0c2147c96dacf687b81186426dcd32369",
+    "wavs/masha_sveta_part1_1.wav": "b1bd62a59c8cee5bc61ee356f3fe3f6ea08453ffcf77435fea8f9d511d5a1803",
+    "wavs/masha_sveta_part1_2.wav": "4bf06e287b8d9c7436785f29c4daf5ec6c64ea5a1134593ebcc12984828d7fff",
+    "wavs/masha_sveta_part1_3.wav": "cd2a8fc30ba762c0ef4ac7009b92a30b9c8f46b9b83b516657c36a2a46ac112c",
+    "wavs/masha_sveta_part1_4.wav": "8c262212e739e0c680db85aab0583cbd40c0b2d24b125f0a48a8ee98fc1f6fe4",
+    "wavs/masha_sveta_part1_5.wav": "0efe329c6fef2fe1c9434c7662f423ee4ca1f494537ff1dc3714e1a096581bda",
+    "wavs/masha_sveta_part1_6.wav": "18564d7c4a8313d01441bcd1c815f60b057df5b1f08e40214cee38fcbe15f616",
+    "wavs/masha_sveta_part1_7.wav": "99034eb35863d4cc46016f5b7f4aff4a2c40c5f46d45c511686e301597019e44",
+    "wavs/masha_sveta_part1_10.wav": "14bdc3cc1ee64d3d4e1d421dee90dac418ff4e461f16c39141b357b4631b69ed",
+    "wavs/masha_sveta_part1_11.wav": "b96fe09d400eb17e66deea5cf1333a7e7c2cb12ac470b564093ad3bf77f5a780",
+    "wavs/masha_sveta_part1_12.wav": "c93b65fdea25724542dbf684aaa2a9d95eedeebf14c164fa33cf021c81be9a76",
+    "wavs/masha_sveta_part1_13.wav": "d4df008b5453d29d32df20ead4f1f75d9c10355fc469fbb69d402a869ba2e15f",
+    "wavs/masha_sveta_part1_14.wav": "b30699bde925c1ba34fb9652375cda90ded0683d83b66d6a3b7e20b0bfd81aab",
+    "wavs/masha_dima_part10_6.wav": "2c22a71cc82a7da0611951957e19f1bd081c0b642e200f419e49eb0e344cd52c",
+    "wavs/masha_dima_part10_2.wav": "7bb882f8717e0abd03a2cd155517f77de4e93b5933e9bfa2161a17d5ad31c5e6",
+    "wavs/masha_dima_part10_4.wav": "66489677af42f5df3cc11f95a48ff364cdf7209cb6bc818b3728f8128ac7d246",
+    "wavs/masha_dima_part10_12.wav": "85110f3aa1b9df809d076730c94883ce5b8894630efea2ff3b4aca121d4824d6"
+  },
+  "ffmpeg_version": "ffmpeg version 8.1.3 Copyright (c) 2000-2026 the FFmpeg developers",
+  "recordings": [
+    {
+      "id": "dialogs_md",
+      "sources": [
+        "wavs/masha_dima_part1_1.wav",
+        "wavs/masha_dima_part1_2.wav",
+        "wavs/masha_dima_part1_3.wav",
+        "wavs/masha_dima_part1_4.wav",
+        "wavs/masha_dima_part1_5.wav",
+        "wavs/masha_dima_part1_6.wav",
+        "wavs/masha_dima_part1_7.wav",
+        "wavs/masha_dima_part1_8.wav",
+        "wavs/masha_dima_part1_9.wav",
+        "wavs/masha_dima_part1_10.wav",
+        "wavs/masha_dima_part1_11.wav",
+        "wavs/masha_dima_part1_12.wav"
+      ],
+      "speaker_map": {
+        "D": "speaker_1",
+        "M": "speaker_2"
+      },
+      "segments": [
+        {
+          "source": "wavs/masha_dima_part1_1.wav",
+          "source_speaker_id": "D",
+          "speaker_id": "speaker_1",
+          "start_sample": 0,
+          "end_sample": 79380,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 79380
+          },
+          "emotion": "happy"
+        },
+        {
+          "source": "wavs/masha_dima_part1_2.wav",
+          "source_speaker_id": "M",
+          "speaker_id": "speaker_2",
+          "start_sample": 90405,
+          "end_sample": 178549,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 88144
+          },
+          "emotion": "happy"
+        },
+        {
+          "source": "wavs/masha_dima_part1_3.wav",
+          "source_speaker_id": "D",
+          "speaker_id": "speaker_1",
+          "start_sample": 189574,
+          "end_sample": 430418,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 240844
+          },
+          "emotion": "happy"
+        },
+        {
+          "source": "wavs/masha_dima_part1_4.wav",
+          "source_speaker_id": "M",
+          "speaker_id": "speaker_2",
+          "start_sample": 441443,
+          "end_sample": 721837,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 280394
+          },
+          "emotion": "happy"
+        },
+        {
+          "source": "wavs/masha_dima_part1_5.wav",
+          "source_speaker_id": "D",
+          "speaker_id": "speaker_1",
+          "start_sample": 732862,
+          "end_sample": 1119578,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 386716
+          },
+          "emotion": "happy"
+        },
+        {
+          "source": "wavs/masha_dima_part1_6.wav",
+          "source_speaker_id": "M",
+          "speaker_id": "speaker_2",
+          "start_sample": 1130603,
+          "end_sample": 1477369,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 346766
+          },
+          "emotion": "happy"
+        },
+        {
+          "source": "wavs/masha_dima_part1_7.wav",
+          "source_speaker_id": "D",
+          "speaker_id": "speaker_1",
+          "start_sample": 1488394,
+          "end_sample": 1784135,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 295741
+          },
+          "emotion": "happy"
+        },
+        {
+          "source": "wavs/masha_dima_part1_8.wav",
+          "source_speaker_id": "M",
+          "speaker_id": "speaker_2",
+          "start_sample": 1795160,
+          "end_sample": 2105624,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 310464
+          },
+          "emotion": "surprise"
+        },
+        {
+          "source": "wavs/masha_dima_part1_9.wav",
+          "source_speaker_id": "D",
+          "speaker_id": "speaker_1",
+          "start_sample": 2116649,
+          "end_sample": 2448694,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 332045
+          },
+          "emotion": "happy"
+        },
+        {
+          "source": "wavs/masha_dima_part1_10.wav",
+          "source_speaker_id": "M",
+          "speaker_id": "speaker_2",
+          "start_sample": 2459719,
+          "end_sample": 2747738,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 288019
+          },
+          "emotion": "happy"
+        },
+        {
+          "source": "wavs/masha_dima_part1_11.wav",
+          "source_speaker_id": "D",
+          "speaker_id": "speaker_1",
+          "start_sample": 2758763,
+          "end_sample": 2990219,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 231456
+          },
+          "emotion": "happy"
+        },
+        {
+          "source": "wavs/masha_dima_part1_12.wav",
+          "source_speaker_id": "M",
+          "speaker_id": "speaker_2",
+          "start_sample": 3001244,
+          "end_sample": 3171470,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 170226
+          },
+          "emotion": "neutral"
+        }
+      ]
+    },
+    {
+      "id": "dialogs_ms",
+      "sources": [
+        "wavs/masha_sveta_part1_1.wav",
+        "wavs/masha_sveta_part1_2.wav",
+        "wavs/masha_sveta_part1_3.wav",
+        "wavs/masha_sveta_part1_4.wav",
+        "wavs/masha_sveta_part1_5.wav",
+        "wavs/masha_sveta_part1_6.wav",
+        "wavs/masha_sveta_part1_7.wav",
+        "wavs/masha_sveta_part1_10.wav",
+        "wavs/masha_sveta_part1_11.wav",
+        "wavs/masha_sveta_part1_12.wav",
+        "wavs/masha_sveta_part1_13.wav",
+        "wavs/masha_sveta_part1_14.wav"
+      ],
+      "speaker_map": {
+        "M": "speaker_1",
+        "S": "speaker_2"
+      },
+      "segments": [
+        {
+          "source": "wavs/masha_sveta_part1_1.wav",
+          "source_speaker_id": "M",
+          "speaker_id": "speaker_1",
+          "start_sample": 0,
+          "end_sample": 231905,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 231905
+          },
+          "emotion": "neutral"
+        },
+        {
+          "source": "wavs/masha_sveta_part1_2.wav",
+          "source_speaker_id": "S",
+          "speaker_id": "speaker_2",
+          "start_sample": 242930,
+          "end_sample": 440498,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 197568
+          },
+          "emotion": "happy"
+        },
+        {
+          "source": "wavs/masha_sveta_part1_3.wav",
+          "source_speaker_id": "M",
+          "speaker_id": "speaker_1",
+          "start_sample": 451523,
+          "end_sample": 660381,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 208858
+          },
+          "emotion": "happy"
+        },
+        {
+          "source": "wavs/masha_sveta_part1_4.wav",
+          "source_speaker_id": "M",
+          "speaker_id": "speaker_1",
+          "start_sample": 671406,
+          "end_sample": 1104018,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 432612
+          },
+          "emotion": "neutral"
+        },
+        {
+          "source": "wavs/masha_sveta_part1_5.wav",
+          "source_speaker_id": "M",
+          "speaker_id": "speaker_1",
+          "start_sample": 1115043,
+          "end_sample": 1343121,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 228078
+          },
+          "emotion": "happy"
+        },
+        {
+          "source": "wavs/masha_sveta_part1_6.wav",
+          "source_speaker_id": "S",
+          "speaker_id": "speaker_2",
+          "start_sample": 1354146,
+          "end_sample": 1761328,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 407182
+          },
+          "emotion": "neutral"
+        },
+        {
+          "source": "wavs/masha_sveta_part1_7.wav",
+          "source_speaker_id": "M",
+          "speaker_id": "speaker_1",
+          "start_sample": 1772353,
+          "end_sample": 1988523,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 216170
+          },
+          "emotion": "happy"
+        },
+        {
+          "source": "wavs/masha_sveta_part1_10.wav",
+          "source_speaker_id": "S",
+          "speaker_id": "speaker_2",
+          "start_sample": 1999548,
+          "end_sample": 2286221,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 286673
+          },
+          "emotion": "neutral"
+        },
+        {
+          "source": "wavs/masha_sveta_part1_11.wav",
+          "source_speaker_id": "M",
+          "speaker_id": "speaker_1",
+          "start_sample": 2297246,
+          "end_sample": 2506129,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 208883
+          },
+          "emotion": "neutral"
+        },
+        {
+          "source": "wavs/masha_sveta_part1_12.wav",
+          "source_speaker_id": "S",
+          "speaker_id": "speaker_2",
+          "start_sample": 2517154,
+          "end_sample": 2828398,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 311244
+          },
+          "emotion": "neutral"
+        },
+        {
+          "source": "wavs/masha_sveta_part1_13.wav",
+          "source_speaker_id": "S",
+          "speaker_id": "speaker_2",
+          "start_sample": 2839423,
+          "end_sample": 2944307,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 104884
+          },
+          "emotion": "neutral"
+        },
+        {
+          "source": "wavs/masha_sveta_part1_14.wav",
+          "source_speaker_id": "S",
+          "speaker_id": "speaker_2",
+          "start_sample": 2955332,
+          "end_sample": 3321859,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 366527
+          },
+          "emotion": "happy"
+        }
+      ]
+    },
+    {
+      "id": "dialogs_msd",
+      "sources": [
+        "wavs/masha_sveta_part1_1.wav",
+        "wavs/masha_sveta_part1_2.wav",
+        "wavs/masha_sveta_part1_3.wav",
+        "wavs/masha_dima_part10_6.wav",
+        "wavs/masha_sveta_part1_6.wav",
+        "wavs/masha_sveta_part1_7.wav",
+        "wavs/masha_dima_part10_2.wav",
+        "wavs/masha_sveta_part1_10.wav",
+        "wavs/masha_sveta_part1_11.wav",
+        "wavs/masha_sveta_part1_12.wav",
+        "wavs/masha_dima_part10_4.wav",
+        "wavs/masha_dima_part10_12.wav"
+      ],
+      "speaker_map": {
+        "M": "speaker_1",
+        "S": "speaker_2",
+        "D": "speaker_3"
+      },
+      "segments": [
+        {
+          "source": "wavs/masha_sveta_part1_1.wav",
+          "source_speaker_id": "M",
+          "speaker_id": "speaker_1",
+          "start_sample": 0,
+          "end_sample": 231905,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 231905
+          },
+          "emotion": "neutral"
+        },
+        {
+          "source": "wavs/masha_sveta_part1_2.wav",
+          "source_speaker_id": "S",
+          "speaker_id": "speaker_2",
+          "start_sample": 242930,
+          "end_sample": 440498,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 197568
+          },
+          "emotion": "happy"
+        },
+        {
+          "source": "wavs/masha_sveta_part1_3.wav",
+          "source_speaker_id": "M",
+          "speaker_id": "speaker_1",
+          "start_sample": 451523,
+          "end_sample": 660381,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 208858
+          },
+          "emotion": "happy"
+        },
+        {
+          "source": "wavs/masha_dima_part10_6.wav",
+          "source_speaker_id": "D",
+          "speaker_id": "speaker_3",
+          "start_sample": 671406,
+          "end_sample": 986478,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 315072
+          },
+          "emotion": "happy"
+        },
+        {
+          "source": "wavs/masha_sveta_part1_6.wav",
+          "source_speaker_id": "S",
+          "speaker_id": "speaker_2",
+          "start_sample": 997503,
+          "end_sample": 1404685,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 407182
+          },
+          "emotion": "neutral"
+        },
+        {
+          "source": "wavs/masha_sveta_part1_7.wav",
+          "source_speaker_id": "M",
+          "speaker_id": "speaker_1",
+          "start_sample": 1415710,
+          "end_sample": 1631880,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 216170
+          },
+          "emotion": "happy"
+        },
+        {
+          "source": "wavs/masha_dima_part10_2.wav",
+          "source_speaker_id": "D",
+          "speaker_id": "speaker_3",
+          "start_sample": 1642905,
+          "end_sample": 1963603,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 320698
+          },
+          "emotion": "neutral"
+        },
+        {
+          "source": "wavs/masha_sveta_part1_10.wav",
+          "source_speaker_id": "S",
+          "speaker_id": "speaker_2",
+          "start_sample": 1974628,
+          "end_sample": 2261301,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 286673
+          },
+          "emotion": "neutral"
+        },
+        {
+          "source": "wavs/masha_sveta_part1_11.wav",
+          "source_speaker_id": "M",
+          "speaker_id": "speaker_1",
+          "start_sample": 2272326,
+          "end_sample": 2481209,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 208883
+          },
+          "emotion": "neutral"
+        },
+        {
+          "source": "wavs/masha_sveta_part1_12.wav",
+          "source_speaker_id": "S",
+          "speaker_id": "speaker_2",
+          "start_sample": 2492234,
+          "end_sample": 2803478,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 311244
+          },
+          "emotion": "neutral"
+        },
+        {
+          "source": "wavs/masha_dima_part10_4.wav",
+          "source_speaker_id": "D",
+          "speaker_id": "speaker_3",
+          "start_sample": 2814503,
+          "end_sample": 3236474,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 421971
+          },
+          "emotion": "neutral"
+        },
+        {
+          "source": "wavs/masha_dima_part10_12.wav",
+          "source_speaker_id": "D",
+          "speaker_id": "speaker_3",
+          "start_sample": 3247499,
+          "end_sample": 3531627,
+          "source_audio": {
+            "sample_rate": 44100,
+            "channels": 1,
+            "sample_width": 2,
+            "frames": 284128
+          },
+          "emotion": "neutral"
+        }
+      ]
+    }
+  ]
+}
