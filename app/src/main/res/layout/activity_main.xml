@@ -1,4 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" />
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:paddingHorizontal="24dp" android:paddingTop="20dp" android:paddingBottom="12dp">
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/app_name" android:textColor="@color/ink" android:textSize="28sp" android:textStyle="bold" />
+        <TextView style="@style/BodyText" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="4dp" android:text="@string/app_tagline" />
+    </LinearLayout>
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp" android:layout_marginBottom="8dp" android:padding="12dp"
+        android:background="@drawable/notice" android:text="@string/demo_notice"
+        android:textColor="@color/accent" android:textSize="13sp" android:textStyle="bold" />
+    <TextView android:id="@+id/message" style="@style/BodyText"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:paddingHorizontal="24dp" android:paddingVertical="8dp" android:accessibilityLiveRegion="polite" android:visibility="gone" />
+    <ScrollView android:id="@+id/content_scroll" android:layout_width="match_parent"
+        android:layout_height="0dp" android:layout_weight="1" android:fillViewport="true">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:paddingHorizontal="24dp" android:paddingBottom="16dp">
+            <Button android:id="@+id/back" style="@style/SecondaryButton"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="@string/back_to_library" android:visibility="gone" />
+            <TextView android:id="@+id/screen_title" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="16dp" android:text="@string/library" android:textColor="@color/ink" android:textSize="24sp" android:textStyle="bold" />
+            <TextView android:id="@+id/screen_description" style="@style/BodyText"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" android:text="@string/library_description" />
+            <LinearLayout android:id="@+id/empty" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="24dp" android:background="@drawable/card"
+                android:orientation="vertical" android:padding="24dp">
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="@string/empty_title" android:textSize="20sp" android:textColor="@color/ink" />
+                <TextView style="@style/BodyText" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp" android:text="@string/empty_description" />
+            </LinearLayout>
+            <LinearLayout android:id="@+id/items" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" />
+            <TextView style="@style/BodyText" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="24dp" android:text="@string/demo_explanation" android:textSize="13sp" />
+        </LinearLayout>
+    </ScrollView>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:paddingHorizontal="20dp" android:paddingTop="8dp" android:paddingBottom="12dp" android:orientation="vertical">
+        <Button android:id="@+id/import_audio" style="@style/ActionButton"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/import_audio" />
+        <Button android:id="@+id/demo" style="@style/SecondaryButton"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/open_demo" />
+        <Button android:id="@+id/export_json" style="@style/ActionButton"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/export_json" android:visibility="gone" />
+    </LinearLayout>
+</LinearLayout>
