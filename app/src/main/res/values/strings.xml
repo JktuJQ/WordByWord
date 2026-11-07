@@ -3,7 +3,7 @@
     <string name="app_name">Слово в слово</string>
     <string name="app_tagline">Разговоры, к которым можно вернуться</string>
     <string name="library">Аудио в текст</string>
-    <string name="library_description">Встречи, интервью, лекции — автоматическая транскрибация и анализ</string>
+    <string name="library_description">Встречи, интервью, лекции — автоматическая транскрипция и анализ</string>
     <string name="mascot_description">Оранжевый персонаж приложения</string>
     <string name="privacy_notice">Аудио остаётся на устройстве</string>
     <string name="empty_title">Добавьте первую запись</string>
@@ -59,8 +59,8 @@
     <string name="error_status">Ошибка обработки</string>
     <string name="imported_status">Готово к обработке</string>
     <string name="cancelled_status">Обработка отменена</string>
-    <string name="import_audio">Загрузить аудиофайл</string>
-    <string name="recording_shortcut">♩  Записать разговор</string>
+    <string name="import_audio">Загрузить аудио</string>
+    <string name="recording_shortcut">Записать разговор</string>
     <string name="benefit_speakers">◉ Разделение по говорящим</string>
     <string name="benefit_timestamps">◷ Временные метки для каждой реплики</string>
     <string name="benefit_privacy">♧ Обработка на устройстве без отправки аудио</string>
