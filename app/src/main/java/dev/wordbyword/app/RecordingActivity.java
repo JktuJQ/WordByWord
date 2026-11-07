@@ -62,6 +62,11 @@ public final class RecordingActivity extends Activity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_recording);
     WindowInsetsHandler.apply(findViewById(R.id.recording_root));
+    if (getResources().getConfiguration().fontScale > 1.15f
+        || getResources().getConfiguration().screenWidthDp < 360) {
+      ((android.widget.LinearLayout) findViewById(R.id.recording_controls))
+          .setOrientation(android.widget.LinearLayout.VERTICAL);
+    }
     findViewById(R.id.recording_back).setOnClickListener(view -> leave());
     findViewById(R.id.recording_start).setOnClickListener(view -> begin());
     findViewById(R.id.recording_pause).setOnClickListener(view -> togglePause());

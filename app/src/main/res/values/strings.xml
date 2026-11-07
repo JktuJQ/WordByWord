@@ -57,8 +57,8 @@
     <string name="error_status">Ошибка обработки</string>
     <string name="imported_status">Готово к обработке</string>
     <string name="cancelled_status">Обработка отменена</string>
-    <string name="import_audio">Загрузить аудиофайл</string>
-    <string name="recording_shortcut">Или записать разговор с микрофона</string>
+    <string name="import_audio">Загрузить аудио</string>
+    <string name="recording_shortcut">Записать разговор</string>
     <string name="benefit_speakers">◉ Разделение по говорящим</string>
     <string name="benefit_timestamps">◷ Временные метки для каждой реплики</string>
     <string name="benefit_privacy">♧ Обработка на устройстве без отправки аудио</string>
@@ -82,4 +82,18 @@
     <string name="export_cancelled">Экспорт отменён.</string>
     <string name="importing">Импортируем аудиофайл…</string>
     <string name="time_range">%1$s — %2$s</string>
+    <string name="home_headline">Слово\nв слово</string>
+    <string name="home_intro">Сохраняйте разговоры.\nВозвращайтесь к важному.</string>
+    <string name="recent_recordings">Ваши записи</string>
+    <string name="transcript_heading">Стенограмма</string>
+    <string name="speaker_hint">Нажмите на имя, чтобы его изменить</string>
+    <string name="nav_home">Главная</string>
+    <string name="nav_library">Библиотека</string>
+    <string name="library_count">Записей: %1$d · Только на устройстве</string>
+    <string name="library_add">Добавить запись</string>
+    <string name="select_all">Выбрать все</string>
+    <string name="deselect_all">Снять выбор</string>
+    <string name="close_search">Закрыть поиск</string>
+    <string name="long_press_hint">Удерживайте запись, чтобы выбрать несколько</string>
+    <string name="home_privacy">Ваши разговоры остаются с вами</string>
 </resources>
