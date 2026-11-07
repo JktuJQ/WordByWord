@@ -1,0 +1,184 @@
+{
+  "dataset": "leshinsky/ru-youtube-diarization",
+  "revision": "e3aaa8a28211afe56c913fcacb26db029b1fb10e",
+  "declared_license": "Apache-2.0; source audiovisual rights not independently verified",
+  "sources": [
+    {
+      "id": "astrology",
+      "audio": "clips/astrology.wav",
+      "annotation": "astrology.json",
+      "annotation_sha256": "bf0b5e1fb49ad7382f6c6001c85da6209132e959753281e3d61758f8fd8094e9",
+      "group": "interview-shared-hosts",
+      "split": "development",
+      "sha256": "106e57cfff38008f054c73822098afdbf0c797f2d1b524b7c58adf588ad22142",
+      "header_sha256": "5b1093d67769ad0288e415eaafae850d7a651cb13050292f3bc09ec48ff29e9f",
+      "prefix_sha256": "725b130d0e977445e087b085e5599d1fd3702affd3ef09b9c686fd4f9e4dbed8",
+      "invalid_regions": [],
+      "annotation_origins": {
+        "manual": 60,
+        "prediction": 28,
+        "prediction-changed": 2520
+      },
+      "byte_range": [
+        78,
+        105840077
+      ]
+    },
+    {
+      "id": "movie",
+      "audio": "clips/movie_podcast.wav",
+      "annotation": "movie_podcast.json",
+      "annotation_sha256": "09f868cc7362dfe85c3160759f1b8d87ba7244bba70990908b7a7e11cb9f93c5",
+      "group": "movie",
+      "split": "evaluation",
+      "sha256": "9a8665dd87deb7fc0b8f2c61a107508f5ddcc9a7131cfb41ba8489faa4e2a2da",
+      "header_sha256": "58f7ab944574be8029608c7b65f6a7d1b930acf9548c2dea1148bc720baf2a92",
+      "prefix_sha256": "5b7c63bbb849d6191eb5bbd30c6d447f102da28b391ada0e602b9e99e60b180f",
+      "invalid_regions": [],
+      "annotation_origins": {
+        "manual": 78,
+        "prediction": 26,
+        "prediction-changed": 2482
+      },
+      "byte_range": [
+        350,
+        115200349
+      ]
+    },
+    {
+      "id": "yCX4MRy14zw",
+      "audio": "clips/yCX4MRy14zw.opus",
+      "annotation": "youtube-1.json",
+      "annotation_sha256": "0ec3643f28f540028e7d3897d049d3cf5cc42553d8c11e066f7093630543511a",
+      "group": "interview-shared-hosts",
+      "split": "development",
+      "sha256": "9b4cfca74056b89e8749852ec539a6568cf5fffbc7057e4c04fe3a6887fc935a",
+      "invalid_regions": [
+        {
+          "region": "68",
+          "start": 296.423,
+          "end": 296.403,
+          "text": [
+            "74."
+          ]
+        }
+      ],
+      "annotation_origins": {
+        "manual": 18,
+        "prediction": 4,
+        "prediction-changed": 364
+      }
+    },
+    {
+      "id": "p0_iIC13bs8",
+      "audio": "clips/p0_iIC13bs8.opus",
+      "annotation": "youtube-1.json",
+      "annotation_sha256": "0ec3643f28f540028e7d3897d049d3cf5cc42553d8c11e066f7093630543511a",
+      "group": "interview-shared-hosts",
+      "split": "development",
+      "sha256": "8b612bc08a1b55300e1d1fb2675bf44480e8fd4c763c16000ad72619df796543",
+      "invalid_regions": [],
+      "annotation_origins": {
+        "manual": 20,
+        "prediction": 2,
+        "prediction-changed": 310
+      }
+    },
+    {
+      "id": "mavrodi",
+      "audio": "clips/nr3hmL9bcPU.opus",
+      "annotation": "youtube-2.json",
+      "annotation_sha256": "644e06da6ac64cfbdcd7d54a9385fb588405ad40b76a0b481ca730bc98f19f20",
+      "group": "mavrodi",
+      "split": "evaluation",
+      "sha256": "2e28e7c7201b2b2d69b89699c1498bb2d93725c875106a4c7510855463440262",
+      "invalid_regions": [],
+      "annotation_origins": {
+        "manual": 12,
+        "prediction": 2,
+        "prediction-changed": 1112
+      }
+    },
+    {
+      "id": "marketing",
+      "audio": "clips/sFt2qKDPrj4.opus",
+      "annotation": "project-35-at-2025-05-08-20-14-e3016d43.json",
+      "annotation_sha256": "10da8153e09180191d351552793cf7f8f995fef9b4f7ac7a0607b1d76422dc87",
+      "group": "marketing",
+      "split": "evaluation",
+      "sha256": "21dbda805407b85e0832a92fcf209e87cf10195fa071de8fb3867555cdedf98c",
+      "excluded": "Eight reversed intervals; not suitable as a full-recording timing reference without independent review",
+      "invalid_regions": [
+        {
+          "region": "123",
+          "start": 419.08,
+          "end": 419.04,
+          "text": [
+            " Заш, кто это?"
+          ]
+        },
+        {
+          "region": "564",
+          "start": 1721.89,
+          "end": 1707.26,
+          "text": [
+            " Вот, и поэтому иногда бывают откаты тоже, да, это эмоционально себя чувствует, да."
+          ]
+        },
+        {
+          "region": "574",
+          "start": 1745.3,
+          "end": 1744.02,
+          "text": [
+            " Почему не четыре?"
+          ]
+        },
+        {
+          "region": "646",
+          "start": 1963.67,
+          "end": 1953.26,
+          "text": [
+            " Этого не знают, просто."
+          ]
+        },
+        {
+          "region": "748",
+          "start": 2335.28,
+          "end": 2325.91,
+          "text": [
+            " которые оказались к тому мышлению."
+          ]
+        },
+        {
+          "region": "799",
+          "start": 2537.8,
+          "end": 2534.6,
+          "text": [
+            " Да, да."
+          ]
+        },
+        {
+          "region": "815",
+          "start": 2577.36,
+          "end": 2574.93,
+          "text": [
+            " Да, да."
+          ]
+        },
+        {
+          "region": "1461",
+          "start": 4433,
+          "end": 4432.88,
+          "text": [
+            " Ну, например, я не знаю, там, Аяза возьмем, да, который влиял на большое количество аудитории."
+          ]
+        }
+      ],
+      "annotation_origins": {
+        "manual": 0,
+        "prediction": 2872,
+        "prediction-changed": 96
+      }
+    }
+  ]
+}

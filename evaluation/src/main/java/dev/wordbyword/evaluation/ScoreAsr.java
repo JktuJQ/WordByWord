@@ -93,7 +93,7 @@ public final class ScoreAsr {
     return result;
   }
 
-  private static String normalize(String text, boolean punctuation) {
+  static String normalize(String text, boolean punctuation) {
     String canonical = normalize(text);
     return punctuation
         ? canonical
