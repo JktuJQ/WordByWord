@@ -41,20 +41,25 @@ jobs:
         with:
           cache-provider: basic
 
-      - name: Cache diarization model downloads
+      - name: Cache model downloads
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         with:
-          path: app/build/diarization-downloads
-          key: diarization-models-${{ hashFiles('app/build.gradle') }}
+          path: |
+            app/build/diarization-downloads
+            app/build/asr-downloads
+          key: speech-models-${{ hashFiles('app/build.gradle') }}
 
       - name: Build, test and lint
-        run: ./gradlew --no-daemon --stacktrace --continue :evaluation:test testDebugUnitTest assembleDebug lintDebug
+        run: ./gradlew --no-daemon --stacktrace --continue :evaluation:test testDebugUnitTest :app:packageDemoApk lintDebug
 
       - name: Upload debug APK
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: wordbyword-debug-${{ github.run_number }}-${{ github.run_attempt }}
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: |
+            artifacts/apk/*.apk
+            artifacts/apk/*.apk.sha256
+            artifacts/apk/*.apk.json
           if-no-files-found: error
           retention-days: 14
 
