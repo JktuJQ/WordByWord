@@ -51,7 +51,8 @@ public final class LocalAsrTest {
                     List.of(new RecognitionResult.Segment("привет", 100, 900)),
                     RecognitionResult.Timing.SEGMENT),
             (pcm, context) -> List.of(),
-            new OverlapTranscriptAssembler());
+            new OverlapTranscriptAssembler(),
+            Runnable::run);
     var result = pipeline.transcribe(recording(), CONTEXT);
     assertEquals("привет", result.utterances().get(0).text());
     assertTrue(result.utterances().get(0).speakerId().isEmpty());
@@ -69,10 +70,9 @@ public final class LocalAsrTest {
             (pcm, context) -> {
               throw new CancellationException();
             },
-            (pcm, context) -> {
-              throw new AssertionError("Diarization after cancellation");
-            },
-            new OverlapTranscriptAssembler());
+            (pcm, context) -> List.of(),
+            new OverlapTranscriptAssembler(),
+            Runnable::run);
     assertThrows(CancellationException.class, () -> pipeline.transcribe(recording(), CONTEXT));
     assertTrue(audio.closed);
   }

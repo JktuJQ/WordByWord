@@ -21,6 +21,8 @@ import java.util.concurrent.Executors;
 public final class WordByWordApplication extends Application {
   private final ExecutorService processing =
       Executors.newSingleThreadExecutor(task -> new Thread(task, "wbw-processing"));
+  private final ExecutorService diarization =
+      Executors.newSingleThreadExecutor(task -> new Thread(task, "wbw-diarization"));
   private final ExecutorService io =
       Executors.newSingleThreadExecutor(task -> new Thread(task, "wbw-io"));
   private AppController controller;
@@ -33,8 +35,11 @@ public final class WordByWordApplication extends Application {
     models.mkdirs();
     TranscriptionPipeline pipeline =
         new LocalTranscriptionPipeline(
-            new AndroidAudioPreparer(this), new SherpaSpeechRecognizer(models),
-            new SherpaOnnxSpeakerDiarizer(this), new OverlapTranscriptAssembler());
+            new AndroidAudioPreparer(this),
+            new SherpaSpeechRecognizer(models),
+            new SherpaOnnxSpeakerDiarizer(this),
+            new OverlapTranscriptAssembler(),
+            BuildConfig.PARALLEL_INFERENCE ? diarization : Runnable::run);
     var handler = new Handler(Looper.getMainLooper());
     repository =
         new FileTranscriptRepository(
