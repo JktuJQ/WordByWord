@@ -36,6 +36,7 @@ public final class MainView {
   private String renderedScreen;
   private String searchQuery = "";
   private boolean libraryPage;
+  private boolean summaryPage;
   private boolean awaitingNewRecording;
   private boolean searching;
   private boolean selecting;
@@ -76,6 +77,7 @@ public final class MainView {
     recordingView = new RecordingListView(items, controller);
     transcriptView = new TranscriptView(root, items, controller);
     if (savedState != null) {
+      summaryPage = savedState.getBoolean("summaryPage");
       searchQuery = savedState.getString("searchQuery", "");
       searching = savedState.getBoolean("searching");
       libraryPage = savedState.getBoolean("libraryPage");
@@ -87,7 +89,8 @@ public final class MainView {
     root.findViewById(R.id.back)
         .setOnClickListener(
             view -> {
-              if (lastState != null && lastState.selected() != null) controller.showLibrary();
+              if (summaryPage) { summaryPage = false; render(lastState); }
+              else if (lastState != null && lastState.selected() != null) controller.showLibrary();
               else if (selecting) toggleSelecting();
               else if (searching) toggleSearch();
               else controller.showLibrary();
@@ -105,6 +108,7 @@ public final class MainView {
               awaitingNewRecording = true;
               recordAudio.run();
             });
+    root.findViewById(R.id.summarize).setOnClickListener(view -> { summaryPage = true; render(lastState); });
     root.findViewById(R.id.export_json).setOnClickListener(view -> exportJson.run());
     root.findViewById(R.id.search_toggle).setOnClickListener(view -> toggleSearch());
     root.findViewById(R.id.select_toggle).setOnClickListener(view -> toggleSelecting());
@@ -132,6 +136,7 @@ public final class MainView {
   }
 
   public void saveState(Bundle state) {
+    state.putBoolean("summaryPage", summaryPage);
     state.putString("searchQuery", searchQuery);
     state.putBoolean("searching", searching);
     state.putBoolean("libraryPage", libraryPage);
@@ -145,7 +150,15 @@ public final class MainView {
     if (notification != null) notification.dismiss();
   }
 
+  public boolean handleSummaryBack() {
+    if (!summaryPage) return false;
+    summaryPage = false;
+    render(lastState);
+    return true;
+  }
+
   public boolean handleBack() {
+    if (handleSummaryBack()) return true;
     if (selecting) {
       toggleSelecting();
       return true;
@@ -176,6 +189,7 @@ public final class MainView {
     }
     lastState = state;
     boolean detail = state.selected() != null;
+    if (!detail) summaryPage = false;
     if (detail) {
       libraryPage = true;
       hideKeyboard();
@@ -184,7 +198,7 @@ public final class MainView {
     ((dev.wordbyword.app.HomeGlowLayout) root).setHomeVisible(true);
     root.findViewById(R.id.bottom_navigation)
         .setBackgroundColor(android.graphics.Color.TRANSPARENT);
-    String screen = detail ? state.selectedId() : home ? "home" : searching ? "search" : "library";
+    String screen = detail ? state.selectedId() + (summaryPage ? "summary" : "") : home ? "home" : searching ? "search" : "library";
     if (!screen.equals(renderedScreen)) {
       ((ScrollView) root.findViewById(R.id.content_scroll)).scrollTo(0, 0);
       renderedScreen = screen;
@@ -198,9 +212,11 @@ public final class MainView {
     setVisible(R.id.home_hero, home);
     setVisible(R.id.page_heading, !home);
     setVisible(R.id.screen_description, detail || !searching && !selecting);
-    setVisible(R.id.screen_title, !detail);
+    setVisible(R.id.screen_title, true);
+    root.findViewById(R.id.transcript_title).setVisibility(View.INVISIBLE);
     text(R.id.transcript_title, detail ? state.selected().recording().title() : "");
-    setVisible(R.id.transcript_playback, detail);
+    setVisible(R.id.transcript_playback, detail && !summaryPage);
+    setVisible(R.id.summarize, detail && !summaryPage);
     setVisible(R.id.library_actions, home);
     setVisible(R.id.library_add, !home && !detail && !searching && !selecting);
     setVisible(R.id.selection_actions, !detail && selecting);
@@ -209,7 +225,7 @@ public final class MainView {
     setVisible(R.id.clear_search, !searchQuery.isEmpty());
     setVisible(R.id.select_toggle, !home && !detail && !searching && !state.items().isEmpty());
     setVisible(R.id.select_all, !detail && selecting);
-    setVisible(R.id.export_json, detail);
+    setVisible(R.id.export_json, detail && !summaryPage);
     setVisible(R.id.empty, !home && !detail && state.items().isEmpty() && !searching);
     setVisible(R.id.items, !home);
     setVisible(R.id.bottom_navigation, !detail && !searching && !selecting);
@@ -228,6 +244,15 @@ public final class MainView {
     root.findViewById(R.id.delete_selected).setEnabled(controller.canDelete(selectedIds));
     root.findViewById(R.id.share_selected).setEnabled(!selectedIds.isEmpty());
     items.removeAllViews();
+    if (detail && summaryPage) {
+      transcriptView.release();
+      text(R.id.screen_title, "Итоги разговора");
+      text(R.id.screen_description, state.selected().recording().title());
+      View summary = activity.getLayoutInflater().inflate(R.layout.view_summary, items, false);
+      items.addView(summary);
+      setVisible(R.id.no_search_results, false);
+      return;
+    }
     if (detail) {
       transcriptView.render(state.selected().transcript());
       setVisible(R.id.no_search_results, false);

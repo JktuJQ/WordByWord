@@ -83,7 +83,7 @@ public final class GlassDialogs {
       button.setAllCaps(false);
       button.setTextColor(context.getColor(R.color.ink));
       button.setBackgroundTintList(null);
-      button.setBackgroundResource(R.drawable.home_glass_primary);
+      button.setBackgroundResource(R.drawable.home_liquid_glass);
       button.setStateListAnimator(null);
       button.setElevation(dp(context, 2));
       LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, dp(context, 52), 1);
@@ -117,7 +117,7 @@ public final class GlassDialogs {
   public static PopupWindow message(View anchor, String value) {
     Context context = anchor.getContext();
     LinearLayout panel = panel(context);
-    panel.setBackgroundResource(R.drawable.message_surface);
+    panel.setBackgroundResource(R.drawable.recording_name_field);
     panel.addView(text(context, value, 16));
     PopupWindow popup =
         new PopupWindow(
@@ -131,7 +131,7 @@ public final class GlassDialogs {
         () -> {
           if (!anchor.isAttachedToWindow()) return;
           popup.showAtLocation(
-              anchor, Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, dp(context, 96));
+              anchor, Gravity.CENTER, 0, 0);
           anchor.postDelayed(popup::dismiss, 2800);
         });
     return popup;

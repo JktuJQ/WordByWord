@@ -4,9 +4,9 @@
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical">
         <TextView android:id="@+id/speaker" android:layout_width="0dp" android:layout_weight="1" android:layout_height="32dp"
             android:gravity="center_vertical" android:maxLines="1" android:ellipsize="end" android:layout_marginEnd="12dp"
-            android:includeFontPadding="false" android:textColor="@color/accent_text" android:textSize="14sp" android:fontFamily="@font/vela_sans_medium" />
+            android:includeFontPadding="false" android:textColor="@color/accent_text" android:textSize="14sp" android:fontFamily="@font/open_sans_regular" />
         <ImageButton android:id="@+id/rename_speaker" style="@style/IconButton" android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/ic_edit" android:contentDescription="@string/rename_participant" />
-        <TextView android:id="@+id/timing" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/muted" android:textSize="12sp" android:fontFamily="@font/vela_sans_medium" />
+        <TextView android:id="@+id/timing" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/muted" android:textSize="12sp" android:fontFamily="@font/open_sans_regular" />
     </LinearLayout>
     <TextView android:id="@+id/utterance_text" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="0dp"
         android:textColor="@color/ink" android:textSize="16sp" android:lineSpacingExtra="5dp" />
