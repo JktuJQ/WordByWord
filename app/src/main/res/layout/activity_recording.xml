@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/recording_root" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:background="@color/background"
-    android:orientation="vertical" android:paddingHorizontal="24dp">
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/recording_root" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/background" android:fillViewport="true">
+<LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="24dp" android:paddingBottom="24dp">
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
         android:gravity="center_vertical" android:orientation="horizontal"
         android:paddingTop="18dp">
@@ -26,30 +24,26 @@
         android:layout_height="0dp" android:layout_weight="1" android:gravity="center"
         android:orientation="vertical">
         <dev.wordbyword.app.VoiceOrbView android:id="@+id/recording_orb"
-            android:layout_width="300dp" android:layout_height="300dp" />
+            android:layout_width="280dp" android:layout_height="280dp" />
+        <TextView android:id="@+id/recording_timer" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginTop="32dp"
+            android:gravity="center" android:text="00:00" android:textColor="@color/ink"
+            android:textSize="52sp" android:fontFamily="sans-serif-light" />
         <TextView android:id="@+id/recording_hint" style="@style/BodyText"
             android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginTop="28dp" android:gravity="center"
-            android:text="@string/recording_screen_title" android:textSize="18sp" />
-        <TextView android:id="@+id/recording_timer" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:layout_marginTop="8dp"
-            android:gravity="center" android:text="00:00" android:textColor="@color/ink"
-            android:textSize="48sp" />
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="12dp" android:gravity="center"
+            android:text="@string/recording_ready" />
+        <LinearLayout android:id="@+id/recording_controls" android:layout_width="match_parent" android:layout_height="wrap_content"
             android:gravity="center" android:layout_marginTop="50dp" android:orientation="horizontal">
             <Button android:id="@+id/recording_pause" style="@style/SecondaryButton"
-                android:layout_width="80dp" android:layout_height="56dp"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="@string/recording_pause" android:visibility="gone" />
             <Button android:id="@+id/recording_start" style="@style/ActionButton"
-                android:layout_width="210dp" android:layout_height="56dp"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="@string/recording_start" />
             <Button android:id="@+id/recording_finish" style="@style/ActionButton"
-                android:layout_width="96dp" android:layout_height="96dp"
-                android:background="@drawable/recording_stop" android:text="■"
-                android:textSize="28sp" android:contentDescription="@string/recording_finish"
-                android:visibility="gone" />
-            <Space android:id="@+id/recording_spacer" android:layout_width="80dp"
-                android:layout_height="1dp" android:visibility="gone" />
+                android:layout_width="wrap_content" android:layout_height="56dp" android:layout_marginStart="12dp"
+                android:text="@string/recording_finish" android:visibility="gone" />
         </LinearLayout>
         <TextView android:id="@+id/recording_cancel" android:layout_width="match_parent"
             android:layout_height="48dp" android:layout_marginTop="14dp"
@@ -82,3 +76,4 @@
             android:text="@string/delete_selected" android:textColor="@color/error" />
     </LinearLayout>
 </LinearLayout>
+</ScrollView>

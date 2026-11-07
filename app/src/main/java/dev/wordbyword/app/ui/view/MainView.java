@@ -5,9 +5,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.graphics.Typeface;
-import android.text.SpannableString;
-import android.text.style.StyleSpan;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Gravity;
@@ -55,6 +52,19 @@ public final class MainView {
     this.importAudio = importAudio;
     this.recordAudio = recordAudio;
     items = root.findViewById(R.id.items);
+    if (activity.getResources().getConfiguration().screenHeightDp < 480) {
+      LinearLayout actions = root.findViewById(R.id.library_actions);
+      actions.setOrientation(LinearLayout.HORIZONTAL);
+      actions.setGravity(Gravity.CENTER_VERTICAL);
+      for (int index = 0; index < 2; index++) {
+        View action = actions.getChildAt(index);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0,
+            (int) (52 * activity.getResources().getDisplayMetrics().density), 1);
+        if (index == 1) params.setMarginStart((int) (12 * activity.getResources().getDisplayMetrics().density));
+        action.setLayoutParams(params);
+      }
+      actions.getChildAt(2).setVisibility(View.GONE);
+    }
     recordingView = new RecordingListView(items, controller);
     transcriptView = new TranscriptView(root, items, controller);
     if (savedState != null) {
@@ -117,8 +127,9 @@ public final class MainView {
       renderedScreen = screen;
     }
     setVisible(R.id.back, detail);
-    setVisible(R.id.home_mark, !detail);
-    setVisible(R.id.home_character, !detail && !searching && !selecting);
+    setVisible(R.id.home_hero, !detail && !searching && !selecting
+        && activity.getResources().getConfiguration().screenHeightDp >= 480);
+    setVisible(R.id.screen_description, activity.getResources().getConfiguration().screenHeightDp >= 480);
     setVisible(R.id.transcript_playback, detail);
     setVisible(R.id.library_actions, !detail && !searching && !selecting);
     setVisible(R.id.selection_actions, !detail && selecting);
@@ -126,8 +137,7 @@ public final class MainView {
     setVisible(R.id.search_input, !detail && searching);
     setVisible(R.id.select_toggle, !detail && !searching && !state.items().isEmpty());
     setVisible(R.id.export_json, detail);
-    setVisible(R.id.empty, false);
-    setVisible(R.id.recent_title, !detail && !state.items().isEmpty() && !searching);
+    setVisible(R.id.empty, !detail && state.items().isEmpty() && !searching);
     ((TextView) root.findViewById(R.id.select_toggle))
         .setText(selecting ? R.string.stop_selecting : R.string.select_records);
     ((TextView) root.findViewById(R.id.selected_count))
@@ -143,11 +153,7 @@ public final class MainView {
       return;
     }
     transcriptView.release();
-    SpannableString heading = new SpannableString(activity.getString(R.string.library));
-    int italicStart = heading.toString().lastIndexOf("текст");
-    if (italicStart >= 0) heading.setSpan(new StyleSpan(Typeface.ITALIC), italicStart,
-        heading.length(), 0);
-    ((TextView) root.findViewById(R.id.screen_title)).setText(heading);
+    text(R.id.screen_title, activity.getString(R.string.library));
     text(
         R.id.screen_description,
         searching

@@ -99,13 +99,15 @@ public final class TranscriptView {
     }
     LinearLayout speakerRow = new LinearLayout(items.getContext());
     speakerRow.setOrientation(LinearLayout.HORIZONTAL);
-    speakerRow.setPadding(0, 18, 0, 6);
+    speakerRow.setPadding(0, 12, 0, 12);
     for (var speaker : transcript.speakers()) {
       TextView chip = new TextView(items.getContext());
       chip.setText(speaker.displayName() + " ✎");
       chip.setTextColor(items.getContext().getColor(R.color.accent));
       chip.setBackgroundResource(R.drawable.notice);
-      chip.setPadding(20, 12, 20, 12);
+      chip.setPadding(24, 12, 24, 12);
+      chip.setMinHeight((int) (48 * items.getResources().getDisplayMetrics().density));
+      chip.setGravity(android.view.Gravity.CENTER);
       LinearLayout.LayoutParams params =
           new LinearLayout.LayoutParams(
               LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -113,7 +115,17 @@ public final class TranscriptView {
       speakerRow.addView(chip, params);
       chip.setOnClickListener(view -> rename(speaker));
     }
-    items.addView(speakerRow);
+    android.widget.HorizontalScrollView speakerScroll = new android.widget.HorizontalScrollView(items.getContext());
+    speakerScroll.setHorizontalScrollBarEnabled(false);
+    speakerScroll.addView(speakerRow);
+    items.addView(speakerScroll);
+    TextView heading = new TextView(items.getContext());
+    heading.setText(R.string.transcript_heading);
+    heading.setTextSize(20);
+    heading.setTextColor(items.getContext().getColor(R.color.ink));
+    heading.setTypeface(null, android.graphics.Typeface.BOLD);
+    heading.setPadding(12, 28, 0, 8);
+    items.addView(heading);
     for (var utterance : transcript.utterances()) {
       View card =
           LayoutInflater.from(items.getContext()).inflate(R.layout.item_utterance, items, false);
@@ -189,8 +201,7 @@ public final class TranscriptView {
     for (int index = 0; index < cards.size(); index++) {
       CardRange range = cards.get(index);
       boolean active = playing && position >= range.startMs() && position < range.endMs();
-      range.card().findViewById(R.id.utterance_text).setBackgroundResource(
-          active ? R.drawable.active_utterance : R.drawable.utterance_bubble);
+      range.card().setBackgroundResource(active ? R.drawable.notice : 0);
       if (active) newActive = index;
     }
     playbackToggle.setText(playing ? "Ⅱ" : "▶");
