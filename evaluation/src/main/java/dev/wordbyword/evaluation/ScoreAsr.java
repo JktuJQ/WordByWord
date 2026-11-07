@@ -36,11 +36,18 @@ public final class ScoreAsr {
   }
 
   public static String normalize(String text) {
-    return Normalizer.normalize(text, Normalizer.Form.NFKC)
-        .toLowerCase(Locale.ROOT)
-        .replace('ё', 'е')
-        .replaceAll("[^\\p{L}\\p{N}]+", " ")
-        .trim();
+    String canonical =
+        Normalizer.normalize(text, Normalizer.Form.NFKC)
+            .toLowerCase(Locale.ROOT)
+            .replace('ё', 'е')
+            .replace("…", "...")
+            .replaceAll("[«»“”„]", "\"")
+            .replace('’', '\'')
+            .replaceAll("[‐‑‒–—−]", "-")
+            .replaceAll("([^\\p{L}\\p{N}\\s])", " $1 ")
+            .replaceAll("\\s+", " ")
+            .trim();
+    return RussianNumbers.canonicalize(canonical);
   }
 
   public static Errors compare(List<String> reference, List<String> hypothesis) {
@@ -77,6 +84,21 @@ public final class ScoreAsr {
   }
 
   public static JsonObject score(JsonObject manifest, JsonObject hypotheses) {
+    var result = score(manifest, hypotheses, true);
+    var lexical = score(manifest, hypotheses, false);
+    result.addProperty("scoring_policy", "ru-punctuation-v2-cardinal-integers");
+    result.addProperty("tokenization", "words, numbers and separate punctuation tokens");
+    result.addProperty("lexical_wer", lexical.get("wer").getAsDouble());
+    result.addProperty("lexical_cer", lexical.get("cer").getAsDouble());
+    return result;
+  }
+
+  private static String normalize(String text, boolean punctuation) {
+    String canonical = normalize(text);
+    return punctuation ? canonical : canonical.replaceAll("[^\\p{L}\\p{N}]+", " ").trim();
+  }
+
+  private static JsonObject score(JsonObject manifest, JsonObject hypotheses, boolean punctuation) {
     var byFile = new HashMap<String, String>();
     String key = hypotheses.has("runs") ? "runs" : "samples";
     for (var entry : hypotheses.getAsJsonArray(key)) {
@@ -103,8 +125,12 @@ public final class ScoreAsr {
       var sample = entry.getAsJsonObject();
       String file = sample.get("file").getAsString();
       if (!byFile.containsKey(file)) throw new IllegalArgumentException("Missing run: " + file);
-      String reference = normalize(sample.get("reference").getAsString());
-      String hypothesis = normalize(byFile.get(file));
+      String referenceText =
+          sample
+              .get(punctuation && sample.has("reference_raw") ? "reference_raw" : "reference")
+              .getAsString();
+      String reference = normalize(referenceText, punctuation);
+      String hypothesis = normalize(byFile.get(file), punctuation);
       Errors row = compare(words(reference), words(hypothesis));
       errors =
           new Errors(
@@ -117,7 +143,7 @@ public final class ScoreAsr {
       if (reference.equals(hypothesis)) exact++;
       var output = new JsonObject();
       output.addProperty("file", file);
-      output.addProperty("reference", sample.get("reference").getAsString());
+      output.addProperty("reference", referenceText);
       output.addProperty("hypothesis", byFile.get(file));
       output.add("errors", JSON.toJsonTree(row));
       samples.add(output);
@@ -127,6 +153,7 @@ public final class ScoreAsr {
     var result = new JsonObject();
     result.addProperty("samples_count", samples.size());
     result.addProperty("words", wordCount);
+    result.addProperty("reference_tokens", wordCount);
     result.addProperty("word_errors", errors.total());
     result.add("word_error_counts", JSON.toJsonTree(errors));
     result.addProperty("wer", errors.total() / (double) wordCount);
