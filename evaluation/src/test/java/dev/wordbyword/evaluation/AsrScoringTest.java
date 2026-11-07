@@ -80,6 +80,29 @@ public class AsrScoringTest {
   }
 
   @Test
+  public void normalizesInflectedCardinalsScalesAndPercentUnits() {
+    assertEquals(ScoreAsr.normalize("2 млн лет"), ScoreAsr.normalize("двух миллионов лет"));
+    assertEquals(ScoreAsr.normalize("80%"), ScoreAsr.normalize("восьмидесяти процентов"));
+    assertEquals(
+        ScoreAsr.normalize("234 человека"),
+        ScoreAsr.normalize("двумстам тридцати четырем человека"));
+    assertEquals("миллионы лет", ScoreAsr.normalize("миллионы лет"));
+    assertEquals("на ветке сорока", ScoreAsr.normalize("на ветке сорока"));
+    assertEquals("мою семью", ScoreAsr.normalize("мою семью"));
+    assertEquals("7000", ScoreAsr.normalize("семью тысячами"));
+    assertEquals("100 % .", ScoreAsr.normalize("ста процентами."));
+  }
+
+  @Test
+  public void lexicalScoreKeepsPercentUnits() {
+    var manifest = object("{\"samples\":[{\"file\":\"a.wav\",\"reference\":\"80 процентов\"}]}");
+    var predictions = object("{\"runs\":[{\"file\":\"a.wav\",\"hypothesis\":\"80%\"}]}");
+    assertEquals(0.0, ScoreAsr.score(manifest, predictions).get("lexical_wer").getAsDouble(), 0.0);
+    predictions.getAsJsonArray("runs").get(0).getAsJsonObject().addProperty("hypothesis", "80");
+    assertEquals(0.5, ScoreAsr.score(manifest, predictions).get("lexical_wer").getAsDouble(), 0.0);
+  }
+
+  @Test
   public void evaluatesOnlyTheRequestedPartitionAndRequiresAllItsSamples() {
     var manifest =
         object(

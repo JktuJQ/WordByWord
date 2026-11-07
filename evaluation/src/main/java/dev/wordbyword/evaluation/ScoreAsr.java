@@ -95,7 +95,9 @@ public final class ScoreAsr {
 
   private static String normalize(String text, boolean punctuation) {
     String canonical = normalize(text);
-    return punctuation ? canonical : canonical.replaceAll("[^\\p{L}\\p{N}]+", " ").trim();
+    return punctuation
+        ? canonical
+        : canonical.replace("%", "процент").replaceAll("[^\\p{L}\\p{N}]+", " ").trim();
   }
 
   private static JsonObject score(JsonObject manifest, JsonObject hypotheses, boolean punctuation) {

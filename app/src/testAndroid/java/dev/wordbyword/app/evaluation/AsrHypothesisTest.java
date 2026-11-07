@@ -86,7 +86,7 @@ public class AsrHypothesisTest {
     root.addProperty("device", android.os.Build.MODEL);
     root.addProperty("sdk", android.os.Build.VERSION.SDK_INT);
     root.addProperty("archive", archive);
-    root.addProperty("runtime", "sherpa-onnx 2.0.1 / bundled GigaAM v2 int8 / ASR threads=2");
+    root.addProperty("runtime", "sherpa-onnx 2.0.1 / bundled GigaAM v3 punct int8 / ASR threads=2");
     root.addProperty("timing_scope", "AndroidAudioPreparer, VAD and per-file ASR model loading");
     try (var status = new BufferedReader(new FileReader("/proc/self/status"))) {
       String line;
