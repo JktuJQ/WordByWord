@@ -132,11 +132,14 @@ public final class SherpaSpeechRecognizer implements SpeechRecognizer {
           context.throwIfCancelled();
           recognizer.decode(stream);
           context.throwIfCancelled();
-          String text = recognizer.getResult(stream).getText().trim();
-          if (!text.isEmpty())
-            result.add(
-                new RecognitionResult.Segment(
-                    text, window.start() * 1000 / RATE, window.end() * 1000 / RATE));
+          var recognized = recognizer.getResult(stream);
+          result.addAll(
+              words(
+                  recognized.getTokens(),
+                  recognized.getTimestamps(),
+                  window.start() * 1000 / RATE,
+                  window.end() * 1000 / RATE,
+                  samples.length / (float) RATE));
         } finally {
           stream.release();
         }
@@ -147,10 +150,43 @@ public final class SherpaSpeechRecognizer implements SpeechRecognizer {
           String.join(
               " ",
               result.stream().map(RecognitionResult.Segment::text).collect(Collectors.toList()));
-      return new RecognitionResult(text, result, RecognitionResult.Timing.SEGMENT);
+      return new RecognitionResult(text, result, RecognitionResult.Timing.WORD);
     } finally {
       recognizer.release();
     }
+  }
+
+  private static List<RecognitionResult.Segment> words(
+      String[] tokens,
+      float[] timestamps,
+      long windowStartMs,
+      long windowEndMs,
+      float windowSeconds) {
+    var words = new ArrayList<RecognitionResult.Segment>();
+    StringBuilder word = new StringBuilder();
+    float wordStart = 0;
+    for (int i = 0; i < tokens.length; i++) {
+      if (tokens[i].equals(" ")) {
+        if (word.length() > 0) {
+          words.add(wordSegment(word.toString(), wordStart, timestamps[i], windowStartMs, windowEndMs));
+          word.setLength(0);
+        }
+        continue;
+      }
+      if (word.length() == 0) wordStart = timestamps[i];
+      word.append(tokens[i]);
+    }
+    if (word.length() > 0) {
+      words.add(wordSegment(word.toString(), wordStart, windowSeconds, windowStartMs, windowEndMs));
+    }
+    return words;
+  }
+
+  private static RecognitionResult.Segment wordSegment(
+      String text, float startSeconds, float endSeconds, long windowStartMs, long windowEndMs) {
+    long startMs = Math.min(windowEndMs, windowStartMs + Math.round(startSeconds * 1000));
+    long endMs = Math.max(startMs, Math.min(windowEndMs, windowStartMs + Math.round(endSeconds * 1000)));
+    return new RecognitionResult.Segment(text, startMs, endMs);
   }
 
   private String model(String name) throws IOException {
