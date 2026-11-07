@@ -13,7 +13,6 @@ import dev.wordbyword.app.core.transcript.OverlapTranscriptAssembler;
 import dev.wordbyword.app.processing.LocalTranscriptionPipeline;
 import dev.wordbyword.app.storage.FileTranscriptRepository;
 import dev.wordbyword.app.ui.AppController;
-import java.io.File;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,12 +30,10 @@ public final class WordByWordApplication extends Application {
   @Override
   public void onCreate() {
     super.onCreate();
-    var models = new File(getExternalFilesDir(null), "models/gigaam-v2");
-    models.mkdirs();
     TranscriptionPipeline pipeline =
         new LocalTranscriptionPipeline(
             new AndroidAudioPreparer(this),
-            new SherpaSpeechRecognizer(models),
+            new SherpaSpeechRecognizer(getAssets()),
             new SherpaOnnxSpeakerDiarizer(this),
             new OverlapTranscriptAssembler(),
             BuildConfig.PARALLEL_INFERENCE ? diarization : Runnable::run);
