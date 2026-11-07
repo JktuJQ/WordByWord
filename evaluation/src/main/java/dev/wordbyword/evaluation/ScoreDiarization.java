@@ -1,3 +1,5 @@
+package dev.wordbyword.evaluation;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -21,7 +23,7 @@ public class ScoreDiarization {
     try {
       if (args.length < 3 || args.length > 4) {
         throw new IllegalArgumentException(
-            "Usage: java ScoreDiarization.java reference.rttm hypothesis.rttm duration_seconds"
+            "Usage: ScoreDiarization reference.rttm hypothesis.rttm duration_seconds"
                 + " [processing_seconds]");
       }
       double duration = positive(args[2]);

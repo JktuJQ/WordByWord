@@ -9,12 +9,13 @@ import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -92,7 +93,8 @@ public final class RecordingActivity extends Activity {
     if (recorder != null) {
       try {
         recorder.stop();
-      } catch (RuntimeException ignored) {
+      } catch (RuntimeException exception) {
+        Log.w("RecordingActivity", "Cannot stop recording", exception);
         if (audioFile != null) audioFile.delete();
       }
       recorder.release();
@@ -110,7 +112,8 @@ public final class RecordingActivity extends Activity {
   }
 
   private void begin() {
-    if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+    if (checkSelfPermission(Manifest.permission.RECORD_AUDIO)
+        != PackageManager.PERMISSION_GRANTED) {
       requestPermissions(new String[] {Manifest.permission.RECORD_AUDIO}, MICROPHONE_PERMISSION);
       return;
     }
@@ -118,7 +121,10 @@ public final class RecordingActivity extends Activity {
       File directory = new File(getFilesDir(), "recordings");
       if (!directory.isDirectory() && !directory.mkdirs()) throw new IOException();
       audioFile = new File(directory, UUID.randomUUID() + ".m4a");
-      recorder = Build.VERSION.SDK_INT >= 31 ? new MediaRecorder(this) : new MediaRecorder();
+      @SuppressWarnings("deprecation")
+      MediaRecorder newRecorder =
+          Build.VERSION.SDK_INT >= 31 ? new MediaRecorder(this) : new MediaRecorder();
+      recorder = newRecorder;
       recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
       recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
       recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
@@ -130,7 +136,8 @@ public final class RecordingActivity extends Activity {
       state = State.RECORDING;
       handler.post(ticker);
       render();
-    } catch (Exception exception) {
+    } catch (IOException | RuntimeException exception) {
+      Log.w("RecordingActivity", "Cannot start recording", exception);
       releaseFailedRecorder();
       showFailure();
     }
@@ -153,6 +160,7 @@ public final class RecordingActivity extends Activity {
       }
       render();
     } catch (RuntimeException exception) {
+      Log.w("RecordingActivity", "Cannot pause or resume recording", exception);
       finishRecording();
     }
   }
@@ -166,6 +174,7 @@ public final class RecordingActivity extends Activity {
       recorder.stop();
       state = State.COMPLETE;
     } catch (RuntimeException exception) {
+      Log.w("RecordingActivity", "Cannot finish recording", exception);
       if (audioFile != null) audioFile.delete();
       audioFile = null;
       state = State.READY;
@@ -191,7 +200,8 @@ public final class RecordingActivity extends Activity {
         return;
       }
       preview.setOnCompletionListener(
-          player -> ((Button) findViewById(R.id.recording_preview)).setText(R.string.recording_preview));
+          player ->
+              ((Button) findViewById(R.id.recording_preview)).setText(R.string.recording_preview));
     }
     preview.start();
     ((Button) findViewById(R.id.recording_preview)).setText(R.string.recording_stop_preview);
@@ -226,7 +236,8 @@ public final class RecordingActivity extends Activity {
               if (recorder != null) {
                 try {
                   recorder.stop();
-                } catch (RuntimeException ignored) {
+                } catch (RuntimeException exception) {
+                  Log.w("RecordingActivity", "Cannot stop recording", exception);
                 }
                 recorder.release();
                 recorder = null;
@@ -238,7 +249,8 @@ public final class RecordingActivity extends Activity {
   }
 
   @Override
-  public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+  public void onRequestPermissionsResult(
+      int requestCode, String[] permissions, int[] grantResults) {
     super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     if (requestCode != MICROPHONE_PERMISSION) return;
     if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -259,14 +271,20 @@ public final class RecordingActivity extends Activity {
   }
 
   private void render() {
-    findViewById(R.id.recording_active).setVisibility(state == State.COMPLETE ? View.GONE : View.VISIBLE);
-    findViewById(R.id.recording_complete).setVisibility(state == State.COMPLETE ? View.VISIBLE : View.GONE);
-    findViewById(R.id.recording_start).setVisibility(state == State.READY ? View.VISIBLE : View.GONE);
+    findViewById(R.id.recording_active)
+        .setVisibility(state == State.COMPLETE ? View.GONE : View.VISIBLE);
+    findViewById(R.id.recording_complete)
+        .setVisibility(state == State.COMPLETE ? View.VISIBLE : View.GONE);
+    findViewById(R.id.recording_start)
+        .setVisibility(state == State.READY ? View.VISIBLE : View.GONE);
     findViewById(R.id.recording_pause)
-        .setVisibility(state == State.RECORDING || state == State.PAUSED ? View.VISIBLE : View.GONE);
+        .setVisibility(
+            state == State.RECORDING || state == State.PAUSED ? View.VISIBLE : View.GONE);
     findViewById(R.id.recording_finish)
-        .setVisibility(state == State.RECORDING || state == State.PAUSED ? View.VISIBLE : View.GONE);
-    findViewById(R.id.recording_cancel).setVisibility(state == State.READY ? View.GONE : View.VISIBLE);
+        .setVisibility(
+            state == State.RECORDING || state == State.PAUSED ? View.VISIBLE : View.GONE);
+    findViewById(R.id.recording_cancel)
+        .setVisibility(state == State.READY ? View.GONE : View.VISIBLE);
     ((Button) findViewById(R.id.recording_pause))
         .setText(state == State.PAUSED ? R.string.recording_resume : R.string.recording_pause);
     int status =
@@ -282,7 +300,8 @@ public final class RecordingActivity extends Activity {
   }
 
   private void renderTimer() {
-    long total = elapsedMs + (state == State.RECORDING ? SystemClock.elapsedRealtime() - startedAt : 0);
+    long total =
+        elapsedMs + (state == State.RECORDING ? SystemClock.elapsedRealtime() - startedAt : 0);
     long seconds = total / 1000;
     ((TextView) findViewById(R.id.recording_timer))
         .setText(String.format(Locale.ROOT, "%02d:%02d", seconds / 60, seconds % 60));
@@ -317,6 +336,9 @@ public final class RecordingActivity extends Activity {
   }
 
   private void showFailure() {
-    new AlertDialog.Builder(this).setMessage(R.string.recording_failed).setPositiveButton("OK", null).show();
+    new AlertDialog.Builder(this)
+        .setMessage(R.string.recording_failed)
+        .setPositiveButton("OK", null)
+        .show();
   }
 }
