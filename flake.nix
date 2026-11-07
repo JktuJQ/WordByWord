@@ -86,7 +86,7 @@
             set_avd_property hw.lcd.width 1080
             set_avd_property hw.lcd.height 1920
             set_avd_property hw.lcd.density 420
-            set_avd_property hw.ramSize 2048
+            set_avd_property hw.ramSize 4096
             set_avd_property vm.heapSize 256
             set_avd_property hw.keyboard yes
             set_avd_property hw.mainKeys no
@@ -94,7 +94,7 @@
             set_avd_property skin.path 1080x1920
             set_avd_property showDeviceFrame no
 
-            echo "WordByWord: Android ${platformVersion}, 1080x1920, 420 dpi"
+            echo "WordByWord: Android ${platformVersion}, 1080x1920, 420 dpi, 4096 MiB RAM"
             exec emulator -avd "$avdName" -gpu auto -no-snapshot "$@"
           '';
         };
