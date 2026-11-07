@@ -2,10 +2,6 @@ package dev.wordbyword.app.ui.view;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.media.MediaPlayer;
-import android.net.Uri;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -16,33 +12,23 @@ import android.widget.TextView;
 import dev.wordbyword.app.R;
 import dev.wordbyword.app.core.transcript.Transcript;
 import dev.wordbyword.app.ui.AppController;
-import java.util.HashMap;
+import dev.wordbyword.app.ui.audio.TranscriptPlayback;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
 
 public final class TranscriptView {
   private final View root;
   private final LinearLayout items;
   private final AppController controller;
-  private final Handler handler = new Handler(Looper.getMainLooper());
+  private final TranscriptPlayback playback;
   private final ArrayList<CardRange> cards = new ArrayList<>();
   private final ScrollView scroll;
-  private MediaPlayer player;
-  private String playerRecordingId;
   private int activeCard = -1;
   private TextView positionLabel;
   private TextView playbackToggle;
   private SeekBar positionSeekbar;
   private Transcript currentTranscript;
-  private int durationMs;
-  private final Runnable positionTicker =
-      new Runnable() {
-        @Override
-        public void run() {
-          updatePlaybackUi();
-          if (player != null && player.isPlaying()) handler.postDelayed(this, 200);
-        }
-      };
 
   private record CardRange(long startMs, long endMs, View card) {}
 
@@ -54,32 +40,27 @@ public final class TranscriptView {
     positionLabel = root.findViewById(R.id.playback_position);
     playbackToggle = root.findViewById(R.id.playback_toggle);
     positionSeekbar = root.findViewById(R.id.playback_seekbar);
+    playback =
+        new TranscriptPlayback(
+            items.getContext(),
+            this::updatePlaybackUi,
+            () ->
+                controller.notifyMessage(items.getContext().getString(R.string.audio_unavailable)));
     playbackToggle.setOnClickListener(view -> togglePlayback());
     root.findViewById(R.id.playback_back).setOnClickListener(view -> seek(-5000));
     root.findViewById(R.id.playback_forward).setOnClickListener(view -> seek(5000));
   }
 
   public void release() {
-    releasePlayer();
+    playback.release();
     cards.clear();
     currentTranscript = null;
     activeCard = -1;
   }
 
-  private void releasePlayer() {
-    handler.removeCallbacks(positionTicker);
-    if (player != null) {
-      player.release();
-      player = null;
-    }
-    playerRecordingId = null;
-    durationMs = 0;
-  }
-
   public void render(Transcript transcript) {
-    if (playerRecordingId != null && !playerRecordingId.equals(transcript.recording().id()))
-      release();
     currentTranscript = transcript;
+    playback.showRecording(transcript.recording());
     text(R.id.screen_title, transcript.recording().title());
     text(
         R.id.screen_description,
@@ -96,16 +77,11 @@ public final class TranscriptView {
     }
     cards.clear();
     activeCard = -1;
-    durationMs =
-        player != null
-            ? player.getDuration()
-            : (int) Math.min(Integer.MAX_VALUE, transcript.recording().durationMs().orElse(0));
-    positionSeekbar.setMax(Math.max(1, durationMs));
     positionSeekbar.setOnSeekBarChangeListener(
         new SeekBar.OnSeekBarChangeListener() {
           @Override
           public void onProgressChanged(SeekBar bar, int progress, boolean fromUser) {
-            if (fromUser && preparePlayer(transcript)) seekTo(progress);
+            if (fromUser) playback.seekTo(transcript.recording(), progress);
           }
 
           @Override
@@ -162,7 +138,7 @@ public final class TranscriptView {
       cards.add(new CardRange(utterance.startMs(), utterance.endMs(), card));
       items.addView(card);
     }
-    updatePlaybackUi();
+    playback.refresh();
   }
 
   private void rename(Transcript.Speaker speaker) {
@@ -187,78 +163,28 @@ public final class TranscriptView {
         .show();
   }
 
-  private boolean preparePlayer(Transcript transcript) {
-    if (player != null && transcript.recording().id().equals(playerRecordingId)) return true;
-    releasePlayer();
-    try {
-      player =
-          MediaPlayer.create(
-              items.getContext(), Uri.parse(transcript.recording().audioUri().toString()));
-      if (player == null) throw new IllegalStateException();
-      playerRecordingId = transcript.recording().id();
-      durationMs = player.getDuration();
-      player.setOnCompletionListener(
-          finished -> {
-            handler.removeCallbacks(positionTicker);
-            updatePlaybackUi();
-          });
-      updatePlaybackUi();
-      return true;
-    } catch (Exception exception) {
-      releasePlayer();
-      controller.notifyMessage(items.getContext().getString(R.string.audio_unavailable));
-      return false;
-    }
-  }
-
   private void togglePlayback() {
-    if (currentTranscript == null || !preparePlayer(currentTranscript)) return;
-    if (player.isPlaying()) {
-      player.pause();
-      handler.removeCallbacks(positionTicker);
-      updatePlaybackUi();
-    } else {
-      if (player.getCurrentPosition() >= durationMs) seekTo(0);
-      player.start();
-      handler.removeCallbacks(positionTicker);
-      handler.post(positionTicker);
-      updatePlaybackUi();
-    }
+    if (currentTranscript != null) playback.toggle(currentTranscript.recording());
   }
 
   private void playFrom(Transcript transcript, long startMs) {
-    if (!preparePlayer(transcript)) return;
-    seekTo(startMs);
-    player.start();
-    handler.removeCallbacks(positionTicker);
-    handler.post(positionTicker);
-    updatePlaybackUi();
+    playback.playAt(transcript.recording(), startMs);
   }
 
   private void seek(long offsetMs) {
-    if (currentTranscript == null || !preparePlayer(currentTranscript)) return;
-    long current = player.getCurrentPosition();
-    long target = Math.max(0, Math.min(player.getDuration(), current + offsetMs));
-    seekTo(target);
-    updatePlaybackUi();
+    if (currentTranscript != null) playback.seek(currentTranscript.recording(), offsetMs);
   }
 
-  private void seekTo(long targetMs) {
-    if (player == null) return;
-    long bounded = Math.max(0, Math.min(durationMs, targetMs));
-    player.seekTo(bounded, MediaPlayer.SEEK_CLOSEST);
-  }
-
-  private void updatePlaybackUi() {
-    if (positionLabel == null || positionSeekbar == null) return;
-    int position = player == null ? 0 : Math.max(0, player.getCurrentPosition());
+  private void updatePlaybackUi(TranscriptPlayback.State state) {
+    int position = state.positionMs();
+    int durationMs = state.durationMs();
     positionLabel.setText(
         items
             .getContext()
             .getString(R.string.playback_position_format, time(position), time(durationMs)));
     positionSeekbar.setMax(Math.max(1, durationMs));
     positionSeekbar.setProgress(Math.min(position, durationMs));
-    boolean playing = player != null && player.isPlaying();
+    boolean playing = state.playing();
     int newActive = -1;
     for (int index = 0; index < cards.size(); index++) {
       CardRange range = cards.get(index);
@@ -274,7 +200,8 @@ public final class TranscriptView {
       activeCard = newActive;
       if (activeCard >= 0) {
         View card = cards.get(activeCard).card();
-        scroll.smoothScrollTo(0, Math.max(0, items.getTop() + card.getTop() - scroll.getHeight() / 3));
+        scroll.smoothScrollTo(
+            0, Math.max(0, items.getTop() + card.getTop() - scroll.getHeight() / 3));
       }
     }
   }
