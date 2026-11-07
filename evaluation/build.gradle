@@ -11,7 +11,7 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
 }
 
-['scoreAsr': 'ScoreAsr', 'scoreDiarization': 'ScoreDiarization'].each { taskName, entryPoint ->
+['scoreAsr': 'ScoreAsr', 'scoreDiarization': 'ScoreDiarization', 'scoreTranscripts': 'ScoreTranscripts'].each { taskName, entryPoint ->
     tasks.register(taskName, JavaExec) {
         classpath = sourceSets.main.runtimeClasspath
         mainClass = "dev.wordbyword.evaluation.${entryPoint}"
