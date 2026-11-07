@@ -39,6 +39,19 @@ public final class LocalAsrTest {
   }
 
   @Test
+  public void zeroContextPreservesSpeechAndLargerContextKeepsWindowsDisjoint() {
+    var speech =
+        List.of(
+            new SherpaSpeechRecognizer.SpeechInterval(1000, 2000),
+            new SherpaSpeechRecognizer.SpeechInterval(3000, 4000));
+    assertEquals(speech, SherpaSpeechRecognizer.addContext(speech, 5000, 0));
+    var expanded = SherpaSpeechRecognizer.addContext(speech, 5000, 16000);
+    assertEquals(0, expanded.get(0).start());
+    assertEquals(expanded.get(0).end(), expanded.get(1).start());
+    assertEquals(5000, expanded.get(1).end());
+  }
+
+  @Test
   public void pipelineUsesRealRecognitionAndLeavesSpeakerUnknown() throws Exception {
     var audio = new Audio();
     var pipeline =
