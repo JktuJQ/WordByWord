@@ -139,9 +139,9 @@ public final class ScoreAsr {
   }
 
   public static void main(String[] args) throws Exception {
-    if (args.length != 3)
+    if (args.length != 3 && args.length != 4)
       throw new IllegalArgumentException(
-          "Usage: ScoreAsr manifest.json android-results.json output.json");
+          "Usage: ScoreAsr manifest.json hypotheses.json output.json [partition]");
     var manifest =
         JSON.fromJson(
             new String(Files.readAllBytes(Path.of(args[0])), StandardCharsets.UTF_8),
@@ -150,7 +150,10 @@ public final class ScoreAsr {
         JSON.fromJson(
             new String(Files.readAllBytes(Path.of(args[1])), StandardCharsets.UTF_8),
             JsonObject.class);
-    var result = score(manifest, hypotheses);
+    var result =
+        args.length == 4
+            ? scorePartition(manifest, hypotheses, args[3])
+            : score(manifest, hypotheses);
     Files.write(
         Path.of(args[2]),
         (new GsonBuilder().setPrettyPrinting().create().toJson(result) + "\n")
@@ -162,5 +165,39 @@ public final class ScoreAsr {
         result.get("cer").getAsDouble() * 100,
         result.get("exact_utterances"),
         result.get("samples_count"));
+  }
+
+  public static JsonObject scorePartition(
+      JsonObject manifest, JsonObject hypotheses, String partition) {
+    var selected = new JsonArray();
+    var files = new java.util.HashSet<String>();
+    var known = new java.util.HashSet<String>();
+    for (var element : manifest.getAsJsonArray("samples")) {
+      var sample = element.getAsJsonObject();
+      String file = sample.get("file").getAsString();
+      if (!known.add(file)) throw new IllegalArgumentException("Duplicate sample: " + file);
+      if (sample.has("partition") && sample.get("partition").getAsString().equals(partition)) {
+        selected.add(sample);
+        files.add(file);
+      }
+    }
+    if (selected.isEmpty())
+      throw new IllegalArgumentException("Unknown or empty partition: " + partition);
+    var runs = new JsonArray();
+    var seen = new java.util.HashSet<String>();
+    String key = hypotheses.has("runs") ? "runs" : "samples";
+    for (var element : hypotheses.getAsJsonArray(key)) {
+      String file = element.getAsJsonObject().get("file").getAsString();
+      if (!known.contains(file) || !seen.add(file))
+        throw new IllegalArgumentException("Unknown or duplicate run: " + file);
+      if (files.contains(file)) runs.add(element);
+    }
+    var subset = new JsonObject();
+    subset.add("samples", selected);
+    var predictions = new JsonObject();
+    predictions.add(key, runs);
+    var result = score(subset, predictions);
+    result.addProperty("partition", partition);
+    return result;
   }
 }
