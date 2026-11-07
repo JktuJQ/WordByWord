@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<dev.wordbyword.app.HomeGlowLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="wrap_content"
     android:background="@drawable/card" android:orientation="vertical"
     android:paddingHorizontal="22dp" android:paddingTop="24dp" android:paddingBottom="30dp">
     <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:text="@string/import_source_title" android:textColor="@color/ink"
+        android:fontFamily="@font/soyuz_grotesk" android:text="@string/import_source_title" android:textColor="@color/ink"
         android:textSize="20sp" android:textStyle="bold" />
     <TextView style="@style/BodyText" android:layout_width="match_parent"
         android:layout_height="wrap_content" android:layout_marginTop="8dp"
@@ -12,7 +12,7 @@
     <Button android:id="@+id/source_file" style="@style/SecondaryButton"
         android:layout_width="match_parent" android:layout_height="52dp"
         android:layout_marginTop="24dp" android:text="@string/import_source_file" />
-    <Button android:id="@+id/source_microphone" style="@style/SecondaryButton"
+    <Button android:layout_marginTop="10dp" android:id="@+id/source_microphone" style="@style/SecondaryButton"
         android:layout_width="match_parent" android:layout_height="52dp"
         android:text="@string/import_source_microphone" />
-</LinearLayout>
+</dev.wordbyword.app.HomeGlowLayout>
