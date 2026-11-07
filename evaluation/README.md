@@ -4,6 +4,7 @@
 
 - `fixtures/asr/` — архив аудио и manifest с эталонами ASR.
 - `fixtures/diarization/` — аудио, метаданные и RTTM-эталоны. Происхождение, лицензии и атрибуция: [SOURCE.md](fixtures/diarization/SOURCE.md). Контрольные суммы проверяются из этой папки: `sha256sum -c SHA256SUMS`.
+- `fixtures/dialogs/` — три составленных разговора по 60–90 секунд из реальных голосов Dialogs (2/2/3 участника), тексты и предварительная разметка по границам клипов. Текст независимо на слух не проверен; RTTM требует уточнения речевых границ перед оценкой DER. Источник, ограничения и пересборка: [SOURCE.md](fixtures/dialogs/SOURCE.md).
 - `src/main/java/dev/wordbyword/evaluation/` — скореры WER/DER.
 - `src/test/java/dev/wordbyword/evaluation/` — тесты нормализации, формул и сопоставления участников.
 - `results/` — локальные гипотезы и отчёты, игнорируются Git.
