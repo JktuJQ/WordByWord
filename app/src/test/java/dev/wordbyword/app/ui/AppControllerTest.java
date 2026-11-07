@@ -48,14 +48,44 @@ public class AppControllerTest {
   }
 
   @Test
+  public void importedRecordingCanBeRenamedWithoutCreatingTranscript() throws Exception {
+    var repository = repository();
+    var recording = recording();
+    var io = new ArrayDeque<Runnable>();
+    var controller =
+        new AppController(
+            repository,
+            (input, context) -> new Transcript(input, List.of(), List.of()),
+            Runnable::run,
+            io::add,
+            Runnable::run);
+    controller.add(recording);
+    controller.renameRecording(recording.id(), "  Интервью  ");
+    assertTrue(controller.state().busy());
+    controller.start(recording.id());
+    assertEquals(AppState.Status.IMPORTED, controller.state().items().get(0).status());
+    io.remove().run();
+    assertFalse(controller.state().busy());
+    assertEquals("Интервью", controller.state().items().get(0).recording().title());
+    assertNull(controller.state().items().get(0).transcript());
+    assertTrue(repository.find(recording.id()).isEmpty());
+    assertEquals("Интервью", repository().listRecordings().get(0).title());
+    assertEquals(recording.audioUri(), repository().listRecordings().get(0).audioUri());
+  }
+
+  @Test
   public void renamedRecordingPersistsWithoutChangingTranscriptOrAudio() throws Exception {
     var repository = repository();
     var recording = recording();
-    var original = new Transcript(recording, List.of(new Transcript.Speaker("a", "Участник 1")),
-        List.of(new Transcript.Utterance(Optional.of("a"), "Привет", 0, 1000)));
+    var original =
+        new Transcript(
+            recording,
+            List.of(new Transcript.Speaker("a", "Участник 1")),
+            List.of(new Transcript.Utterance(Optional.of("a"), "Привет", 0, 1000)));
     repository.save(original);
-    var controller = new AppController(repository, (input, context) -> original,
-        Runnable::run, Runnable::run, Runnable::run);
+    var controller =
+        new AppController(
+            repository, (input, context) -> original, Runnable::run, Runnable::run, Runnable::run);
     controller.attach(state -> {});
     controller.load();
     controller.renameRecording(recording.id(), "  Встреча  ");
@@ -69,8 +99,13 @@ public class AppControllerTest {
 
   @Test
   public void dismissedMessageDoesNotReappearAfterNavigationOrListenerReplacement() {
-    var controller = new AppController(repository(),
-        (input, context) -> new Transcript(input, List.of(), List.of()), Runnable::run, Runnable::run, Runnable::run);
+    var controller =
+        new AppController(
+            repository(),
+            (input, context) -> new Transcript(input, List.of(), List.of()),
+            Runnable::run,
+            Runnable::run,
+            Runnable::run);
     var messages = new java.util.ArrayList<String>();
     controller.attach(state -> messages.add(state.message()));
     controller.notifyMessage("Экспорт отменён.");

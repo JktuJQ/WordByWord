@@ -35,33 +35,25 @@ public final class RecordingListView {
     ((TextView) card.findViewById(R.id.recording_title)).setText(item.recording().title());
     ((TextView) card.findViewById(R.id.recording_detail)).setText(item.detail());
     View rename = card.findViewById(R.id.rename_recording);
-    rename.setVisibility(item.status() == AppState.Status.READY && !selecting ? View.VISIBLE : View.GONE);
-    rename.setOnClickListener(view -> GlassDialogs.rename(items.getContext(), "Название записи",
-        item.recording().title(), name -> controller.renameRecording(item.recording().id(), name)));
-    TextView status = card.findViewById(R.id.recording_status);
-    status.setTextColor(items.getContext().getColor(R.color.accent_text));
-    status.setText(
-        switch (item.status()) {
-          case PROCESSING -> R.string.processing_status;
-          case READY -> R.string.ready_status;
-          case ERROR -> R.string.error_status;
-          case CANCELLED -> R.string.cancelled_status;
-          case IMPORTED -> R.string.imported_status;
+    rename.setVisibility(!selecting ? View.VISIBLE : View.GONE);
+    rename.setEnabled(!state.busy());
+    rename.setOnClickListener(
+        view ->
+            GlassDialogs.rename(
+                items.getContext(),
+                "Название записи",
+                item.recording().title(),
+                name -> controller.renameRecording(item.recording().id(), name)));
+    card.setOnLongClickListener(
+        view -> {
+          beginSelection.accept(item.recording().id());
+          return true;
         });
-    if (item.status() == AppState.Status.ERROR) {
-      status.setTextColor(items.getContext().getColor(R.color.error));
-      android.graphics.drawable.GradientDrawable errorBackground = new android.graphics.drawable.GradientDrawable();
-      errorBackground.setColor(0xFFFCE9E5);
-      errorBackground.setCornerRadius(16 * items.getResources().getDisplayMetrics().density);
-      status.setBackground(errorBackground);
-    }
-    card.setOnLongClickListener(view -> {
-      beginSelection.accept(item.recording().id());
-      return true;
-    });
-    card.setBackgroundResource(selectedIds.contains(item.recording().id()) ? R.drawable.selected_card : R.drawable.card);
+    card.setBackgroundResource(
+        selectedIds.contains(item.recording().id()) ? R.drawable.selected_card : R.drawable.card);
     CheckBox selected = card.findViewById(R.id.recording_selected);
     selected.setVisibility(selecting ? View.VISIBLE : View.GONE);
+    selected.setContentDescription(item.recording().title());
     selected.setChecked(selectedIds.contains(item.recording().id()));
     selected.setOnClickListener(view -> toggleSelection.accept(item.recording().id()));
     if (selecting) {
@@ -75,19 +67,31 @@ public final class RecordingListView {
         .ifPresent(
             value -> progress.setProgress((int) Math.round(Math.max(0, Math.min(1, value)) * 100)));
     Button action = card.findViewById(R.id.recording_action);
-    action.setVisibility(selecting || item.status() == AppState.Status.READY ? View.GONE : View.VISIBLE);
-    card.findViewById(R.id.recording_chevron).setVisibility(!selecting && item.status() == AppState.Status.READY ? View.VISIBLE : View.GONE);
+    action.setVisibility(selecting ? View.GONE : View.VISIBLE);
     TextView metadata = card.findViewById(R.id.recording_kind);
-    metadata.setVisibility(item.status() == AppState.Status.READY ? View.VISIBLE : View.GONE);
+    long duration = item.recording().durationMs().orElse(0) / 1000;
+    metadata.setText(
+        String.format(java.util.Locale.ROOT, "%02d:%02d", duration / 60, duration % 60));
     if (item.transcript() != null) {
       long seconds = item.recording().durationMs().orElse(0) / 1000;
-      metadata.setText(String.format(java.util.Locale.ROOT, "%02d:%02d · %s", seconds / 60, seconds % 60,
-          RecordingLabels.summary(item.transcript().utterances().size(), item.transcript().speakers().size())));
+      metadata.setText(
+          String.format(
+              java.util.Locale.ROOT,
+              "%02d:%02d · %s",
+              seconds / 60,
+              seconds % 60,
+              RecordingLabels.summary(
+                  item.transcript().utterances().size(), item.transcript().speakers().size())));
     }
-    card.findViewById(R.id.recording_detail).setVisibility(item.status() == AppState.Status.READY || item.status() == AppState.Status.IMPORTED ? View.GONE : View.VISIBLE);
+    card.findViewById(R.id.recording_detail)
+        .setVisibility(
+            item.status() == AppState.Status.READY || item.status() == AppState.Status.IMPORTED
+                ? View.GONE
+                : View.VISIBLE);
     if (processing) {
       String label = item.detail();
-      if (!label.equals("Превращаем речь в текст") && !label.equals("Различаем голоса")
+      if (!label.equals("Превращаем речь в текст")
+          && !label.equals("Различаем голоса")
           && !label.equals("Собираем всё воедино…")) label = "Превращаем речь в текст";
       int percent = (int) Math.round(item.progress().orElse(0) * 100);
       ((TextView) card.findViewById(R.id.recording_detail)).setText(label + " · " + percent + "%");

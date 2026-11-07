@@ -4,9 +4,9 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
-import android.graphics.RadialGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.RadialGradient;
 import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.view.View;
@@ -37,13 +37,26 @@ public final class VoiceOrbView extends View {
     float cx = width / 2f;
     float cy = height / 2f;
     float radius = Math.min(cx, cy) * 0.76f;
-    glow = new RadialGradient(cx, cy, radius * 1.3f,
-        new int[] {0x45FF8A27, 0x00FF8A27}, null, Shader.TileMode.CLAMP);
-    sphere = new RadialGradient(cx - radius * 0.35f, cy - radius * 0.45f, radius * 1.75f,
-        new int[] {Color.rgb(255, 238, 180), Color.rgb(255, 170, 36), Color.rgb(242, 87, 9)},
-        new float[] {0f, 0.42f, 1f}, Shader.TileMode.CLAMP);
-    ribbon = new LinearGradient(cx, cy - radius * 0.3f, cx, cy + radius,
-        new int[] {0xFFFFAD20, 0xFFF6670A, 0xFFFFB58F}, null, Shader.TileMode.CLAMP);
+    glow =
+        new RadialGradient(
+            cx, cy, radius * 1.3f, new int[] {0x45FF8A27, 0x00FF8A27}, null, Shader.TileMode.CLAMP);
+    sphere =
+        new RadialGradient(
+            cx - radius * 0.35f,
+            cy - radius * 0.45f,
+            radius * 1.75f,
+            new int[] {Color.rgb(255, 238, 180), Color.rgb(255, 170, 36), Color.rgb(242, 87, 9)},
+            new float[] {0f, 0.42f, 1f},
+            Shader.TileMode.CLAMP);
+    ribbon =
+        new LinearGradient(
+            cx,
+            cy - radius * 0.3f,
+            cx,
+            cy + radius,
+            new int[] {0xFFFFAD20, 0xFFF6670A, 0xFFFFB58F},
+            null,
+            Shader.TileMode.CLAMP);
   }
 
   @Override
@@ -65,8 +78,10 @@ public final class VoiceOrbView extends View {
     outline.reset();
     for (int i = 0; i <= 120; i++) {
       double angle = i * Math.PI * 2 / 120;
-      float deformation = level * (0.15f * (float) Math.sin(angle * 3 + phase)
-          + 0.075f * (float) Math.cos(angle * 5 - phase * 0.7f));
+      float deformation =
+          level
+              * (0.22f * (float) Math.sin(angle * 3 + phase)
+                  + 0.10f * (float) Math.cos(angle * 5 - phase * 0.7f));
       float r = radius * (1 + deformation);
       float x = cx + r * (float) Math.cos(angle);
       float y = cy + r * (float) Math.sin(angle);
@@ -81,8 +96,13 @@ public final class VoiceOrbView extends View {
     path.reset();
     float wave = (float) Math.sin(phase) * radius * 0.1f * level;
     path.moveTo(cx - radius, cy + radius * 0.3f);
-    path.cubicTo(cx - radius * 0.1f, cy + radius + wave,
-        cx + radius * 0.1f, cy - radius * 0.95f, cx + radius, cy - radius * 0.2f);
+    path.cubicTo(
+        cx - radius * 0.1f,
+        cy + radius + wave,
+        cx + radius * 0.1f,
+        cy - radius * 0.95f,
+        cx + radius,
+        cy - radius * 0.2f);
     path.lineTo(cx + radius, cy + radius);
     path.lineTo(cx - radius, cy + radius);
     path.close();
@@ -90,11 +110,6 @@ public final class VoiceOrbView extends View {
     canvas.drawPath(path, paint);
     canvas.restore();
     paint.setShader(null);
-    paint.setStyle(Paint.Style.STROKE);
-    paint.setStrokeWidth(getResources().getDisplayMetrics().density);
-    paint.setColor(0xBFFFFFFF);
-    canvas.drawPath(outline, paint);
-    paint.setStyle(Paint.Style.FILL);
     if (isShown() && (level > 0 || target > 0)) postInvalidateOnAnimation();
   }
 }

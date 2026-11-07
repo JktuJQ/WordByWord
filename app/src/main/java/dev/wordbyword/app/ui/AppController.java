@@ -22,6 +22,7 @@ public final class AppController {
   private final Set<String> deleting = new HashSet<>();
   private final Map<String, Item> items = new LinkedHashMap<>();
   private Consumer<AppState> listener;
+  private boolean renaming;
   private String selectedId;
   private String message = "";
 
@@ -39,7 +40,7 @@ public final class AppController {
     return new AppState(
         List.copyOf(items.values()),
         selectedId,
-        processing.isBusy() || !deleting.isEmpty(),
+        processing.isBusy() || renaming || !deleting.isEmpty(),
         processing.isCancelling(),
         message);
   }
@@ -96,7 +97,8 @@ public final class AppController {
   }
 
   public boolean canDelete(Set<String> recordingIds) {
-    return !recordingIds.isEmpty()
+    return !renaming
+        && !recordingIds.isEmpty()
         && deleting.isEmpty()
         && recordingIds.stream()
             .allMatch(
@@ -146,20 +148,37 @@ public final class AppController {
 
   public void renameRecording(String id, String name) {
     Item item = items.get(id);
-    if (item == null || item.status() != Status.READY || name == null || name.isBlank()
-        || deleting.contains(id)) return;
-    library.renameRecording(id, name.trim(), updated -> {
-      Item old = items.get(id);
-      if (old == null) return;
-      items.put(id, new Item(updated.recording(), old.status(), old.detail(), old.progress(), updated));
-      emit();
-    }, this::notifyMessage);
+    if (item == null || state().busy() || name == null || name.isBlank()) return;
+    renaming = true;
+    emit();
+    library.renameRecording(
+        id,
+        name.trim(),
+        updated -> {
+          renaming = false;
+          Item old = items.get(id);
+          if (old != null) {
+            Transcript transcript = old.transcript();
+            if (transcript != null)
+              transcript = new Transcript(updated, transcript.speakers(), transcript.utterances());
+            items.put(
+                id, new Item(updated, old.status(), old.detail(), old.progress(), transcript));
+          }
+          emit();
+        },
+        error -> {
+          renaming = false;
+          notifyMessage(error);
+        });
   }
 
   public void start(String recordingId) {
     Item item = items.get(recordingId);
-    if (processing.isBusy() || !deleting.isEmpty() || item == null || item.status() == Status.READY)
-      return;
+    if (processing.isBusy()
+        || renaming
+        || !deleting.isEmpty()
+        || item == null
+        || item.status() == Status.READY) return;
     message = "";
     processing.start(
         item.recording(),

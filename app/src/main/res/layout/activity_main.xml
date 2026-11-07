@@ -4,15 +4,15 @@
     android:orientation="vertical" android:background="@color/background">
     <LinearLayout android:id="@+id/top_toolbar" android:layout_width="match_parent" android:layout_height="64dp"
         android:gravity="center_vertical" android:paddingHorizontal="20dp">
-        <TextView android:id="@+id/back" style="@style/IconButton" android:layout_width="48dp" android:layout_height="48dp"
-            android:drawableTop="@drawable/ic_back" android:contentDescription="@string/back_to_library" android:visibility="gone" />
-        <Space android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
+        <ImageButton android:id="@+id/back" style="@style/IconButton" android:layout_width="48dp" android:layout_height="48dp"
+            android:src="@drawable/ic_back" android:contentDescription="@string/back_to_library" android:visibility="gone" />
+        <TextView android:id="@+id/transcript_title" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginHorizontal="8dp" android:fontFamily="@font/vela_sans_medium" android:textColor="@color/ink" android:textSize="20sp" android:maxLines="2" android:ellipsize="end" />
         <ImageButton android:id="@+id/search_toggle" style="@style/IconButton" android:layout_width="48dp" android:layout_height="48dp"
             android:src="@drawable/ic_search" android:contentDescription="@string/search" />
-        <TextView android:id="@+id/select_toggle" android:layout_width="wrap_content" android:layout_height="48dp" android:paddingHorizontal="8dp" android:gravity="center"
-            android:text="@string/select_records" android:textSize="14sp" android:textColor="@color/ink" android:background="?android:attr/selectableItemBackground" />
-        <ImageButton android:id="@+id/export_json" style="@style/IconButton" android:layout_width="48dp" android:layout_height="48dp"
-            android:src="@drawable/ic_export" android:contentDescription="@string/export_json" android:visibility="gone" />
+        <TextView android:id="@+id/select_toggle" android:layout_width="wrap_content" android:layout_height="48dp" android:paddingHorizontal="16dp" android:elevation="2dp" android:clickable="true" android:focusable="true" android:gravity="center"
+            android:text="@string/select_records" android:textSize="14sp" android:textColor="@color/ink" android:background="@drawable/home_glass_secondary" />
+        <Button android:id="@+id/export_json" style="@style/SecondaryButton" android:layout_width="wrap_content" android:layout_height="48dp" android:minWidth="0dp" android:paddingHorizontal="12dp" android:text="@string/export_label" android:drawablePadding="6dp"
+            android:drawableStart="@drawable/ic_export" android:contentDescription="@string/export_json" android:visibility="gone" />
     </LinearLayout>
     <LinearLayout android:id="@+id/page_heading" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="24dp" android:paddingTop="12dp" android:paddingBottom="16dp">
         <TextView android:id="@+id/screen_title" android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -36,7 +36,7 @@
                 <TextView android:id="@+id/hero_title" android:layout_width="match_parent" android:layout_height="56dp" android:gravity="center"
                     android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="16sp" android:autoSizeMaxTextSize="42sp" android:autoSizeStepGranularity="2sp" android:text="@string/home_headline" android:textColor="@color/ink" android:textSize="72sp" android:fontFamily="@font/soyuz_grotesk" android:lineSpacingExtra="-8dp" android:includeFontPadding="false" />
                 <TextView android:id="@+id/hero_description" style="@style/BodyText" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center"
-                    android:text="@string/home_intro" android:fontFamily="@font/soyuz_grotesk" android:includeFontPadding="false" android:textSize="26sp" android:layout_marginTop="6dp" android:textColor="@color/ink" />
+                    android:text="@string/home_intro" android:fontFamily="@font/soyuz_grotesk" android:includeFontPadding="false" android:textSize="28sp" android:layout_marginTop="8dp" android:textColor="#45494F" />
             </LinearLayout>
             <LinearLayout android:id="@+id/empty" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="32dp" android:orientation="vertical" android:padding="24dp" android:background="@drawable/card">
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/empty_title" android:textColor="@color/ink" android:textSize="20sp" android:textStyle="bold" />
@@ -48,19 +48,19 @@
         </LinearLayout>
     </ScrollView>
     <include android:id="@+id/transcript_playback" layout="@layout/view_playback_status" android:visibility="gone" />
-    <LinearLayout android:id="@+id/selection_actions" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical"
-        android:paddingHorizontal="24dp" android:paddingVertical="12dp" android:background="@color/surface" android:visibility="gone">
+    <LinearLayout android:id="@+id/selection_actions" android:layout_marginHorizontal="24dp" android:layout_marginVertical="12dp" android:elevation="2dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical"
+        android:paddingHorizontal="12dp" android:paddingVertical="12dp" android:background="@drawable/card" android:visibility="gone">
         <Button android:id="@+id/share_selected" style="@style/SecondaryButton" android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:text="@string/share_selected" android:textSize="14sp" android:paddingHorizontal="8dp" />
         <Button android:id="@+id/delete_selected" style="@style/SecondaryButton" android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1" android:layout_marginStart="12dp" android:text="@string/delete_selected" android:textColor="@color/error" android:textSize="14sp" android:paddingHorizontal="8dp" />
     </LinearLayout>
-    <LinearLayout android:id="@+id/library_actions" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="24dp" android:paddingBottom="52dp">
+    <LinearLayout android:id="@+id/library_actions" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="24dp" android:paddingBottom="96dp">
         <Button android:id="@+id/record_shortcut" style="@style/ActionButton" android:background="@drawable/home_glass_primary" android:textSize="20sp" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="12sp" android:autoSizeMaxTextSize="20sp" android:layout_width="match_parent" android:layout_height="56dp" android:text="@string/recording_shortcut" android:drawableStart="@drawable/ic_mic" android:drawableTint="@color/ink" />
         <Button android:id="@+id/import_audio" style="@style/SecondaryButton" android:background="@drawable/home_glass_secondary" android:textSize="20sp" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="12sp" android:autoSizeMaxTextSize="20sp" android:layout_width="match_parent" android:layout_height="56dp" android:layout_marginTop="10dp" android:text="@string/import_audio" android:drawableStart="@drawable/ic_upload" />
     </LinearLayout>
     <Button android:id="@+id/library_add" style="@style/SecondaryButton" android:layout_width="match_parent" android:layout_height="52dp"
         android:layout_marginHorizontal="24dp" android:layout_marginVertical="12dp" android:text="@string/library_add" android:visibility="gone" />
-    <dev.wordbyword.app.GlassNavigationLayout android:id="@+id/bottom_navigation" android:layout_width="match_parent" android:layout_height="76dp" android:paddingHorizontal="24dp" android:paddingVertical="8dp" android:gravity="center_vertical">
-        <ImageButton android:id="@+id/nav_home" android:layout_width="0dp" android:layout_height="60dp" android:layout_weight="1" android:layout_marginEnd="8dp" android:padding="18dp" android:scaleType="fitCenter" android:background="@android:color/transparent" android:src="@drawable/ic_home" android:contentDescription="@string/nav_home" />
-        <ImageButton android:id="@+id/nav_library" android:layout_width="0dp" android:layout_height="60dp" android:layout_weight="1" android:layout_marginStart="8dp" android:padding="18dp" android:scaleType="fitCenter" android:background="@android:color/transparent" android:src="@drawable/ic_library" android:contentDescription="@string/nav_library" />
+    <dev.wordbyword.app.GlassNavigationLayout android:id="@+id/bottom_navigation" android:layout_gravity="center_horizontal" android:layout_width="240dp" android:layout_height="76dp" android:paddingHorizontal="24dp" android:paddingVertical="8dp" android:gravity="center_vertical">
+        <ImageButton android:id="@+id/nav_home" android:layout_width="0dp" android:layout_height="60dp" android:layout_weight="1" android:layout_marginEnd="8dp" android:padding="20dp" android:scaleType="fitCenter" android:background="@android:color/transparent" android:src="@drawable/ic_home" android:contentDescription="@string/nav_home" />
+        <ImageButton android:id="@+id/nav_library" android:layout_width="0dp" android:layout_height="60dp" android:layout_weight="1" android:layout_marginStart="8dp" android:padding="20dp" android:scaleType="fitCenter" android:background="@android:color/transparent" android:src="@drawable/ic_library" android:contentDescription="@string/nav_library" />
     </dev.wordbyword.app.GlassNavigationLayout>
 </dev.wordbyword.app.HomeGlowLayout>

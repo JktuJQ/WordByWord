@@ -14,7 +14,7 @@
     <string name="delete_selected">Удалить</string>
     <string name="selected_count">Выбрано: %1$d</string>
     <string name="delete_confirm_title">Удалить выбранные записи?</string>
-    <string name="delete_confirm_message">Записи исчезнут из текущей библиотеки.</string>
+    <string name="delete_confirm_message">Записи исчезнут из библиотеки.</string>
     <string name="not_now">Отмена</string>
     <string name="seek_back">Назад на 5 секунд</string>
     <string name="play_utterance">Воспроизвести реплику</string>
@@ -96,4 +96,5 @@
     <string name="close_search">Закрыть поиск</string>
     <string name="long_press_hint">Удерживайте запись, чтобы выбрать несколько</string>
     <string name="home_privacy">Ваши разговоры остаются с вами</string>
+    <string name="export_label">Экспорт</string>
 </resources>

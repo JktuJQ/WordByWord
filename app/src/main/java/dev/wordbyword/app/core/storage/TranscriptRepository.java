@@ -16,6 +16,8 @@ public interface TranscriptRepository {
 
   Transcript save(Transcript transcript) throws IOException;
 
+  Recording renameRecording(String recordingId, String title) throws IOException;
+
   void delete(String recordingId) throws IOException;
 
   Transcript update(String recordingId, UnaryOperator<Transcript> transformation)
