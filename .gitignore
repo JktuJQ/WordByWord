@@ -23,7 +23,10 @@ result-*
 # Local signing configuration; Gradle Wrapper files remain tracked.
 keystore.properties
 
-# Large model/runtime binaries, prepared locally via app/prepare-diarization-models.py;
-# never committed, same convention as experiments/asr-probe/.gitignore.
+# Large model/runtime binaries, downloaded by the prepareDiarizationModels
+# Gradle task; never committed, same convention as experiments/asr-probe/.gitignore.
 /app/vendor/
 /app/src/main/assets/diarization/
+
+# Generated hypothesis RTTMs from test-data/diarization/evaluate.sh.
+*.hyp.rttm
