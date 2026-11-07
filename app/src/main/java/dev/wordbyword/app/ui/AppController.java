@@ -75,6 +75,12 @@ public final class AppController {
     emit();
   }
 
+  public void clearMessage() {
+    if (message.isEmpty()) return;
+    message = "";
+    emit();
+  }
+
   public void notifyMessage(String text) {
     message = text;
     emit();

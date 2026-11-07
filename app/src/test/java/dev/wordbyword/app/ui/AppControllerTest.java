@@ -48,6 +48,24 @@ public class AppControllerTest {
   }
 
   @Test
+  public void dismissedMessageDoesNotReappearAfterNavigationOrListenerReplacement() {
+    var controller = new AppController(repository(),
+        (input, context) -> new Transcript(input, List.of(), List.of()), Runnable::run, Runnable::run, Runnable::run);
+    var messages = new java.util.ArrayList<String>();
+    controller.attach(state -> messages.add(state.message()));
+    controller.notifyMessage("Экспорт отменён.");
+    assertEquals("Экспорт отменён.", controller.state().message());
+    controller.clearMessage();
+    assertEquals("", messages.get(messages.size() - 1));
+    controller.showLibrary();
+    controller.detach();
+    controller.attach(state -> messages.add(state.message()));
+    assertEquals("", messages.get(messages.size() - 1));
+    controller.notifyMessage("Экспорт отменён.");
+    assertEquals("Экспорт отменён.", controller.state().message());
+  }
+
+  @Test
   public void successfulTaskCanBeOpenedAndSurvivesListenerReplacement() throws Exception {
     var worker = new ArrayDeque<Runnable>();
     var repository = repository();
