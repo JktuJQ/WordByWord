@@ -3,7 +3,8 @@
     <string name="app_name">Слово в слово</string>
     <string name="app_tagline">Разговоры, к которым можно вернуться</string>
     <string name="library">Аудио в текст</string>
-    <string name="library_description">Встречи, интервью, лекции — автоматическая транскрипция и анализ</string>
+    <string name="library_description">Встречи, интервью, лекции — автоматическая транскрибация и анализ</string>
+    <string name="mascot_description">Оранжевый персонаж приложения</string>
     <string name="privacy_notice">Аудио остаётся на устройстве</string>
     <string name="empty_title">Добавьте первую запись</string>
     <string name="recent_recordings">Недавние записи</string>

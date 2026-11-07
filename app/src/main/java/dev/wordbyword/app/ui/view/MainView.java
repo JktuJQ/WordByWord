@@ -5,6 +5,9 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.graphics.Typeface;
+import android.text.SpannableString;
+import android.text.style.StyleSpan;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Gravity;
@@ -114,6 +117,7 @@ public final class MainView {
       renderedScreen = screen;
     }
     setVisible(R.id.back, detail);
+    setVisible(R.id.home_mascot, !detail && !searching && !selecting);
     setVisible(R.id.transcript_playback, detail);
     setVisible(R.id.library_actions, !detail && !searching && !selecting);
     setVisible(R.id.selection_actions, !detail && selecting);
@@ -138,7 +142,11 @@ public final class MainView {
       return;
     }
     transcriptView.release();
-    text(R.id.screen_title, activity.getString(R.string.library));
+    SpannableString heading = new SpannableString(activity.getString(R.string.library));
+    int italicStart = heading.toString().lastIndexOf("текст");
+    if (italicStart >= 0) heading.setSpan(new StyleSpan(Typeface.ITALIC), italicStart,
+        heading.length(), 0);
+    ((TextView) root.findViewById(R.id.screen_title)).setText(heading);
     text(
         R.id.screen_description,
         searching
