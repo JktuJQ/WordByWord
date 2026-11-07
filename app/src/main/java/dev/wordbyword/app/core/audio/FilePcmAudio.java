@@ -62,11 +62,10 @@ final class FilePcmAudio implements PcmAudio {
       }
 
       int samplesRead = totalBytesRead / 4;
-      ByteBuffer byteBuffer = ByteBuffer.wrap(buffer, 0, samplesRead * 4);
-      byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-      for (int i = 0; i < samplesRead; i++) {
-        destination[offset + i] = byteBuffer.getFloat();
-      }
+      ByteBuffer.wrap(buffer, 0, samplesRead * 4)
+          .order(ByteOrder.LITTLE_ENDIAN)
+          .asFloatBuffer()
+          .get(destination, offset, samplesRead);
       return samplesRead;
     }
 
@@ -91,11 +90,8 @@ final class FilePcmAudio implements PcmAudio {
       if (length == 0) {
         return;
       }
-      ByteBuffer byteBuffer = ByteBuffer.allocate(length * 4);
-      byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-      for (int i = 0; i < length; i++) {
-        byteBuffer.putFloat(data[offset + i]);
-      }
+      ByteBuffer byteBuffer = ByteBuffer.allocate(length * 4).order(ByteOrder.LITTLE_ENDIAN);
+      byteBuffer.asFloatBuffer().put(data, offset, length);
       out.write(byteBuffer.array());
       sampleCount += length;
     }
