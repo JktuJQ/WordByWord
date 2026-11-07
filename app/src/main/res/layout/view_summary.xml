@@ -1,0 +1,4 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:padding="24dp" android:background="@drawable/card" android:orientation="vertical">
+<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Краткое содержание" android:fontFamily="@font/soyuz_grotesk" android:textSize="24sp" android:textColor="@color/ink" />
+<TextView style="@style/BodyText" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="Здесь появятся главные мысли, решения и задачи из разговора. Функция станет доступна после подключения модели для подведения итогов." />
+</LinearLayout>

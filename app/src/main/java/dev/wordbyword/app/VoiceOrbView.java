@@ -45,7 +45,7 @@ public final class VoiceOrbView extends View {
             cx - radius * 0.35f,
             cy - radius * 0.45f,
             radius * 1.75f,
-            new int[] {Color.rgb(255, 238, 180), Color.rgb(255, 170, 36), Color.rgb(242, 87, 9)},
+            new int[] {Color.rgb(255, 238, 180), Color.rgb(255, 170, 36), Color.rgb(255, 153, 0)},
             new float[] {0f, 0.42f, 1f},
             Shader.TileMode.CLAMP);
     ribbon =
@@ -54,7 +54,7 @@ public final class VoiceOrbView extends View {
             cy - radius * 0.3f,
             cx,
             cy + radius,
-            new int[] {0xFFFFAD20, 0xFFF6670A, 0xFFFFB58F},
+            new int[] {0xFFFFE34D, 0xFFFFA600, 0xFFFFD52A},
             null,
             Shader.TileMode.CLAMP);
   }
@@ -89,6 +89,12 @@ public final class VoiceOrbView extends View {
       else outline.lineTo(x, y);
     }
     outline.close();
+    float hue = 40f + 5f * (float) Math.sin(now / 4500.0);
+    sphere = new RadialGradient(cx - radius * 0.35f, cy - radius * 0.45f, radius * 1.75f,
+        new int[] {Color.HSVToColor(new float[] {hue + 15, 0.3f, 1f}),
+            Color.HSVToColor(new float[] {hue, 0.85f, 1f}),
+            Color.HSVToColor(new float[] {hue - 5, 0.98f, 1f})},
+        new float[] {0f, 0.42f, 1f}, Shader.TileMode.CLAMP);
     paint.setShader(sphere);
     canvas.drawPath(outline, paint);
     canvas.save();
@@ -110,6 +116,6 @@ public final class VoiceOrbView extends View {
     canvas.drawPath(path, paint);
     canvas.restore();
     paint.setShader(null);
-    if (isShown() && (level > 0 || target > 0)) postInvalidateOnAnimation();
+    if (isShown()) postInvalidateOnAnimation();
   }
 }

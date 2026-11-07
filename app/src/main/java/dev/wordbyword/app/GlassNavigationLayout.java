@@ -18,7 +18,7 @@ public final class GlassNavigationLayout extends LinearLayout {
 
   public GlassNavigationLayout(Context context, AttributeSet attrs) {
     super(context, attrs);
-    glass = context.getDrawable(R.drawable.home_glass_primary);
+    glass = context.getDrawable(R.drawable.home_liquid_glass);
     setWillNotDraw(false);
   }
 
