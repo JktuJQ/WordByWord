@@ -22,3 +22,8 @@ result-*
 
 # Local signing configuration; Gradle Wrapper files remain tracked.
 keystore.properties
+
+# Large model/runtime binaries, prepared locally via app/prepare-diarization-models.py;
+# never committed, same convention as experiments/asr-probe/.gitignore.
+/app/vendor/
+/app/src/main/assets/diarization/
