@@ -144,6 +144,18 @@ public final class AppController {
         this::notifyMessage);
   }
 
+  public void renameRecording(String id, String name) {
+    Item item = items.get(id);
+    if (item == null || item.status() != Status.READY || name == null || name.isBlank()
+        || deleting.contains(id)) return;
+    library.renameRecording(id, name.trim(), updated -> {
+      Item old = items.get(id);
+      if (old == null) return;
+      items.put(id, new Item(updated.recording(), old.status(), old.detail(), old.progress(), updated));
+      emit();
+    }, this::notifyMessage);
+  }
+
   public void start(String recordingId) {
     Item item = items.get(recordingId);
     if (processing.isBusy() || !deleting.isEmpty() || item == null || item.status() == Status.READY)

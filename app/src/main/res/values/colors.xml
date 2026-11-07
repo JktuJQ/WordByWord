@@ -13,4 +13,5 @@
     <color name="active_muted">#646B74</color>
     <color name="active_accent">#191C20</color>
     <color name="accent_text">#191C20</color>
+    <color name="playback_yellow">#FFC928</color>
 </resources>

@@ -32,6 +32,7 @@ public final class MainView {
   private final Runnable importAudio;
   private final Runnable recordAudio;
   private final Set<String> selectedIds = new LinkedHashSet<>();
+  private android.widget.PopupWindow notification;
   private AppState lastState;
   private String renderedScreen;
   private String searchQuery = "";
@@ -56,10 +57,9 @@ public final class MainView {
     items = root.findViewById(R.id.items);
     if (activity.getResources().getConfiguration().screenHeightDp < 480) {
       root.findViewById(R.id.hero_description).setVisibility(View.GONE);
-      View orb = root.findViewById(R.id.hero_orb);
-      orb.getLayoutParams().height = Math.round(64 * activity.getResources().getDisplayMetrics().density);
       TextView headline = root.findViewById(R.id.hero_title);
       headline.setText(activity.getString(R.string.home_headline).replace('\n', ' '));
+      headline.setAutoSizeTextTypeWithDefaults(TextView.AUTO_SIZE_TEXT_TYPE_NONE);
       headline.setTextSize(26);
       root.findViewById(R.id.home_hero).setPadding(0, 0, 0, 0);
       LinearLayout actions = root.findViewById(R.id.library_actions);
@@ -135,6 +135,7 @@ public final class MainView {
 
   public void release() {
     transcriptView.release();
+    if (notification != null) notification.dismiss();
   }
 
   public boolean handleBack() {
@@ -155,7 +156,8 @@ public final class MainView {
 
   public void render(AppState state) {
     if (!state.message().isBlank()) {
-      android.widget.Toast.makeText(activity, state.message(), android.widget.Toast.LENGTH_SHORT).show();
+      if (notification != null) notification.dismiss();
+      notification = GlassDialogs.message(root, state.message());
       controller.clearMessage();
       return;
     }
@@ -170,6 +172,9 @@ public final class MainView {
       hideKeyboard();
     }
     boolean home = !detail && !libraryPage;
+    ((dev.wordbyword.app.HomeGlowLayout) root).setHomeVisible(true);
+    root.findViewById(R.id.bottom_navigation).setBackgroundColor(
+        android.graphics.Color.TRANSPARENT);
     String screen = detail ? state.selectedId() : home ? "home" : searching ? "search" : "library";
     if (!screen.equals(renderedScreen)) {
       ((ScrollView) root.findViewById(R.id.content_scroll)).scrollTo(0, 0);
@@ -232,13 +237,12 @@ public final class MainView {
   }
 
   private void updateNavigation(int id, boolean selected) {
-    TextView tab = root.findViewById(id);
+    android.widget.ImageButton tab = root.findViewById(id);
     tab.setSelected(selected);
-    tab.setBackgroundResource(selected ? R.drawable.nav_selected : R.drawable.nav_idle);
     int color = activity.getColor(selected ? R.color.ink : R.color.muted);
-    tab.setTextColor(color);
-    tab.setCompoundDrawableTintList(android.content.res.ColorStateList.valueOf(color));
-    tab.setTypeface(null, selected ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
+    tab.setImageTintList(android.content.res.ColorStateList.valueOf(color));
+    if (selected) ((dev.wordbyword.app.GlassNavigationLayout) root.findViewById(R.id.bottom_navigation))
+        .select(id == R.id.nav_home ? 0 : 1);
   }
 
   private void navigate(boolean toLibrary) {
@@ -250,6 +254,13 @@ public final class MainView {
     searchQuery = "";
     ((EditText) root.findViewById(R.id.search_input)).setText("");
     controller.showLibrary();
+    View content = root.findViewById(R.id.content_scroll);
+    content.animate().cancel();
+    if (android.animation.ValueAnimator.areAnimatorsEnabled()) {
+      content.setAlpha(0.3f);
+      content.setTranslationY(12 * activity.getResources().getDisplayMetrics().density);
+      content.animate().alpha(1).translationY(0).setDuration(320).start();
+    }
   }
 
   private void importFile() {
@@ -356,17 +367,11 @@ public final class MainView {
 
   private void confirmDelete() {
     if (selectedIds.isEmpty()) return;
-    new AlertDialog.Builder(activity)
-        .setTitle(R.string.delete_confirm_title)
-        .setMessage(R.string.delete_confirm_message)
-        .setNegativeButton(R.string.not_now, null)
-        .setPositiveButton(
-            R.string.delete_selected,
-            (dialog, which) -> {
-              controller.delete(Set.copyOf(selectedIds));
-              toggleSelecting();
-            })
-        .show();
+    GlassDialogs.confirm(activity, activity.getString(R.string.delete_confirm_title),
+        activity.getString(R.string.delete_confirm_message), () -> {
+          controller.delete(Set.copyOf(selectedIds));
+          toggleSelecting();
+        });
   }
 
   private void setVisible(int id, boolean visible) {
