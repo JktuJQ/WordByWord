@@ -29,6 +29,21 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
+    defaultConfig {
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    sourceSets {
+        androidTest {
+            java.srcDirs = ['src/testAndroid/java']
+            assets.srcDirs = [
+                'src/testAndroid/assets',
+                '../evaluation/fixtures/diarization',
+                '../evaluation/fixtures/asr'
+            ]
+        }
+    }
 }
 
 dependencies {
@@ -39,6 +54,9 @@ dependencies {
         it.file("build-tools/${android.buildToolsVersion}/core-lambda-stubs.jar")
     })
     testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test:runner:1.7.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.3.0'
+    androidTestImplementation 'com.google.code.gson:gson:2.15.0'
 }
 
 def diarizationVendorDir = file('vendor')
@@ -121,6 +139,75 @@ tasks.register('prepareDiarizationModels') {
     }
 }
 
+def asrAssetsDir = file('src/main/assets/asr')
+def asrDownloadDir = layout.buildDirectory.dir('asr-downloads').get().asFile
+def asrArchiveDir = 'sherpa-onnx-nemo-transducer-giga-am-v2-russian-2025-04-19'
+
+def asrArtifacts = [
+    gigaam: [
+        url: "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/${asrArchiveDir}.tar.bz2",
+        sha256: '6c4bec4c4a70961fc4ec583bf5506089480a9a649c1816ef96b6e4fb8338cd71',
+        fileName: "${asrArchiveDir}.tar.bz2"
+    ],
+    vad: [
+        url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/silero_vad.onnx',
+        sha256: '9e2449e1087496d8d4caba907f23e0bd3f78d91fa552479bb9c23ac09cbb1fd6',
+        fileName: 'silero_vad.onnx'
+    ]
+]
+
+tasks.register('prepareAsrModels') {
+    def encoderOnnx = new File(asrAssetsDir, 'encoder.int8.onnx')
+    def decoderOnnx = new File(asrAssetsDir, 'decoder.onnx')
+    def joinerOnnx = new File(asrAssetsDir, 'joiner.onnx')
+    def tokensTxt = new File(asrAssetsDir, 'tokens.txt')
+    def vadOnnx = new File(asrAssetsDir, 'silero_vad.onnx')
+
+    onlyIf {
+        !(encoderOnnx.exists() && decoderOnnx.exists() && joinerOnnx.exists()
+            && tokensTxt.exists() && vadOnnx.exists())
+    }
+
+    doLast {
+        asrDownloadDir.mkdirs()
+        asrAssetsDir.mkdirs()
+
+        asrArtifacts.each { key, artifact ->
+            def downloaded = new File(asrDownloadDir, artifact.fileName)
+            if (!downloaded.exists() || sha256Of(downloaded) != artifact.sha256) {
+                logger.lifecycle("Downloading ${artifact.fileName}")
+                ant.get(src: artifact.url, dest: downloaded, verbose: false)
+            }
+            def actualSha256 = sha256Of(downloaded)
+            if (actualSha256 != artifact.sha256) {
+                throw new GradleException(
+                    "Checksum mismatch for ${artifact.fileName}: expected ${artifact.sha256}, got ${actualSha256}")
+            }
+        }
+
+        copy {
+            from(tarTree(resources.bzip2(
+                new File(asrDownloadDir, asrArtifacts.gigaam.fileName)))) {
+                include "${asrArchiveDir}/encoder.int8.onnx"
+                include "${asrArchiveDir}/decoder.onnx"
+                include "${asrArchiveDir}/joiner.onnx"
+                include "${asrArchiveDir}/tokens.txt"
+                eachFile { details -> details.path = details.name }
+                includeEmptyDirs = false
+            }
+            into asrAssetsDir
+        }
+
+        copy {
+            from(asrDownloadDir) {
+                include asrArtifacts.vad.fileName
+            }
+            into asrAssetsDir
+        }
+    }
+}
+
 tasks.named('preBuild').configure {
     dependsOn('prepareDiarizationModels')
+    dependsOn('prepareAsrModels')
 }
