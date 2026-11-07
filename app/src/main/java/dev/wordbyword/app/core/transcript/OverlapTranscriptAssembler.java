@@ -40,7 +40,8 @@ public final class OverlapTranscriptAssembler implements TranscriptAssembler {
     long currentEnd = 0;
 
     for (RecognitionResult.Segment segment : asrSegments) {
-      Optional<String> speaker = assignSpeaker(segment, diarization);
+      context.throwIfCancelled();
+      Optional<String> speaker = assignSpeaker(segment, diarization, context);
       boolean sameKnownSpeaker =
           currentSpeaker != null && currentSpeaker.isPresent() && currentSpeaker.equals(speaker);
       boolean withinGap = sameKnownSpeaker && segment.startMs() - currentEnd <= MAX_GAP_MS;
@@ -63,17 +64,20 @@ public final class OverlapTranscriptAssembler implements TranscriptAssembler {
     utterances.add(
         new Transcript.Utterance(currentSpeaker, currentText.toString(), currentStart, currentEnd));
 
-    return new Transcript(recording, buildSpeakers(utterances), utterances);
+    return new Transcript(recording, buildSpeakers(utterances, context), utterances);
   }
 
   private static Optional<String> assignSpeaker(
-      RecognitionResult.Segment segment, List<SpeakerDiarizer.Segment> diarization) {
+      RecognitionResult.Segment segment,
+      List<SpeakerDiarizer.Segment> diarization,
+      ProcessingContext context) {
     SpeakerDiarizer.Segment bestOverlap = null;
     long bestOverlapMs = 0;
     SpeakerDiarizer.Segment nearest = null;
     long nearestDistanceMs = Long.MAX_VALUE;
 
     for (SpeakerDiarizer.Segment candidate : diarization) {
+      context.throwIfCancelled();
       long overlap =
           overlapMs(segment.startMs(), segment.endMs(), candidate.startMs(), candidate.endMs());
       if (overlap > bestOverlapMs
@@ -111,11 +115,13 @@ public final class OverlapTranscriptAssembler implements TranscriptAssembler {
     return 0;
   }
 
-  private static List<Transcript.Speaker> buildSpeakers(List<Transcript.Utterance> utterances) {
+  private static List<Transcript.Speaker> buildSpeakers(
+      List<Transcript.Utterance> utterances, ProcessingContext context) {
     List<Transcript.Speaker> speakers = new ArrayList<>();
     Set<String> seen = new HashSet<>();
     int index = 1;
     for (Transcript.Utterance utterance : utterances) {
+      context.throwIfCancelled();
       if (utterance.speakerId().isPresent() && seen.add(utterance.speakerId().get())) {
         speakers.add(new Transcript.Speaker(utterance.speakerId().get(), "Участник " + index));
         index++;
