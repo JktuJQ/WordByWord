@@ -35,8 +35,8 @@ public final class RecordingListView {
     ((TextView) card.findViewById(R.id.recording_title)).setText(item.recording().title());
     ((TextView) card.findViewById(R.id.recording_detail)).setText(item.detail());
     View rename = card.findViewById(R.id.rename_recording);
-    rename.setVisibility(!selecting ? View.VISIBLE : View.GONE);
-    rename.setEnabled(!state.busy());
+    rename.setVisibility(View.VISIBLE);
+    rename.setEnabled(!state.busy() && !selecting);
     rename.setOnClickListener(
         view ->
             GlassDialogs.rename(
@@ -50,7 +50,7 @@ public final class RecordingListView {
           return true;
         });
     card.setBackgroundResource(
-        selectedIds.contains(item.recording().id()) ? R.drawable.selected_card : R.drawable.card);
+        R.drawable.card);
     CheckBox selected = card.findViewById(R.id.recording_selected);
     selected.setVisibility(selecting ? View.VISIBLE : View.GONE);
     selected.setContentDescription(item.recording().title());
@@ -67,7 +67,8 @@ public final class RecordingListView {
         .ifPresent(
             value -> progress.setProgress((int) Math.round(Math.max(0, Math.min(1, value)) * 100)));
     Button action = card.findViewById(R.id.recording_action);
-    action.setVisibility(selecting ? View.GONE : View.VISIBLE);
+    action.setVisibility(selecting || item.status() == AppState.Status.READY ? View.GONE : View.VISIBLE);
+    card.findViewById(R.id.recording_chevron).setVisibility(!selecting && item.status() == AppState.Status.READY ? View.VISIBLE : View.GONE);
     TextView metadata = card.findViewById(R.id.recording_kind);
     long duration = item.recording().durationMs().orElse(0) / 1000;
     metadata.setText(
