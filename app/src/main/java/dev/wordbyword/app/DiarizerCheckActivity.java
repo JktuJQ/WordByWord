@@ -18,7 +18,12 @@ import dev.wordbyword.app.core.diarization.SherpaOnnxSpeakerDiarizer;
 import dev.wordbyword.app.core.diarization.SpeakerDiarizer;
 import dev.wordbyword.app.core.processing.ProcessingContext;
 import dev.wordbyword.app.core.processing.ProcessingException;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.List;
+import java.util.Locale;
 import java.util.OptionalDouble;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutorService;
@@ -64,7 +69,8 @@ public final class DiarizerCheckActivity extends Activity {
     String testUri = getIntent().getStringExtra("audio_uri");
     if (testUri != null) {
       long cancelAfterMs = getIntent().getLongExtra("cancel_after_ms", 0);
-      runCheck(Uri.parse(testUri), cancelAfterMs);
+      String recordingId = getIntent().getStringExtra("recording_id");
+      runCheck(Uri.parse(testUri), cancelAfterMs, recordingId);
     }
   }
 
@@ -81,12 +87,12 @@ public final class DiarizerCheckActivity extends Activity {
     if (requestCode == PICK_AUDIO_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
       Uri uri = data.getData();
       if (uri != null) {
-        runCheck(uri, 0);
+        runCheck(uri, 0, null);
       }
     }
   }
 
-  private void runCheck(Uri uri, long cancelAfterMs) {
+  private void runCheck(Uri uri, long cancelAfterMs, String recordingId) {
     cancelled.set(false);
     setStatus("Диаризация: " + uri);
 
@@ -125,6 +131,11 @@ public final class DiarizerCheckActivity extends Activity {
             }
             String message = "OK: segments=" + segments.size() + " elapsedMs=" + elapsedMs;
             Log.i(TAG, message);
+
+            if (recordingId != null) {
+              writeRttm(recordingId, segments);
+            }
+
             setStatus(message);
           } catch (ProcessingException exception) {
             Log.e(TAG, "ProcessingException: " + exception.getMessage(), exception);
@@ -137,6 +148,27 @@ public final class DiarizerCheckActivity extends Activity {
             setStatus("Неожиданная ошибка: " + exception);
           }
         });
+  }
+
+  private void writeRttm(String recordingId, List<SpeakerDiarizer.Segment> segments) {
+    File output = new File(getCacheDir(), recordingId + ".hyp.rttm");
+    try (Writer writer = new FileWriter(output)) {
+      for (SpeakerDiarizer.Segment segment : segments) {
+        double startSeconds = segment.startMs() / 1000.0;
+        double durationSeconds = (segment.endMs() - segment.startMs()) / 1000.0;
+        writer.write(
+            String.format(
+                Locale.ROOT,
+                "SPEAKER %s 1 %.3f %.3f <NA> <NA> %s <NA> <NA>%n",
+                recordingId,
+                startSeconds,
+                durationSeconds,
+                segment.speakerId()));
+      }
+      Log.i(TAG, "Wrote RTTM: " + output);
+    } catch (IOException exception) {
+      Log.e(TAG, "Failed to write RTTM to " + output, exception);
+    }
   }
 
   private void setStatus(String message) {
