@@ -75,3 +75,5 @@ gh run download <run-id> --repo JktuJQ/WordByWord
 вопросы общих компонентов согласуются с их потребителями. Branch protection
 этим изменением не настраивается; при его включении имя check для выбора —
 `Android build and checks`.
+
+Скореры WER/DER и их JVM-тесты собраны в отдельном модуле `evaluation` и не включаются в Android APK. CI запускает `:evaluation:test` и сохраняет его отчёты. Датасеты и команды оценки описаны в [evaluation/README.md](../evaluation/README.md).

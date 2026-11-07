@@ -77,6 +77,9 @@
         </LinearLayout>
     </ScrollView>
 
+    <include android:id="@+id/transcript_playback" layout="@layout/view_playback_status"
+        android:visibility="gone" />
+
     <LinearLayout android:id="@+id/selection_actions" android:layout_width="match_parent"
         android:layout_height="wrap_content" android:gravity="center_vertical"
         android:orientation="horizontal" android:paddingHorizontal="20dp" android:paddingVertical="8dp"

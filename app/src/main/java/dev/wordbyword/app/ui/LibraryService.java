@@ -6,6 +6,7 @@ import dev.wordbyword.app.core.transcript.Transcript;
 import dev.wordbyword.app.core.transcript.TranscriptEditor;
 import dev.wordbyword.app.ui.AppState.Item;
 import dev.wordbyword.app.ui.AppState.Status;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.OptionalDouble;
@@ -14,8 +15,11 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 final class LibraryService {
+  private static final Logger LOG = Logger.getLogger(LibraryService.class.getName());
   private final TranscriptRepository repository;
   private final Executor worker;
   private final Executor ui;
@@ -40,7 +44,8 @@ final class LibraryService {
                       transcript == null ? "Готово к запуску" : "Стенограмма готова",
                       OptionalDouble.empty(),
                       transcript));
-            } catch (Exception exception) {
+            } catch (IOException exception) {
+              LOG.log(Level.WARNING, "Cannot load recording " + recording.id(), exception);
               items.add(
                   new Item(
                       recording,
@@ -94,6 +99,7 @@ final class LibraryService {
             T value = operation.call();
             ui.execute(() -> success.accept(value));
           } catch (Exception exception) {
+            LOG.log(Level.WARNING, message, exception);
             ui.execute(() -> failure.accept(message));
           }
         });

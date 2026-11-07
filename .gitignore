@@ -28,3 +28,5 @@ keystore.properties
 
 /docs/asr-results.json
 *.hyp.rttm
+
+/evaluation/results/

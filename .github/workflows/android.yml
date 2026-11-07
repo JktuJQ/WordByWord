@@ -48,7 +48,7 @@ jobs:
           key: diarization-models-${{ hashFiles('app/build.gradle') }}
 
       - name: Build, test and lint
-        run: ./gradlew --no-daemon --stacktrace --continue testDebugUnitTest assembleDebug lintDebug
+        run: ./gradlew --no-daemon --stacktrace --continue :evaluation:test testDebugUnitTest assembleDebug lintDebug
 
       - name: Upload debug APK
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
@@ -66,6 +66,8 @@ jobs:
           path: |
             app/build/reports/
             app/build/test-results/testDebugUnitTest/
+            evaluation/build/reports/
+            evaluation/build/test-results/test/
             build/reports/problems/
           if-no-files-found: ignore
           retention-days: 14
