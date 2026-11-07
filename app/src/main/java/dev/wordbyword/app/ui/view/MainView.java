@@ -117,7 +117,8 @@ public final class MainView {
       renderedScreen = screen;
     }
     setVisible(R.id.back, detail);
-    setVisible(R.id.home_mascot, !detail && !searching && !selecting);
+    setVisible(R.id.home_mark, !detail);
+    setVisible(R.id.home_character, !detail && !searching && !selecting);
     setVisible(R.id.transcript_playback, detail);
     setVisible(R.id.library_actions, !detail && !searching && !selecting);
     setVisible(R.id.selection_actions, !detail && selecting);
@@ -125,7 +126,7 @@ public final class MainView {
     setVisible(R.id.search_input, !detail && searching);
     setVisible(R.id.select_toggle, !detail && !searching && !state.items().isEmpty());
     setVisible(R.id.export_json, detail);
-    setVisible(R.id.empty, !detail && state.items().isEmpty() && !searching);
+    setVisible(R.id.empty, false);
     setVisible(R.id.recent_title, !detail && !state.items().isEmpty() && !searching);
     ((TextView) root.findViewById(R.id.select_toggle))
         .setText(selecting ? R.string.stop_selecting : R.string.select_records);

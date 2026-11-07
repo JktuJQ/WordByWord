@@ -11,6 +11,11 @@ import dev.wordbyword.app.R;
 import dev.wordbyword.app.ui.AppController;
 import dev.wordbyword.app.ui.AppState;
 import java.util.Set;
+import java.util.Locale;
+import java.io.File;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.function.Consumer;
 
 public final class RecordingListView {
@@ -33,6 +38,17 @@ public final class RecordingListView {
     ((TextView) card.findViewById(R.id.recording_kind)).setText(R.string.imported_badge);
     ((TextView) card.findViewById(R.id.recording_title)).setText(item.recording().title());
     ((TextView) card.findViewById(R.id.recording_detail)).setText(item.detail());
+    long durationSeconds = item.recording().durationMs().orElse(0) / 1000;
+    String duration = String.format(Locale.ROOT, "%02d:%02d", durationSeconds / 60, durationSeconds % 60);
+    int speakers = item.transcript() == null ? 0 : item.transcript().speakers().size();
+    long createdAt = "file".equals(item.recording().audioUri().getScheme())
+        ? new File(item.recording().audioUri()).lastModified() : 0;
+    String created = createdAt > 0
+        ? DateTimeFormatter.ofPattern("d MMM", new Locale("ru"))
+            .format(Instant.ofEpochMilli(createdAt).atZone(ZoneId.systemDefault())) + " · "
+        : "";
+    ((TextView) card.findViewById(R.id.recording_meta))
+        .setText(created + duration + (speakers > 0 ? " · " + speakers + " спикера" : ""));
     TextView status = card.findViewById(R.id.recording_status);
     status.setText(
         switch (item.status()) {
@@ -61,6 +77,10 @@ public final class RecordingListView {
             value -> progress.setProgress((int) Math.round(Math.max(0, Math.min(1, value)) * 100)));
     Button action = card.findViewById(R.id.recording_action);
     action.setVisibility(selecting ? View.GONE : View.VISIBLE);
+    card.findViewById(R.id.recording_play).setOnClickListener(view -> {
+      if (selecting) toggleSelection.accept(item.recording().id());
+      else action.performClick();
+    });
     if (processing) {
       action.setText(state.cancelling() ? R.string.cancelling : R.string.cancel);
       action.setEnabled(!state.cancelling());

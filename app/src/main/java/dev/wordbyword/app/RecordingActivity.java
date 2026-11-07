@@ -277,7 +277,8 @@ public final class RecordingActivity extends Activity {
           case COMPLETE -> R.string.recording_done;
         };
     ((TextView) findViewById(R.id.recording_state)).setText(status);
-    ((TextView) findViewById(R.id.recording_hint)).setText(status);
+    findViewById(R.id.recording_spacer).setVisibility(
+        state == State.RECORDING || state == State.PAUSED ? View.VISIBLE : View.GONE);
     renderTimer();
   }
 

@@ -5,6 +5,9 @@
     android:background="@drawable/card" android:elevation="4dp">
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
         android:gravity="center_vertical" android:orientation="horizontal">
+        <ImageView android:id="@+id/recording_play" android:layout_width="48dp"
+            android:layout_height="48dp" android:layout_marginEnd="12dp"
+            android:src="@drawable/play_tile" android:contentDescription="@string/play_utterance" />
         <CheckBox android:id="@+id/recording_selected" android:layout_width="48dp"
             android:layout_height="48dp" android:buttonTint="@color/accent"
             android:visibility="gone" />
@@ -18,7 +21,10 @@
     </LinearLayout>
     <TextView android:id="@+id/recording_kind" style="@style/BodyText"
         android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:layout_marginTop="5dp" android:textSize="12sp" />
+        android:layout_marginTop="5dp" android:paddingStart="60dp" android:textSize="12sp" />
+    <TextView android:id="@+id/recording_meta" style="@style/BodyText"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:paddingStart="60dp" android:textSize="12sp" />
     <TextView android:id="@+id/recording_detail" style="@style/BodyText"
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:layout_marginTop="9dp" android:textSize="12sp" />
