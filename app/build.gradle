@@ -1,3 +1,6 @@
+import groovy.json.JsonOutput
+import java.time.Instant
+
 plugins {
     id 'com.android.application'
 }
@@ -210,4 +213,48 @@ tasks.register('prepareAsrModels') {
 tasks.named('preBuild').configure {
     dependsOn('prepareDiarizationModels')
     dependsOn('prepareAsrModels')
+}
+
+tasks.register('packageDemoApk') {
+    group = 'distribution'
+    description = 'Build an installable offline APK and export its checksum and build metadata.'
+    dependsOn 'assembleDebug'
+
+    doLast {
+        def destination = rootProject.file('artifacts/apk')
+        def apkName = "wordbyword-${android.defaultConfig.versionName}-debug.apk"
+        copy {
+            from layout.buildDirectory.file('outputs/apk/debug/app-debug.apk')
+            into destination
+            rename { apkName }
+        }
+        def apk = new File(destination, apkName)
+        new File(destination, "${apkName}.sha256").text = "${sha256Of(apk)}  ${apkName}\n"
+        def revision = providers.exec {
+            workingDir rootProject.projectDir
+            commandLine 'git', 'rev-parse', 'HEAD'
+        }.standardOutput.asText.get().trim()
+        def dirty = providers.exec {
+            workingDir rootProject.projectDir
+            commandLine 'git', 'status', '--porcelain'
+        }.standardOutput.asText.get().trim()
+        def models = fileTree('src/main/assets').matching {
+            include 'asr/**', 'diarization/**'
+        }.files.sort { it.name }.collect { model ->
+            [file: relativePath(model), bytes: model.length(), sha256: sha256Of(model)]
+        }
+        def metadata = [
+            apk: apkName, bytes: apk.length(), sha256: sha256Of(apk),
+            sourceCommit: revision, sourceDirty: !dirty.isEmpty(),
+            builtAtUtc: Instant.now().toString(), variant: 'debug',
+            versionName: android.defaultConfig.versionName,
+            versionCode: android.defaultConfig.versionCode,
+            minSdk: android.defaultConfig.minSdkVersion.apiLevel,
+            abis: ['arm64-v8a', 'x86_64'], parallelInference: parallelInference.toBoolean(),
+            gradle: gradle.gradleVersion, java: System.getProperty('java.version'), models: models
+        ]
+        new File(destination, "${apkName}.json").text =
+            JsonOutput.prettyPrint(JsonOutput.toJson(metadata)) + '\n'
+        logger.lifecycle("APK: ${apk}")
+    }
 }
