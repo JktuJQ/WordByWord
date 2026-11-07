@@ -12,6 +12,7 @@ import com.k2fsa.sherpa.onnx.VadModelConfig;
 import dev.wordbyword.app.core.audio.PcmAudio;
 import dev.wordbyword.app.core.processing.ProcessingContext;
 import dev.wordbyword.app.core.processing.ProcessingException;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -25,9 +26,34 @@ public final class SherpaSpeechRecognizer implements SpeechRecognizer {
   private static final int RATE = PcmAudio.SAMPLE_RATE_HZ;
   private static final String MODELS_ASSET_DIR = "asr";
   private final AssetManager assets;
+  private final File models;
+  private final OfflineModelConfig modelConfig;
+  private final float maxSpeechDuration;
+  private final long contextSamples;
 
   public SherpaSpeechRecognizer(AssetManager assets) {
+    this(assets, null, null, 15f, 200);
+  }
+
+  public SherpaSpeechRecognizer(
+      File models, OfflineModelConfig modelConfig, float maxSpeechDuration, int contextMs) {
+    this(null, models, modelConfig, maxSpeechDuration, contextMs);
+  }
+
+  private SherpaSpeechRecognizer(
+      AssetManager assets,
+      File models,
+      OfflineModelConfig modelConfig,
+      float maxSpeechDuration,
+      int contextMs) {
+    if (!Float.isFinite(maxSpeechDuration) || maxSpeechDuration <= 0 || contextMs < 0) {
+      throw new IllegalArgumentException("Invalid VAD duration or context");
+    }
     this.assets = assets;
+    this.models = models;
+    this.modelConfig = modelConfig;
+    this.maxSpeechDuration = maxSpeechDuration;
+    this.contextSamples = contextMs * (long) RATE / 1000;
   }
 
   @Override
@@ -54,7 +80,7 @@ public final class SherpaSpeechRecognizer implements SpeechRecognizer {
     long count;
     var silero = new SileroVadModelConfig();
     silero.setModel(model("silero_vad.onnx"));
-    silero.setMaxSpeechDuration(15f);
+    silero.setMaxSpeechDuration(maxSpeechDuration);
     var vadConfig = new VadModelConfig();
     vadConfig.setSileroVadModelConfig(silero);
     Vad vad = new Vad(assets, vadConfig);
@@ -86,10 +112,15 @@ public final class SherpaSpeechRecognizer implements SpeechRecognizer {
       vad.release();
     }
     context.throwIfCancelled();
-    return addContext(windows, count);
+    return addContext(windows, count, contextSamples);
   }
 
   private OfflineRecognizer loadRecognizer() throws IOException {
+    if (modelConfig != null) {
+      var config = new OfflineRecognizerConfig();
+      config.setModelConfig(modelConfig);
+      return new OfflineRecognizer(assets, config);
+    }
     var transducer = new OfflineTransducerModelConfig();
     transducer.setEncoder(model("encoder.int8.onnx"));
     transducer.setDecoder(model("decoder.onnx"));
@@ -154,13 +185,17 @@ public final class SherpaSpeechRecognizer implements SpeechRecognizer {
   }
 
   private String model(String name) throws IOException {
+    if (models != null) {
+      File file = new File(models, name);
+      if (!file.isFile() || file.length() == 0) throw new IOException("Missing model: " + file);
+      return file.getAbsolutePath();
+    }
     String path = MODELS_ASSET_DIR + "/" + name;
     InputStream probe;
     try {
       probe = assets.open(path);
     } catch (IOException exception) {
-      throw new IOException(
-          "Модель распознавания отсутствует в приложении: " + name, exception);
+      throw new IOException("Модель распознавания отсутствует в приложении: " + name, exception);
     }
     try {
       if (probe.available() <= 0) {
@@ -197,11 +232,16 @@ public final class SherpaSpeechRecognizer implements SpeechRecognizer {
   record SpeechInterval(long start, long end) {}
 
   static List<SpeechInterval> addContext(List<SpeechInterval> windows, long count) {
+    return addContext(windows, count, RATE / 5);
+  }
+
+  static List<SpeechInterval> addContext(
+      List<SpeechInterval> windows, long count, long contextSamples) {
     var result = new ArrayList<SpeechInterval>();
     for (int i = 0; i < windows.size(); i++) {
       SpeechInterval w = windows.get(i);
-      long start = Math.max(0, w.start() - RATE / 5);
-      long end = Math.min(count, w.end() + RATE / 5);
+      long start = Math.max(0, w.start() - contextSamples);
+      long end = Math.min(count, w.end() + contextSamples);
       if (i > 0) start = Math.max(start, (windows.get(i - 1).end() + w.start()) / 2);
       if (i + 1 < windows.size()) end = Math.min(end, (w.end() + windows.get(i + 1).start()) / 2);
       if (start < end) result.add(new SpeechInterval(start, end));
