@@ -24,9 +24,15 @@ public final class AndroidAudioPreparer implements AudioPreparer {
   private static final String STAGE_DECODING = "Декодирование аудио";
 
   private final Context context;
+  private final boolean antiAliasingFilter;
 
   public AndroidAudioPreparer(Context context) {
+    this(context, false);
+  }
+
+  public AndroidAudioPreparer(Context context, boolean antiAliasingFilter) {
     this.context = context.getApplicationContext();
+    this.antiAliasingFilter = antiAliasingFilter;
   }
 
   @Override
@@ -135,6 +141,7 @@ public final class AndroidAudioPreparer implements AudioPreparer {
       throws ProcessingException {
     MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
     LinearResampler resampler = null;
+    LowPassFilter filter = null;
     boolean sawInputEos = false;
     boolean sawOutputEos = false;
 
@@ -163,13 +170,15 @@ public final class AndroidAudioPreparer implements AudioPreparer {
         if (outputIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
           MediaFormat outputFormat = codec.getOutputFormat();
           resampler = createResampler(outputFormat);
+          filter = createAntiAliasingFilter(outputFormat);
         } else if (outputIndex >= 0) {
           if (resampler == null) {
             resampler = createResampler(codec.getOutputFormat());
+            filter = createAntiAliasingFilter(codec.getOutputFormat());
           }
           if (info.size > 0) {
             ByteBuffer outputBuffer = codec.getOutputBuffer(outputIndex);
-            writeDecodedChunk(outputBuffer, info, codec.getOutputFormat(), resampler, writer);
+            writeDecodedChunk(outputBuffer, info, codec.getOutputFormat(), filter, resampler, writer);
           }
           codec.releaseOutputBuffer(outputIndex, false);
           if ((info.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
@@ -199,10 +208,19 @@ public final class AndroidAudioPreparer implements AudioPreparer {
     return new LinearResampler(sampleRate, PcmAudio.SAMPLE_RATE_HZ);
   }
 
+  private LowPassFilter createAntiAliasingFilter(MediaFormat outputFormat) {
+    int sampleRate = outputFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE);
+    if (!antiAliasingFilter || sampleRate <= PcmAudio.SAMPLE_RATE_HZ) {
+      return null;
+    }
+    return new LowPassFilter(sampleRate, PcmAudio.SAMPLE_RATE_HZ / 2, 63);
+  }
+
   private void writeDecodedChunk(
       ByteBuffer outputBuffer,
       MediaCodec.BufferInfo info,
       MediaFormat outputFormat,
+      LowPassFilter filter,
       LinearResampler resampler,
       FilePcmAudio.Writer writer)
       throws IOException {
@@ -231,7 +249,8 @@ public final class AndroidAudioPreparer implements AudioPreparer {
     }
 
     float[] mono = toMono(interleaved, channelCount);
-    float[] resampled = resampler.process(mono, 0, mono.length);
+    float[] filtered = filter == null ? mono : filter.process(mono, 0, mono.length);
+    float[] resampled = resampler.process(filtered, 0, filtered.length);
     writer.write(resampled, 0, resampled.length);
   }
 
