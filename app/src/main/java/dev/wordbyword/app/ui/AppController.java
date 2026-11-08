@@ -5,6 +5,7 @@ import dev.wordbyword.app.core.recording.Recording;
 import dev.wordbyword.app.core.storage.TranscriptRepository;
 import dev.wordbyword.app.core.transcript.Transcript;
 import dev.wordbyword.app.processing.ProcessingRunner;
+import dev.wordbyword.app.summary.SummaryRunner;
 import dev.wordbyword.app.ui.AppState.Item;
 import dev.wordbyword.app.ui.AppState.Status;
 import java.util.HashSet;
@@ -25,6 +26,36 @@ public final class AppController {
   private boolean renaming;
   private String selectedId;
   private String message = "";
+  private SummaryRunner summaries;
+
+  public void configureSummaries(SummaryRunner summaries) {
+    this.summaries = summaries;
+    summaries.onChange(this::emit);
+  }
+
+  public SummaryRunner.State summaryState(String id) {
+    return summaries == null ? new SummaryRunner.State("", "", "", false) : summaries.state(id);
+  }
+
+  public void summarize() {
+    Item item = items.get(selectedId);
+    if (summaries != null && !state().busy() && item != null && item.transcript() != null)
+      summaries.start(item.transcript());
+  }
+
+  public void cancelSummary() {
+    if (summaries != null) summaries.cancel();
+  }
+
+  public void openSummary() {
+    Item item = items.get(selectedId);
+    if (summaries != null && !state().busy() && item != null && item.transcript() != null)
+      summaries.open(item.transcript());
+  }
+
+  private boolean summaryBusy() {
+    return summaries != null && summaries.isBusy();
+  }
 
   public AppController(
       TranscriptRepository repository,
@@ -40,7 +71,7 @@ public final class AppController {
     return new AppState(
         List.copyOf(items.values()),
         selectedId,
-        processing.isBusy() || renaming || !deleting.isEmpty(),
+        processing.isBusy() || summaryBusy() || renaming || !deleting.isEmpty(),
         processing.isCancelling(),
         message);
   }
@@ -101,7 +132,7 @@ public final class AppController {
   }
 
   public boolean canDelete(Set<String> recordingIds) {
-    return !renaming
+    return !summaryBusy() && !renaming
         && !recordingIds.isEmpty()
         && deleting.isEmpty()
         && recordingIds.stream()
@@ -131,6 +162,7 @@ public final class AppController {
   }
 
   public void renameSpeaker(String speakerId, String displayName) {
+    if (summaryBusy()) return;
     String recordingId = selectedId;
     if (recordingId == null || speakerId == null || displayName == null || displayName.isBlank())
       return;
@@ -178,7 +210,7 @@ public final class AppController {
 
   public void start(String recordingId) {
     Item item = items.get(recordingId);
-    if (processing.isBusy()
+    if (processing.isBusy() || summaryBusy()
         || renaming
         || !deleting.isEmpty()
         || item == null

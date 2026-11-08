@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="summary_heading">Краткое содержание</string>
+    <string name="summary_notice">Ключевые фрагменты выбирает локальная модель. Текст приводится дословно из стенограммы.</string>
+    <string name="summary_intro">Получите краткое содержание разговора без подключения к интернету.</string>
+    <string name="summary_create">Создать краткое содержание</string>
+    <string name="summary_cancel">Отменить создание</string>
+    <string name="summary_open">Открыть краткое содержание</string>
     <string name="app_name">Слово в слово</string>
     <string name="app_tagline">Разговоры, к которым можно вернуться</string>
     <string name="library">Слово в слово</string>

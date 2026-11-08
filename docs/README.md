@@ -21,6 +21,7 @@
 | Обработка и ресурсы | [processing.md](processing.md), [contracts.md](contracts.md) |
 | Модели | [asr-models.md](asr-models.md), [asr-quality.md](asr-quality.md), [diarization-models.md](diarization-models.md) |
 | Хранение | [storage.md](storage.md) |
+| Краткое содержание | [summarization.md](summarization.md) |
 | Сборочные проверки | [ci.md](ci.md) |
 | Датасеты и команды оценки | [testing/evaluation.md](testing/evaluation.md) |
 | Исторический отчёт сборки | [testing/build-2026-11-07.md](testing/build-2026-11-07.md) |

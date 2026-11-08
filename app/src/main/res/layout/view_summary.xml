@@ -1,4 +1,23 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:padding="24dp" android:background="@drawable/card" android:orientation="vertical">
-<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Краткое содержание" android:fontFamily="@font/soyuz_grotesk" android:textSize="24sp" android:textColor="@color/ink" />
-<TextView style="@style/BodyText" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="Здесь появятся главные мысли, решения и задачи из разговора. Функция станет доступна после подключения модели для подведения итогов." />
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:layout_marginTop="10dp" android:padding="24dp"
+    android:background="@drawable/card" android:orientation="vertical">
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="@string/summary_heading" android:fontFamily="@font/soyuz_grotesk"
+        android:textSize="24sp" android:textColor="@color/ink" />
+    <TextView style="@style/BodyText" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:layout_marginTop="12dp"
+        android:text="@string/summary_notice" />
+    <ProgressBar android:id="@+id/summary_progress" style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent" android:layout_height="4dp"
+        android:layout_marginTop="20dp" android:indeterminate="true" android:visibility="gone" />
+    <TextView android:id="@+id/summary_status" style="@style/BodyText"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="16dp" android:accessibilityLiveRegion="polite" />
+    <TextView android:id="@+id/summary_text" style="@style/BodyText"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="16dp" android:textIsSelectable="true" android:textColor="@color/ink" />
+    <Button android:id="@+id/summary_generate" style="@style/ActionButton"
+        android:layout_width="match_parent" android:layout_height="52dp"
+        android:layout_marginTop="20dp" android:text="@string/summary_create" />
 </LinearLayout>
