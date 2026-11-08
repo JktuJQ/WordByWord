@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.WordByWord.Base" parent="android:style/Theme.Material.Light.NoActionBar">
-        <item name="android:fontFamily">sans</item>
+        <item name="android:fontFamily">@font/vela_sans_medium</item>
         <item name="android:colorAccent">@color/accent</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowBackground">@color/background</item>
@@ -11,16 +11,40 @@
         <item name="android:textAllCaps">false</item>
         <item name="android:textSize">16sp</item>
         <item name="android:minHeight">48dp</item>
-        <item name="android:backgroundTint">@color/accent</item>
-        <item name="android:textColor">@color/surface</item>
+        <item name="android:background">@drawable/home_glass_primary</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="android:paddingHorizontal">24dp</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:elevation">2dp</item>
+        <item name="android:textColor">@color/ink</item>
     </style>
     <style name="SecondaryButton" parent="ActionButton">
-        <item name="android:backgroundTint">@color/accent_soft</item>
-        <item name="android:textColor">@color/accent</item>
+        <item name="android:background">@drawable/home_glass_secondary</item>
+        <item name="android:textColor">@color/ink</item>
     </style>
     <style name="BodyText">
         <item name="android:textColor">@color/muted</item>
         <item name="android:textSize">15sp</item>
         <item name="android:lineSpacingExtra">3dp</item>
+    </style>
+    <style name="IconButton">
+        <item name="android:background">@drawable/icon_button</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+    <style name="NavButton" parent="android:style/Widget.Material.Button">
+        <item name="android:textAllCaps">false</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:elevation">2dp</item>
+        <item name="android:textColor">@color/muted</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:drawablePadding">4dp</item>
+        <item name="android:paddingVertical">8dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
     </style>
 </resources>

@@ -40,7 +40,8 @@ public final class RecordingActivity extends Activity {
   private final Handler handler = new Handler(Looper.getMainLooper());
   private State state = State.READY;
   private MediaRecorder recorder;
-  private MediaPlayer preview;
+  private dev.wordbyword.app.ui.audio.TranscriptPlayback preview;
+  private dev.wordbyword.app.core.recording.Recording previewRecording;
   private File audioFile;
   private long elapsedMs;
   private long startedAt;
@@ -67,7 +68,35 @@ public final class RecordingActivity extends Activity {
     findViewById(R.id.recording_pause).setOnClickListener(view -> togglePause());
     findViewById(R.id.recording_finish).setOnClickListener(view -> finishRecording());
     findViewById(R.id.recording_cancel).setOnClickListener(view -> confirmDiscard());
-    findViewById(R.id.recording_preview).setOnClickListener(view -> togglePreview());
+    preview = new dev.wordbyword.app.ui.audio.TranscriptPlayback(this, progress -> {
+      android.widget.SeekBar seek = findViewById(R.id.playback_seekbar);
+      seek.setMax(Math.max(1, progress.durationMs()));
+      seek.setProgress(progress.positionMs());
+      ((TextView) findViewById(R.id.playback_position)).setText(String.format(Locale.ROOT,
+          "%02d:%02d / %02d:%02d", progress.positionMs() / 60000, progress.positionMs() / 1000 % 60,
+          progress.durationMs() / 60000, progress.durationMs() / 1000 % 60));
+      ((android.widget.ImageButton) findViewById(R.id.playback_toggle)).setImageResource(
+          progress.playing() ? R.drawable.ic_pause : R.drawable.ic_play);
+      findViewById(R.id.playback_toggle).setContentDescription(getString(
+          progress.playing() ? R.string.pause_utterance : R.string.play_utterance));
+    }, this::showFailure);
+    findViewById(R.id.playback_toggle).setOnClickListener(view -> {
+      if (previewRecording != null) preview.toggle(previewRecording);
+    });
+    findViewById(R.id.playback_back).setOnClickListener(view -> {
+      if (previewRecording != null) preview.seek(previewRecording, -5000);
+    });
+    findViewById(R.id.playback_forward).setOnClickListener(view -> {
+      if (previewRecording != null) preview.seek(previewRecording, 5000);
+    });
+    ((android.widget.SeekBar) findViewById(R.id.playback_seekbar)).setOnSeekBarChangeListener(
+        new android.widget.SeekBar.OnSeekBarChangeListener() {
+          public void onProgressChanged(android.widget.SeekBar bar, int value, boolean fromUser) {
+            if (fromUser && previewRecording != null) preview.seekTo(previewRecording, value);
+          }
+          public void onStartTrackingTouch(android.widget.SeekBar bar) {}
+          public void onStopTrackingTouch(android.widget.SeekBar bar) {}
+        });
     findViewById(R.id.recording_transcribe).setOnClickListener(view -> sendRecording());
     findViewById(R.id.recording_delete).setOnClickListener(view -> confirmDiscard());
     if (Build.VERSION.SDK_INT >= 33) {
@@ -82,7 +111,7 @@ public final class RecordingActivity extends Activity {
     if (state == State.RECORDING) togglePause();
     if (preview != null) {
       preview.release();
-      preview = null;
+
     }
     super.onStop();
   }
@@ -173,6 +202,10 @@ public final class RecordingActivity extends Activity {
     try {
       recorder.stop();
       state = State.COMPLETE;
+      previewRecording = new dev.wordbyword.app.core.recording.Recording("preview",
+          audioFile.toURI(), "Запись", java.util.OptionalLong.of(elapsedMs));
+      preview.showRecording(previewRecording);
+      preview.refresh();
     } catch (RuntimeException exception) {
       Log.w("RecordingActivity", "Cannot finish recording", exception);
       if (audioFile != null) audioFile.delete();
@@ -184,27 +217,6 @@ public final class RecordingActivity extends Activity {
       recorder = null;
       render();
     }
-  }
-
-  private void togglePreview() {
-    if (audioFile == null) return;
-    if (preview != null && preview.isPlaying()) {
-      preview.pause();
-      ((Button) findViewById(R.id.recording_preview)).setText(R.string.recording_preview);
-      return;
-    }
-    if (preview == null) {
-      preview = MediaPlayer.create(this, Uri.fromFile(audioFile));
-      if (preview == null) {
-        showFailure();
-        return;
-      }
-      preview.setOnCompletionListener(
-          player ->
-              ((Button) findViewById(R.id.recording_preview)).setText(R.string.recording_preview));
-    }
-    preview.start();
-    ((Button) findViewById(R.id.recording_preview)).setText(R.string.recording_stop_preview);
   }
 
   private void sendRecording() {
@@ -227,25 +239,22 @@ public final class RecordingActivity extends Activity {
   }
 
   private void confirmDiscard() {
-    new AlertDialog.Builder(this)
-        .setTitle(R.string.delete_confirm_title)
-        .setNegativeButton(R.string.not_now, null)
-        .setPositiveButton(
-            R.string.delete_selected,
-            (dialog, which) -> {
-              if (recorder != null) {
-                try {
-                  recorder.stop();
-                } catch (RuntimeException exception) {
-                  Log.w("RecordingActivity", "Cannot stop recording", exception);
-                }
-                recorder.release();
-                recorder = null;
-              }
-              if (audioFile != null) audioFile.delete();
-              finish();
-            })
-        .show();
+    dev.wordbyword.app.ui.view.GlassDialogs.confirm(this, "Удалить запись?",
+        "Эта запись будет удалена без возможности восстановления.", () -> {
+          handler.removeCallbacks(ticker);
+          if (preview != null) preview.release();
+          if (recorder != null) {
+            try {
+              recorder.stop();
+            } catch (RuntimeException exception) {
+              Log.w("RecordingActivity", "Cannot stop recording", exception);
+            }
+            recorder.release();
+            recorder = null;
+          }
+          if (audioFile != null) audioFile.delete();
+          finish();
+        });
   }
 
   @Override
@@ -271,6 +280,8 @@ public final class RecordingActivity extends Activity {
   }
 
   private void render() {
+    findViewById(R.id.recording_toolbar).setVisibility(state == State.COMPLETE ? View.GONE : View.VISIBLE);
+    ((HomeGlowLayout) findViewById(R.id.recording_root)).setVoiceMode(state != State.COMPLETE);
     findViewById(R.id.recording_active)
         .setVisibility(state == State.COMPLETE ? View.GONE : View.VISIBLE);
     findViewById(R.id.recording_complete)
@@ -285,8 +296,9 @@ public final class RecordingActivity extends Activity {
             state == State.RECORDING || state == State.PAUSED ? View.VISIBLE : View.GONE);
     findViewById(R.id.recording_cancel)
         .setVisibility(state == State.READY ? View.GONE : View.VISIBLE);
-    ((Button) findViewById(R.id.recording_pause))
-        .setText(state == State.PAUSED ? R.string.recording_resume : R.string.recording_pause);
+    android.widget.ImageButton pause = findViewById(R.id.recording_pause);
+    pause.setImageResource(state == State.PAUSED ? R.drawable.ic_play : R.drawable.ic_pause);
+    pause.setContentDescription(getString(state == State.PAUSED ? R.string.recording_resume : R.string.recording_pause));
     int status =
         switch (state) {
           case READY -> R.string.recording_ready;
@@ -294,7 +306,7 @@ public final class RecordingActivity extends Activity {
           case PAUSED -> R.string.recording_paused;
           case COMPLETE -> R.string.recording_done;
         };
-    ((TextView) findViewById(R.id.recording_state)).setText(status);
+
     ((TextView) findViewById(R.id.recording_hint)).setText(status);
     renderTimer();
   }
@@ -310,7 +322,8 @@ public final class RecordingActivity extends Activity {
   private void animateOrb() {
     if (recorder == null) return;
     int amplitude = recorder.getMaxAmplitude();
-    float level = Math.min(1f, amplitude / 12000f);
+    float level = amplitude <= 100 ? 0f : Math.min(1f, (float) (Math.log1p((amplitude - 100) / 140f) / Math.log1p(30)));
+    ((HomeGlowLayout) findViewById(R.id.recording_root)).setVoiceLevel(level);
     orbScale = orbScale * 0.65f + (1f + level * 0.22f) * 0.35f;
     View orb = findViewById(R.id.recording_orb);
     ((VoiceOrbView) orb).setLevel(level);
@@ -319,6 +332,7 @@ public final class RecordingActivity extends Activity {
 
   private void resetOrb() {
     orbScale = 1f;
+    ((HomeGlowLayout) findViewById(R.id.recording_root)).setVoiceLevel(0);
     View orb = findViewById(R.id.recording_orb);
     ((VoiceOrbView) orb).setLevel(0f);
     orb.animate().scaleX(1f).scaleY(1f).setDuration(180).start();

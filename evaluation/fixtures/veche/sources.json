@@ -1,0 +1,187 @@
+{
+  "dataset": "artem-tish/veche-bench",
+  "revision": "a0ab08d6887b64995d076b475a87310953a51138",
+  "license": "CC-BY-4.0",
+  "files": [
+    {
+      "path": "data_raw/10-it-meeteing/10-it-meeteing.csv",
+      "size": 30489,
+      "git_blob": "8ace5c3540908f7d7b2838df7e5c350b5702b416"
+    },
+    {
+      "path": "data_raw/10-it-meeteing/10-it-meeteing.wav",
+      "size": 21133388,
+      "sha256": "2bbbbaa5aead8ebd9430d6a42d8800e60efedf4d61e20c64158ff8992b17581f"
+    },
+    {
+      "path": "data_raw/2-one-to-one/2-one-to-one.csv",
+      "size": 6779,
+      "git_blob": "0282c50c6d966e08dd94d068de5bea980d3afdf1"
+    },
+    {
+      "path": "data_raw/2-one-to-one/2-one-to-one.wav",
+      "size": 5107276,
+      "sha256": "acb30a071e185f01d0de38a59429f3ece10696bb64cfcc6657ea9904d6f09cdb"
+    },
+    {
+      "path": "data_raw/3-auth-incident/3-auth-incident.csv",
+      "size": 11982,
+      "git_blob": "7f6ec7128e8d4e98d548dab3da505d4103cbdbc9"
+    },
+    {
+      "path": "data_raw/3-auth-incident/3-auth-incident.wav",
+      "size": 10049068,
+      "sha256": "1cdde3e2c3bbd17ac0d39c991701bdf39b34c824f8ee5049ebef075496f44b31"
+    },
+    {
+      "path": "data_raw/4-hr-retention/4-hr-retention.csv",
+      "size": 63371,
+      "git_blob": "1bc1c4a261d902099d666d2f9dadad5d6d7d7806"
+    },
+    {
+      "path": "data_raw/4-hr-retention/4-hr-retention.wav",
+      "size": 55465516,
+      "sha256": "b9322ddac6d6ae001c0e0152cc01cf62966b8da26a7d88697bc419787c8cfcec"
+    },
+    {
+      "path": "data_raw/5-it-product/5-it-product.csv",
+      "size": 16692,
+      "git_blob": "90df525d9ac3dadf60c85db60f6fef5e4d8895ac"
+    },
+    {
+      "path": "data_raw/5-it-product/5-it-product.wav",
+      "size": 12532876,
+      "sha256": "fc43f146d626247bb5a5f4771a2eaa8634b6b9d87f709a38d2cca370b15512ca"
+    },
+    {
+      "path": "data_raw/6-b2b-saas/6-b2b-saas.csv",
+      "size": 41995,
+      "git_blob": "215e52649a6bc3619edf50b5bb6cc6fa722916cf"
+    },
+    {
+      "path": "data_raw/6-b2b-saas/6-b2b-saas.wav",
+      "size": 36288780,
+      "sha256": "b6f8a48ed0662976077b492d5ee14cb478fd3c452d33717bbb7f00a45c1f871c"
+    },
+    {
+      "path": "data_raw/7-bi-platform/7-bi-platform.csv",
+      "size": 29592,
+      "git_blob": "13ff83d0e67e629398f8cdc237a2f52e05a1a8b9"
+    },
+    {
+      "path": "data_raw/7-bi-platform/7-bi-platform.wav",
+      "size": 21604620,
+      "sha256": "98421c864a3e2454ccac7e9c8f50aff19909f2b742fe53495af9680e62e71bbf"
+    },
+    {
+      "path": "data_raw/8-sales-meeting/8-sales-meeting.csv",
+      "size": 40683,
+      "git_blob": "5c2701fc3acfde57d0fdfdc79ceb2da79f5820bf"
+    },
+    {
+      "path": "data_raw/8-sales-meeting/8-sales-meeting.wav",
+      "size": 38653388,
+      "sha256": "1e5dfe01c706977be47521a6acd7042b17735942d08f17bff7dbd39f5da13b38"
+    },
+    {
+      "path": "data_raw/9-tech-strategy-meeting/9-tech-strategy-meeting.csv",
+      "size": 43380,
+      "git_blob": "4faa71c869d4e1dfcc17b6b5b6824bc48bcbe605"
+    },
+    {
+      "path": "data_raw/9-tech-strategy-meeting/9-tech-strategy-meeting.wav",
+      "size": 36040876,
+      "sha256": "3b75bd66ab3c553f52cd2bbb7d9822c71beba4899ffe5688d5dc27f3fe29c233"
+    },
+    {
+      "path": "data_hard/10-it-meeteing/10-it-meeteing.csv",
+      "size": 30485,
+      "git_blob": "89abc0a7de49e9a4b469de95b1b7491b8d657d22"
+    },
+    {
+      "path": "data_hard/10-it-meeteing/10-it-meeteing.wav",
+      "size": 20781900,
+      "sha256": "d7d40af147a55050db4ad1d968f4255408425bd6c6d3ec7b03cae51e516c3dc0"
+    },
+    {
+      "path": "data_hard/2-one-to-one/2-one-to-one.csv",
+      "size": 6776,
+      "git_blob": "26aa7f1c631ef105ebf58eb65b900c55a812f1a8"
+    },
+    {
+      "path": "data_hard/2-one-to-one/2-one-to-one.wav",
+      "size": 4902092,
+      "sha256": "b5d3db192f2f0d18297364662f1988a246de14ef74866f7bd7848ce33652f22b"
+    },
+    {
+      "path": "data_hard/3-auth-incident/3-auth-incident.csv",
+      "size": 11982,
+      "git_blob": "6f21df841b5cfe48844cbc263885c1ccb30855af"
+    },
+    {
+      "path": "data_hard/3-auth-incident/3-auth-incident.wav",
+      "size": 9744684,
+      "sha256": "5ef7596327d38d9f1120fd07671acf6439339aaa51a26f255f9ac4e5e97faf57"
+    },
+    {
+      "path": "data_hard/4-hr-retention/4-hr-retention.csv",
+      "size": 63373,
+      "git_blob": "df541f72cc542290d4f4ce2ad9eebba5ea800dd5"
+    },
+    {
+      "path": "data_hard/4-hr-retention/4-hr-retention.wav",
+      "size": 55360492,
+      "sha256": "f77c7298ccad685737017f329221148b6908eff54d2a0857c23aca3d7c17c714"
+    },
+    {
+      "path": "data_hard/5-it-product/5-it-product.csv",
+      "size": 16688,
+      "git_blob": "b92c18e9fa94199483591c56ba85ff54fa1e341f"
+    },
+    {
+      "path": "data_hard/5-it-product/5-it-product.wav",
+      "size": 12497260,
+      "sha256": "dd2dddc162151084082f836c9f5dd8c1479769bb89900a996db6d4d38f3a1705"
+    },
+    {
+      "path": "data_hard/6-b2b-saas/6-b2b-saas.csv",
+      "size": 41992,
+      "git_blob": "1e5b1b029175cdfac483930c728379336136aa60"
+    },
+    {
+      "path": "data_hard/6-b2b-saas/6-b2b-saas.wav",
+      "size": 35849900,
+      "sha256": "71bbe7c80be51eee4c1c59a2e817a657c646bc7a13716100847155056bb46091"
+    },
+    {
+      "path": "data_hard/7-bi-platform/7-bi-platform.csv",
+      "size": 29590,
+      "git_blob": "5a29b8ddc3e0b8c711d9dcd96ff524211f6981c4"
+    },
+    {
+      "path": "data_hard/7-bi-platform/7-bi-platform.wav",
+      "size": 21223852,
+      "sha256": "cee9669abd8e80136fc3ad3a902929f59b0640f3366e15c7d532bc2bd1301bb0"
+    },
+    {
+      "path": "data_hard/8-sales-meeting/8-sales-meeting.csv",
+      "size": 40673,
+      "git_blob": "864e20019d736b74e63e96ae7ca8696eddc49cac"
+    },
+    {
+      "path": "data_hard/8-sales-meeting/8-sales-meeting.wav",
+      "size": 38080524,
+      "sha256": "6984395fed505d780faca189788a7a54b7e15d70357040b146f6301e386c0ea9"
+    },
+    {
+      "path": "data_hard/9-tech-strategy-meeting/9-tech-strategy-meeting.csv",
+      "size": 43377,
+      "git_blob": "6f3c59032eab33de65cd793132eb1eb9378b9fe1"
+    },
+    {
+      "path": "data_hard/9-tech-strategy-meeting/9-tech-strategy-meeting.wav",
+      "size": 35683596,
+      "sha256": "673e8830ec3241881f0ec861b7d4c1ea703fb42bcea019389a9b5556d59a6328"
+    }
+  ]
+}

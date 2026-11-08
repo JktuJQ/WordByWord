@@ -79,6 +79,15 @@ final class LibraryService {
         "Не удалось сохранить имя участника");
   }
 
+  void renameRecording(
+      String id, String name, Consumer<Recording> success, Consumer<String> failure) {
+    execute(
+        () -> repository.renameRecording(id, name),
+        success,
+        failure,
+        "Не удалось сохранить название записи");
+  }
+
   void delete(Set<String> ids, Consumer<String> success, BiConsumer<String, String> failure) {
     for (String id : ids)
       execute(

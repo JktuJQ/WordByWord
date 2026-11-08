@@ -52,8 +52,8 @@ public final class LocalTranscriptionPipeline implements TranscriptionPipeline {
       throws ProcessingException {
     long started = System.nanoTime();
     context.throwIfCancelled();
-    context.reportProgress("Подготавливаем аудио", OptionalDouble.empty());
-    try (var audio = audioPreparer.prepare(recording.audioUri(), context)) {
+    context.reportProgress("Превращаем речь в текст", OptionalDouble.of(0));
+    try (var audio = audioPreparer.prepare(recording.audioUri(), preparationProgress(context))) {
       context.throwIfCancelled();
       var stop = new AtomicBoolean();
       var progress = new ModelProgress(context, stop);
@@ -85,7 +85,7 @@ public final class LocalTranscriptionPipeline implements TranscriptionPipeline {
               : recording.durationMs();
       var completedRecording =
           new Recording(recording.id(), recording.audioUri(), recording.title(), duration);
-      context.reportProgress("Собираем стенограмму", OptionalDouble.empty());
+      context.reportProgress("Собираем всё воедино…", OptionalDouble.of(0.95));
       var result =
           assembler.assemble(completedRecording, recognition.value(), speakers.value(), context);
       context.throwIfCancelled();
@@ -95,10 +95,25 @@ public final class LocalTranscriptionPipeline implements TranscriptionPipeline {
               "pipeline recording=%s elapsed_ms=%d",
               recording.id(),
               (System.nanoTime() - started) / 1_000_000));
+      context.reportProgress("Собираем всё воедино…", OptionalDouble.of(1));
       return result;
     } catch (IOException exception) {
       throw new ProcessingException("Не удалось освободить временное аудио", exception);
     }
+  }
+
+  private static ProcessingContext preparationProgress(ProcessingContext parent) {
+    return new ProcessingContext() {
+      public boolean isCancellationRequested() {
+        return parent.isCancellationRequested();
+      }
+
+      public void reportProgress(String stage, OptionalDouble fraction) {
+        double value = fraction.orElse(0);
+        parent.reportProgress("Превращаем речь в текст",
+            OptionalDouble.of(Double.isFinite(value) ? Math.max(0, Math.min(1, value)) * 0.05 : 0));
+      }
+    };
   }
 
   @FunctionalInterface
@@ -137,8 +152,8 @@ public final class LocalTranscriptionPipeline implements TranscriptionPipeline {
   private static final class ModelProgress {
     private final ProcessingContext parent;
     private final AtomicBoolean stop;
-    private String asrStage = "ожидание";
-    private String diarizationStage = "ожидание";
+    private double asrFraction;
+    private double diarizationFraction;
     final ProcessingContext asr = context(true);
     final ProcessingContext diarization = context(false);
 
@@ -160,13 +175,18 @@ public final class LocalTranscriptionPipeline implements TranscriptionPipeline {
     }
 
     private synchronized void update(boolean recognition, String stage, OptionalDouble fraction) {
-      String detail = stage;
-      if (fraction.isPresent() && Double.isFinite(fraction.getAsDouble()))
-        detail += " " + Math.round(Math.max(0, Math.min(1, fraction.getAsDouble())) * 100) + "%";
-      if (recognition) asrStage = detail;
-      else diarizationStage = detail;
-      parent.reportProgress(
-          "ASR: " + asrStage + "; диаризация: " + diarizationStage, OptionalDouble.empty());
+      double value = fraction.isPresent() && Double.isFinite(fraction.getAsDouble())
+          ? Math.max(0, Math.min(1, fraction.getAsDouble())) : 0;
+      if (recognition) {
+        double mapped = stage.equals("Ищем речь") ? value * 0.1
+            : stage.equals("Загружаем распознавание") ? 0.1
+            : 0.1 + value * 0.9;
+        asrFraction = Math.max(asrFraction, mapped);
+      } else {
+        diarizationFraction = Math.max(diarizationFraction, value);
+      }
+      parent.reportProgress(asrFraction < 1 ? "Превращаем речь в текст" : "Различаем голоса",
+          OptionalDouble.of(Math.min(0.95, 0.05 + 0.65 * asrFraction + 0.25 * diarizationFraction)));
     }
   }
 }

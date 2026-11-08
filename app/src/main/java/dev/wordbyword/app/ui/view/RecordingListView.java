@@ -27,26 +27,33 @@ public final class RecordingListView {
       AppState state,
       boolean selecting,
       Set<String> selectedIds,
-      Consumer<String> toggleSelection) {
+      Consumer<String> toggleSelection,
+      Consumer<String> beginSelection) {
     View card =
         LayoutInflater.from(items.getContext()).inflate(R.layout.item_recording, items, false);
     ((TextView) card.findViewById(R.id.recording_kind)).setText(R.string.imported_badge);
     ((TextView) card.findViewById(R.id.recording_title)).setText(item.recording().title());
     ((TextView) card.findViewById(R.id.recording_detail)).setText(item.detail());
-    TextView status = card.findViewById(R.id.recording_status);
-    status.setText(
-        switch (item.status()) {
-          case PROCESSING -> R.string.processing_status;
-          case READY -> R.string.ready_status;
-          case ERROR -> R.string.error_status;
-          case CANCELLED -> R.string.cancelled_status;
-          case IMPORTED -> R.string.imported_status;
+    View rename = card.findViewById(R.id.rename_recording);
+    rename.setVisibility(!selecting ? View.VISIBLE : View.GONE);
+    rename.setEnabled(!state.busy());
+    rename.setOnClickListener(
+        view ->
+            GlassDialogs.rename(
+                items.getContext(),
+                "Название записи",
+                item.recording().title(),
+                name -> controller.renameRecording(item.recording().id(), name)));
+    card.setOnLongClickListener(
+        view -> {
+          beginSelection.accept(item.recording().id());
+          return true;
         });
-    if (item.status() == AppState.Status.ERROR) {
-      status.setTextColor(items.getContext().getColor(R.color.error));
-    }
+    card.setBackgroundResource(
+        selectedIds.contains(item.recording().id()) ? R.drawable.selected_card : R.drawable.card);
     CheckBox selected = card.findViewById(R.id.recording_selected);
     selected.setVisibility(selecting ? View.VISIBLE : View.GONE);
+    selected.setContentDescription(item.recording().title());
     selected.setChecked(selectedIds.contains(item.recording().id()));
     selected.setOnClickListener(view -> toggleSelection.accept(item.recording().id()));
     if (selecting) {
@@ -61,7 +68,33 @@ public final class RecordingListView {
             value -> progress.setProgress((int) Math.round(Math.max(0, Math.min(1, value)) * 100)));
     Button action = card.findViewById(R.id.recording_action);
     action.setVisibility(selecting ? View.GONE : View.VISIBLE);
+    TextView metadata = card.findViewById(R.id.recording_kind);
+    long duration = item.recording().durationMs().orElse(0) / 1000;
+    metadata.setText(
+        String.format(java.util.Locale.ROOT, "%02d:%02d", duration / 60, duration % 60));
+    if (item.transcript() != null) {
+      long seconds = item.recording().durationMs().orElse(0) / 1000;
+      metadata.setText(
+          String.format(
+              java.util.Locale.ROOT,
+              "%02d:%02d · %s",
+              seconds / 60,
+              seconds % 60,
+              RecordingLabels.summary(
+                  item.transcript().utterances().size(), item.transcript().speakers().size())));
+    }
+    card.findViewById(R.id.recording_detail)
+        .setVisibility(
+            item.status() == AppState.Status.READY || item.status() == AppState.Status.IMPORTED
+                ? View.GONE
+                : View.VISIBLE);
     if (processing) {
+      String label = item.detail();
+      if (!label.equals("Превращаем речь в текст")
+          && !label.equals("Различаем голоса")
+          && !label.equals("Собираем всё воедино…")) label = "Превращаем речь в текст";
+      int percent = (int) Math.round(item.progress().orElse(0) * 100);
+      ((TextView) card.findViewById(R.id.recording_detail)).setText(label + " · " + percent + "%");
       action.setText(state.cancelling() ? R.string.cancelling : R.string.cancel);
       action.setEnabled(!state.cancelling());
       action.setOnClickListener(view -> controller.cancel());
