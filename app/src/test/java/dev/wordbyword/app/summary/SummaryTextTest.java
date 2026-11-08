@@ -19,6 +19,14 @@ public final class SummaryTextTest {
   }
 
   @Test
+  public void selectionToleratesModelEchoingTheNumberedListFormat() {
+    var passages = List.of("Встреча завтра.", "Сервер не покупаем.", "Смета готова.");
+    assertEquals(
+        "• Встреча завтра.\n• Сервер не покупаем.\n• Смета готова.",
+        SummaryText.select(passages, "1) 1\n2) 2\n3) 3"));
+  }
+
+  @Test
   public void passagesPreserveAllContentWithBoundedNumbering() {
     String input = "Первое. Второе!\nТретье? ".repeat(20).trim();
     var passages = SummaryText.passages(input);

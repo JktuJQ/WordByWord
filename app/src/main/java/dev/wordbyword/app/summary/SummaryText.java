@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class SummaryText {
   private SummaryText() {}
@@ -23,17 +25,16 @@ public final class SummaryText {
   }
 
   public static String select(List<String> passages, String answer) {
-    String numbers = answer.trim();
-    if (numbers.startsWith("[") && numbers.endsWith("]"))
-      numbers = numbers.substring(1, numbers.length() - 1).trim();
-    if (!numbers.matches("[1-9][0-9]*(\\s*,\\s*[1-9][0-9]*){0,2}"))
-      throw new IllegalArgumentException("Модель вернула некорректные номера фрагментов");
+    Matcher numbers = Pattern.compile("[1-9][0-9]*").matcher(answer);
     var selected = new TreeSet<Integer>();
-    for (String number : numbers.split(",")) {
-      int index = Integer.parseInt(number.trim()) - 1;
-      if (index >= passages.size()) throw new IllegalArgumentException("Неизвестный фрагмент");
-      selected.add(index);
+    int accepted = 0;
+    while (accepted < 3 && numbers.find()) {
+      int index = Integer.parseInt(numbers.group()) - 1;
+      if (index < 0 || index >= passages.size()) continue;
+      if (selected.add(index)) accepted++;
     }
+    if (selected.isEmpty())
+      throw new IllegalArgumentException("Модель вернула некорректные номера фрагментов");
     StringBuilder result = new StringBuilder();
     for (int index : selected) result.append("• ").append(passages.get(index)).append('\n');
     return result.toString().trim();
