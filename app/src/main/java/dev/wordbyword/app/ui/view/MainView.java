@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.EditText;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -108,7 +109,11 @@ public final class MainView {
               awaitingNewRecording = true;
               recordAudio.run();
             });
-    root.findViewById(R.id.summarize).setOnClickListener(view -> { summaryPage = true; render(lastState); });
+    root.findViewById(R.id.summarize).setOnClickListener(view -> {
+      summaryPage = true;
+      controller.openSummary();
+      render(lastState);
+    });
     root.findViewById(R.id.export_json).setOnClickListener(view -> exportJson.run());
     root.findViewById(R.id.search_toggle).setOnClickListener(view -> toggleSearch());
     root.findViewById(R.id.select_toggle).setOnClickListener(view -> toggleSelecting());
@@ -249,6 +254,21 @@ public final class MainView {
       text(R.id.screen_title, "Итоги разговора");
       text(R.id.screen_description, state.selected().recording().title());
       View summary = activity.getLayoutInflater().inflate(R.layout.view_summary, items, false);
+      var result = controller.summaryState(state.selectedId());
+      ((TextView) summary.findViewById(R.id.summary_text)).setText(result.text());
+      ((TextView) summary.findViewById(R.id.summary_status)).setText(
+          result.detail().isBlank() && result.text().isBlank()
+              ? activity.getString(R.string.summary_intro) : result.detail());
+      summary.findViewById(R.id.summary_progress).setVisibility(result.busy() ? View.VISIBLE : View.GONE);
+      Button generate = summary.findViewById(R.id.summary_generate);
+      generate.setText(result.busy() ? R.string.summary_cancel
+          : result.text().isBlank() ? R.string.summary_create : R.string.summary_open);
+      generate.setVisibility(!result.busy() && !result.text().isBlank() ? View.GONE : View.VISIBLE);
+      generate.setEnabled(result.busy() || !state.busy());
+      generate.setOnClickListener(view -> {
+        if (result.busy()) controller.cancelSummary();
+        else controller.summarize();
+      });
       items.addView(summary);
       setVisible(R.id.no_search_results, false);
       return;
