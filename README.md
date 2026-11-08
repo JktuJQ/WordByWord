@@ -6,6 +6,10 @@ Android-приложение для локальной расшифровки р
 
 [Скачать APK с Google Drive](https://drive.google.com/drive/folders/1ZYgRJRdBaZq9iS3Q1PHWbhk9aVXv3mPC?usp=sharing).
 
+## Видео
+
+[Видео в Google Drive](https://drive.google.com/drive/folders/1ZYgRJRdBaZq9iS3Q1PHWbhk9aVXv3mPC?usp=sharing).
+
 ## Установка и использование
 
 Требования: Android 8.0 или новее, процессор ARM64 или x86-64.
