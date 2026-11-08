@@ -1,21 +1,16 @@
-# Документация WordByWord
+# Документация
 
-Установка и использование — в [README проекта](../README.md).
-
-| Область | Документы |
+| Документ | Содержание |
 | --- | --- |
-| Архитектура | [ARCHITECTURE.md](ARCHITECTURE.md) |
-| Форматы аудио и JSON | [PROTOCOL.md](PROTOCOL.md), [Java-контракты](contracts.md) |
-| Модели распознавания | [asr-models.md](asr-models.md), [сравнение качества](asr-quality.md) |
-| Диаризация | [diarization-models.md](diarization-models.md), [диагностика](diarization-diagnostics.md) |
-| Краткое содержание | [summarization.md](summarization.md) |
-| Выполнение и хранение | [processing.md](processing.md), [storage.md](storage.md) |
-| Ограничения | [LIMITATIONS.md](LIMITATIONS.md) |
-| Результаты тестов | [TEST_RESULTS.md](TEST_RESULTS.md) |
-| Датасеты и команды оценки | [evaluation/README.md](../evaluation/README.md) |
-| Сборка и проверки | [build.md](build.md), [CI](ci.md) |
-| Требования хакатона | [hackathon.md](hackathon.md) |
-
-APK и сведения о сборке создаются в `artifacts/apk/`.
-Исходники приложения находятся в `app/src/`, проверки качества — в `evaluation/`.
-Лицензии и происхождение тестовых данных указаны рядом с наборами в `evaluation/fixtures/`.
+| [README проекта](../README.md) | Установка, использование и материалы сдачи |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Компоненты, исполнение и хранение |
+| [PROTOCOL.md](PROTOCOL.md) | Форматы аудио и экспорт JSON |
+| [asr-models.md](asr-models.md) | Распознавание речи и VAD |
+| [diarization-models.md](diarization-models.md) | Определение говорящих |
+| [summarization.md](summarization.md) | Краткое содержание |
+| [LIMITATIONS.md](LIMITATIONS.md) | Ограничения |
+| [TEST_RESULTS.md](TEST_RESULTS.md) | Результаты измерений |
+| [asr-quality.md](asr-quality.md) | Сравнение моделей ASR |
+| [build.md](build.md) | Сборка APK, эмулятор и проверки |
+| [evaluation](../evaluation/README.md) | Датасеты, скореры и запуск измерений |
+| [hackathon.md](hackathon.md) | Требования организаторов |

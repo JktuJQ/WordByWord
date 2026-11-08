@@ -7,10 +7,6 @@
     <string name="summary_cancel">Отменить создание</string>
     <string name="summary_open">Открыть краткое содержание</string>
     <string name="app_name">Слово в слово</string>
-    <string name="app_tagline">Разговоры, к которым можно вернуться</string>
-    <string name="library">Слово в слово</string>
-    <string name="library_description">Ваши разговоры и стенограммы</string>
-    <string name="privacy_notice">Аудио остаётся на устройстве</string>
     <string name="empty_title">Добавьте первую запись</string>
     <string name="empty_description">Загрузите аудиофайл, чтобы получить стенограмму разговора.</string>
     <string name="search">Поиск записей</string>
@@ -26,8 +22,6 @@
     <string name="play_utterance">Воспроизвести реплику</string>
     <string name="seek_forward">Вперёд на 5 секунд</string>
     <string name="rename_participant">Переименовать участника</string>
-    <string name="name_hint">Имя участника</string>
-    <string name="save_name">Сохранить</string>
     <string name="audio_unavailable">Для этой стенограммы нет воспроизводимого аудио.</string>
     <string name="pause_utterance">Приостановить воспроизведение</string>
     <string name="playback_initial_position">00:00 / 00:00</string>
@@ -43,8 +37,6 @@
     <string name="recording_finish">Завершить</string>
     <string name="recording_cancel">Отменить запись</string>
     <string name="recording_done">Запись завершена</string>
-    <string name="recording_preview">Прослушать запись</string>
-    <string name="recording_stop_preview">Остановить прослушивание</string>
     <string name="recording_name_hint">Название записи</string>
     <string name="recording_transcribe">Сохранить</string>
     <string name="microphone_permission">Для записи разговора нужен доступ к микрофону.</string>
@@ -57,17 +49,8 @@
     <string name="import_source_description">Без интернета, без передачи данных</string>
     <string name="import_source_file">Выбрать из файлов</string>
     <string name="import_source_microphone">Записать разговор</string>
-    <string name="microphone_later">Запись с микрофона появится в следующей версии.</string>
-    <string name="ready_status">Расшифровка готова</string>
-    <string name="processing_status">Обрабатывается</string>
-    <string name="error_status">Ошибка обработки</string>
-    <string name="imported_status">Готово к обработке</string>
-    <string name="cancelled_status">Обработка отменена</string>
     <string name="import_audio">Загрузить аудио</string>
     <string name="recording_shortcut">Записать разговор</string>
-    <string name="benefit_speakers">◉ Разделение по говорящим</string>
-    <string name="benefit_timestamps">◷ Временные метки для каждой реплики</string>
-    <string name="benefit_privacy">♧ Обработка на устройстве без отправки аудио</string>
     <string name="back_to_library">← Все записи</string>
     <string name="export_json">Экспортировать JSON</string>
     <string name="start_processing">Обработать</string>
@@ -77,7 +60,6 @@
     <string name="cancelling">Отменяем…</string>
     <string name="transcript_empty">В записи не обнаружено речи.</string>
     <string name="unknown_speaker">Неизвестный участник</string>
-    <string name="recording_summary">%1$d реплик · %2$d участников</string>
     <string name="imported_badge">Аудиофайл</string>
     <string name="import_failed">Не удалось импортировать аудиофайл. Проверьте доступ к нему и свободное место на устройстве.</string>
     <string name="picker_unavailable">На устройстве нет приложения для выбора файлов.</string>
@@ -90,9 +72,6 @@
     <string name="time_range">%1$s — %2$s</string>
     <string name="home_headline">Сказано–записано</string>
     <string name="home_intro">Слово в слово</string>
-    <string name="recent_recordings">Ваши записи</string>
-    <string name="transcript_heading">Стенограмма</string>
-    <string name="speaker_hint">Нажмите на имя, чтобы его изменить</string>
     <string name="nav_home">Главная</string>
     <string name="nav_library">Библиотека</string>
     <string name="library_count">Записей: %1$d</string>
@@ -100,7 +79,5 @@
     <string name="select_all">Выбрать все</string>
     <string name="deselect_all">Снять выбор</string>
     <string name="close_search">Закрыть поиск</string>
-    <string name="long_press_hint">Удерживайте запись, чтобы выбрать несколько</string>
-    <string name="home_privacy">Ваши разговоры остаются с вами</string>
     <string name="export_label">Экспорт</string>
 </resources>

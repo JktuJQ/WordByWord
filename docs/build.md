@@ -52,7 +52,7 @@ sha256sum -c wordbyword-0.1.0-debug.apk.sha256
 Стандартный результат `assembleDebug` находится в `app/build/outputs/apk/debug/app-debug.apk`.
 Параллельная обработка включена по умолчанию.
 Для последовательной сборки передайте `-PparallelInference=false`.
-Измерения приведены в [processing.md](processing.md).
+Условия измерений приведены в [TEST_RESULTS.md](TEST_RESULTS.md).
 
 Debug-подпись использует ключ `~/.android/debug.keystore`.
 Для release-сборки нужен постоянный ключ, который не хранится в Git.
@@ -115,3 +115,14 @@ adb -e shell am start -n dev.wordbyword.app/.MainActivity
 
 `measure-on-device.sh` удаляет установленное приложение при выходе.
 Не запускайте его на устройстве с библиотекой, которую нужно сохранить.
+
+## Проверки
+
+```sh
+./gradlew :evaluation:test :app:testDebugUnitTest :app:assembleDebug :app:lintDebug
+./gradlew :app:assembleDebugAndroidTest
+```
+
+CI выполняет основные проверки и публикует APK и отчёты как артефакты workflow.
+Конфигурация находится в [.github/workflows/android.yml](../.github/workflows/android.yml).
+Подготовка моделей и упаковка APK вынесены в `app/gradle/models.gradle` и `app/gradle/distribution.gradle`.

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<dev.wordbyword.app.HomeGlowLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<dev.wordbyword.app.ui.widget.HomeGlowLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="wrap_content"
     android:background="@drawable/card" android:orientation="vertical"
     android:paddingHorizontal="22dp" android:paddingTop="24dp" android:paddingBottom="30dp">
@@ -15,4 +15,4 @@
     <Button android:layout_marginTop="10dp" android:id="@+id/source_microphone" style="@style/SecondaryButton"
         android:layout_width="match_parent" android:layout_height="52dp"
         android:text="@string/import_source_microphone" />
-</dev.wordbyword.app.HomeGlowLayout>
+</dev.wordbyword.app.ui.widget.HomeGlowLayout>

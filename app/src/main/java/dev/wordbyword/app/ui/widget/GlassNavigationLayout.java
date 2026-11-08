@@ -1,4 +1,4 @@
-package dev.wordbyword.app;
+package dev.wordbyword.app.ui.widget;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -8,6 +8,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.LinearLayout;
+import dev.wordbyword.app.R;
 
 public final class GlassNavigationLayout extends LinearLayout {
   private final Drawable glass;
@@ -36,13 +37,14 @@ public final class GlassNavigationLayout extends LinearLayout {
     animator = ValueAnimator.ofFloat(0, 1);
     animator.setDuration(480);
     animator.setInterpolator(new AccelerateDecelerateInterpolator());
-    animator.addUpdateListener(value -> {
-      float t = (float) value.getAnimatedValue();
-      float travel = Math.max(0, (t - 0.15f) / 0.85f);
-      position = from + (index - from) * travel;
-      expansion = 1 + 0.07f * (float) Math.sin(Math.PI * t);
-      invalidate();
-    });
+    animator.addUpdateListener(
+        value -> {
+          float t = (float) value.getAnimatedValue();
+          float travel = Math.max(0, (t - 0.15f) / 0.85f);
+          position = from + (index - from) * travel;
+          expansion = 1 + 0.07f * (float) Math.sin(Math.PI * t);
+          invalidate();
+        });
     animator.start();
   }
 
@@ -55,8 +57,11 @@ public final class GlassNavigationLayout extends LinearLayout {
     float left = first.getLeft() + (second.getLeft() - first.getLeft()) * position;
     float width = first.getWidth();
     float extra = width * (expansion - 1) / 2;
-    glass.setBounds(Math.round(left - extra), first.getTop(),
-        Math.round(left + width + extra), first.getBottom());
+    glass.setBounds(
+        Math.round(left - extra),
+        first.getTop(),
+        Math.round(left + width + extra),
+        first.getBottom());
     glass.draw(canvas);
   }
 

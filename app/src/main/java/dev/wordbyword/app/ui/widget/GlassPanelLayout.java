@@ -1,4 +1,4 @@
-package dev.wordbyword.app;
+package dev.wordbyword.app.ui.widget;
 
 import android.content.Context;
 import android.graphics.Canvas;

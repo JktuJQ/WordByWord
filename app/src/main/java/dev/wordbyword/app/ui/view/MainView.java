@@ -10,14 +10,16 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.EditText;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import dev.wordbyword.app.R;
 import dev.wordbyword.app.ui.AppController;
 import dev.wordbyword.app.ui.AppState;
+import dev.wordbyword.app.ui.widget.GlassNavigationLayout;
+import dev.wordbyword.app.ui.widget.HomeGlowLayout;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -90,8 +92,11 @@ public final class MainView {
     root.findViewById(R.id.back)
         .setOnClickListener(
             view -> {
-              if (summaryPage) { summaryPage = false; render(lastState); }
-              else if (lastState != null && lastState.selected() != null) controller.showLibrary();
+              if (summaryPage) {
+                summaryPage = false;
+                render(lastState);
+              } else if (lastState != null && lastState.selected() != null)
+                controller.showLibrary();
               else if (selecting) toggleSelecting();
               else if (searching) toggleSearch();
               else controller.showLibrary();
@@ -109,11 +114,13 @@ public final class MainView {
               awaitingNewRecording = true;
               recordAudio.run();
             });
-    root.findViewById(R.id.summarize).setOnClickListener(view -> {
-      summaryPage = true;
-      controller.openSummary();
-      render(lastState);
-    });
+    root.findViewById(R.id.summarize)
+        .setOnClickListener(
+            view -> {
+              summaryPage = true;
+              controller.openSummary();
+              render(lastState);
+            });
     root.findViewById(R.id.export_json).setOnClickListener(view -> exportJson.run());
     root.findViewById(R.id.search_toggle).setOnClickListener(view -> toggleSearch());
     root.findViewById(R.id.select_toggle).setOnClickListener(view -> toggleSelecting());
@@ -200,10 +207,13 @@ public final class MainView {
       hideKeyboard();
     }
     boolean home = !detail && !libraryPage;
-    ((dev.wordbyword.app.HomeGlowLayout) root).setHomeVisible(true);
+    ((HomeGlowLayout) root).setHomeVisible(true);
     root.findViewById(R.id.bottom_navigation)
         .setBackgroundColor(android.graphics.Color.TRANSPARENT);
-    String screen = detail ? state.selectedId() + (summaryPage ? "summary" : "") : home ? "home" : searching ? "search" : "library";
+    String screen =
+        detail
+            ? state.selectedId() + (summaryPage ? "summary" : "")
+            : home ? "home" : searching ? "search" : "library";
     if (!screen.equals(renderedScreen)) {
       ((ScrollView) root.findViewById(R.id.content_scroll)).scrollTo(0, 0);
       renderedScreen = screen;
@@ -256,19 +266,26 @@ public final class MainView {
       View summary = activity.getLayoutInflater().inflate(R.layout.view_summary, items, false);
       var result = controller.summaryState(state.selectedId());
       ((TextView) summary.findViewById(R.id.summary_text)).setText(result.text());
-      ((TextView) summary.findViewById(R.id.summary_status)).setText(
-          result.detail().isBlank() && result.text().isBlank()
-              ? activity.getString(R.string.summary_intro) : result.detail());
-      summary.findViewById(R.id.summary_progress).setVisibility(result.busy() ? View.VISIBLE : View.GONE);
+      ((TextView) summary.findViewById(R.id.summary_status))
+          .setText(
+              result.detail().isBlank() && result.text().isBlank()
+                  ? activity.getString(R.string.summary_intro)
+                  : result.detail());
+      summary
+          .findViewById(R.id.summary_progress)
+          .setVisibility(result.busy() ? View.VISIBLE : View.GONE);
       Button generate = summary.findViewById(R.id.summary_generate);
-      generate.setText(result.busy() ? R.string.summary_cancel
-          : result.text().isBlank() ? R.string.summary_create : R.string.summary_open);
+      generate.setText(
+          result.busy()
+              ? R.string.summary_cancel
+              : result.text().isBlank() ? R.string.summary_create : R.string.summary_open);
       generate.setVisibility(!result.busy() && !result.text().isBlank() ? View.GONE : View.VISIBLE);
       generate.setEnabled(result.busy() || !state.busy());
-      generate.setOnClickListener(view -> {
-        if (result.busy()) controller.cancelSummary();
-        else controller.summarize();
-      });
+      generate.setOnClickListener(
+          view -> {
+            if (result.busy()) controller.cancelSummary();
+            else controller.summarize();
+          });
       items.addView(summary);
       setVisible(R.id.no_search_results, false);
       return;
@@ -309,7 +326,7 @@ public final class MainView {
     int color = activity.getColor(selected ? R.color.ink : R.color.muted);
     tab.setImageTintList(android.content.res.ColorStateList.valueOf(color));
     if (selected)
-      ((dev.wordbyword.app.GlassNavigationLayout) root.findViewById(R.id.bottom_navigation))
+      ((GlassNavigationLayout) root.findViewById(R.id.bottom_navigation))
           .select(id == R.id.nav_home ? 0 : 1);
   }
 

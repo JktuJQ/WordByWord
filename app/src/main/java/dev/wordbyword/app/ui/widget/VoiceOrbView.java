@@ -1,4 +1,4 @@
-package dev.wordbyword.app;
+package dev.wordbyword.app.ui.widget;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -46,7 +46,6 @@ public final class VoiceOrbView extends View {
             new int[] {Color.rgb(255, 238, 180), Color.rgb(255, 170, 36), Color.rgb(255, 153, 0)},
             new float[] {0f, 0.42f, 1f},
             Shader.TileMode.CLAMP);
-
   }
 
   @Override
@@ -91,11 +90,18 @@ public final class VoiceOrbView extends View {
     }
     outline.close();
     float hue = 51f - 22f * level + 2f * (float) Math.sin(now / 4500.0);
-    sphere = new RadialGradient(cx - radius * 0.35f, cy - radius * 0.45f, radius * 1.75f,
-        new int[] {Color.HSVToColor(new float[] {Math.min(60f, hue + 10), 0.45f, 1f}),
-            Color.HSVToColor(new float[] {hue, 0.85f, 1f}),
-            Color.HSVToColor(new float[] {hue - 5, 0.98f, 1f})},
-        new float[] {0f, 0.42f, 1f}, Shader.TileMode.CLAMP);
+    sphere =
+        new RadialGradient(
+            cx - radius * 0.35f,
+            cy - radius * 0.45f,
+            radius * 1.75f,
+            new int[] {
+              Color.HSVToColor(new float[] {Math.min(60f, hue + 10), 0.45f, 1f}),
+              Color.HSVToColor(new float[] {hue, 0.85f, 1f}),
+              Color.HSVToColor(new float[] {hue - 5, 0.98f, 1f})
+            },
+            new float[] {0f, 0.42f, 1f},
+            Shader.TileMode.CLAMP);
     paint.setShader(sphere);
     canvas.drawPath(outline, paint);
     paint.setShader(null);

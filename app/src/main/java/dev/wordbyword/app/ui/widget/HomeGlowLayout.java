@@ -1,4 +1,4 @@
-package dev.wordbyword.app;
+package dev.wordbyword.app.ui.widget;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -104,15 +104,24 @@ public final class HomeGlowLayout extends LinearLayout {
     drawGlow(
         canvas,
         yellow,
-        width * (0.5f + 0.40f * (float) (0.75 * Math.sin(phase + 2.1) + 0.25 * Math.cos(phase * 3 + 0.5))),
-        height * (0.5f + 0.34f * (float) (0.7 * Math.sin(phase * 2 + 3.3) + 0.3 * Math.cos(phase + 0.7))),
+        width
+            * (0.5f
+                + 0.40f
+                    * (float) (0.75 * Math.sin(phase + 2.1) + 0.25 * Math.cos(phase * 3 + 0.5))),
+        height
+            * (0.5f
+                + 0.34f * (float) (0.7 * Math.sin(phase * 2 + 3.3) + 0.3 * Math.cos(phase + 0.7))),
         width * 0.72f,
         height * 0.28f);
     drawGlow(
         canvas,
         amber,
-        width * (0.5f + 0.40f * (float) (0.7 * Math.cos(phase + 4.2) + 0.3 * Math.sin(phase * 2 + 1.2))),
-        height * (0.5f + 0.34f * (float) (0.75 * Math.sin(phase * 3 + 4.2) + 0.25 * Math.cos(phase * 2))),
+        width
+            * (0.5f
+                + 0.40f * (float) (0.7 * Math.cos(phase + 4.2) + 0.3 * Math.sin(phase * 2 + 1.2))),
+        height
+            * (0.5f
+                + 0.34f * (float) (0.75 * Math.sin(phase * 3 + 4.2) + 0.25 * Math.cos(phase * 2))),
         width * 0.80f,
         height * 0.27f);
   }

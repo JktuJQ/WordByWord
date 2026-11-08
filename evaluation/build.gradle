@@ -11,32 +11,7 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
 }
 
-sourceSets {
-    diagnostic {
-        compileClasspath += sourceSets.main.output
-        runtimeClasspath += sourceSets.main.output
-    }
-}
-
-configurations.diagnosticImplementation.extendsFrom(configurations.implementation)
-
-dependencies {
-    diagnosticImplementation files(providers.gradleProperty('sherpaJvmJar')
-        .getOrElse('../local-models/sherpa-onnx-jvm.jar'))
-}
-
-tasks.register('diarizationDiagnostics', JavaExec) {
-    dependsOn('diagnosticClasses')
-    classpath = sourceSets.diagnostic.runtimeClasspath
-    mainClass = 'dev.wordbyword.evaluation.DiarizationDiagnostics'
-    workingDir = rootProject.projectDir
-    systemProperty('java.library.path', providers.gradleProperty('sherpaNativeDir').getOrElse(''))
-}
-
-['scoreAsr': 'ScoreAsr', 'scoreDiarization': 'ScoreDiarization', 'scoreTranscripts': 'ScoreTranscripts',
- 'summarizeDiarizationDiagnostics': 'SummarizeDiarizationDiagnostics',
- 'sweepDiarizationThresholds': 'SweepDiarizationThresholds',
- 'anchorContamination': 'AnchorContamination'].each { taskName, entryPoint ->
+['scoreAsr': 'ScoreAsr', 'scoreDiarization': 'ScoreDiarization', 'scoreTranscripts': 'ScoreTranscripts'].each { taskName, entryPoint ->
     tasks.register(taskName, JavaExec) {
         classpath = sourceSets.main.runtimeClasspath
         mainClass = "dev.wordbyword.evaluation.${entryPoint}"

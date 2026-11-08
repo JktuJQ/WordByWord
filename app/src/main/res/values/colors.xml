@@ -7,7 +7,6 @@
     <color name="accent">#FF6A00</color>
     <color name="accent_soft">#F0F1F3</color>
     <color name="secondary_speaker">#246B60</color>
-    <color name="divider">#E3E6EA</color>
     <color name="error">#B3261E</color>
     <color name="active_surface">#E9ECEF</color>
     <color name="active_muted">#646B74</color>

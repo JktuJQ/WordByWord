@@ -28,8 +28,6 @@
       "reference_artifact": "artifacts/test-results/diarization-prefixes-2026-11-08/astrology-reference.rttm",
       "hypothesis_artifact": "artifacts/test-results/diarization-prefixes-2026-11-08/astrology-hypothesis.rttm",
       "hypothesis_sha256": "bf3798c541b716e226a39524275bf841fd3dbcfeea2111a6ad2bbee2a81b1cf7",
-      "raw_hypothesis_artifact": "artifacts/test-results/diarization-prefixes-2026-11-08/astrology-raw_hypothesis.txt",
-      "raw_hypothesis_sha256": "658f51142b4ad66b82cb9948f0a82c83bb5d9c5851b647e1efdda1b6abc83290",
       "clipped_end_seconds": [
         0.028999999999996362
       ]
@@ -59,8 +57,6 @@
       "reference_artifact": "artifacts/test-results/diarization-prefixes-2026-11-08/movie-reference.rttm",
       "hypothesis_artifact": "artifacts/test-results/diarization-prefixes-2026-11-08/movie-hypothesis.rttm",
       "hypothesis_sha256": "3dd93a9136f8215242a2abb78ef429aed9b671f38f1529d046f99916b9b25e13",
-      "raw_hypothesis_artifact": "artifacts/test-results/diarization-prefixes-2026-11-08/movie-raw_hypothesis.txt",
-      "raw_hypothesis_sha256": "8b088fda94c27ff58f5cf0ad5089bdbf1cad21d8b4869fee47ee3c301175ee0a",
       "clipped_end_seconds": [
         0.016999999999995907
       ]
@@ -90,8 +86,6 @@
       "reference_artifact": "artifacts/test-results/diarization-prefixes-2026-11-08/mavrodi-reference.rttm",
       "hypothesis_artifact": "artifacts/test-results/diarization-prefixes-2026-11-08/mavrodi-hypothesis.rttm",
       "hypothesis_sha256": "465ec9780149d1378d03751ea8b4606c71ad8112fffc734cc1404ab560ccabb5",
-      "raw_hypothesis_artifact": "artifacts/test-results/diarization-prefixes-2026-11-08/mavrodi-raw_hypothesis.txt",
-      "raw_hypothesis_sha256": "d50a919e1c8e4e6f5f1b81ae9f4085d33dabf06e26bcb1fd9c98569ae1f8cd19",
       "clipped_end_seconds": []
     }
   ],

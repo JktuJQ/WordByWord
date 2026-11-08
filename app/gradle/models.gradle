@@ -1,0 +1,178 @@
+def diarizationVendorDir = file('vendor')
+def diarizationAssetsDir = file('src/main/assets/diarization')
+def diarizationDownloadDir = layout.buildDirectory.dir('diarization-downloads').get().asFile
+
+def diarizationArtifacts = [
+    aar: [
+        url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/v2.0.1/sherpa-onnx-2.0.1.aar',
+        sha256: 'a8d09d1d32f3eb8520482c6d3d43fae674681c5b050385967c70a3c2c9bf0ee7',
+        fileName: 'sherpa-onnx-2.0.1.aar'
+    ],
+    segmentationArchive: [
+        url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-segmentation-models/sherpa-onnx-pyannote-segmentation-3-0.tar.bz2',
+        sha256: '24615ee884c897d9d2ba09bb4d30da6bb1b15e685065962db5b02e76e4996488',
+        fileName: 'sherpa-onnx-pyannote-segmentation-3-0.tar.bz2'
+    ],
+    embedding: [
+        url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/3dspeaker_speech_eres2net_sv_en_voxceleb_16k.onnx',
+        sha256: 'c59158379255ad66e161679cca6af8d52d51e389e3224ab7d7a7baae295c2db5',
+        fileName: '3dspeaker_speech_eres2net_sv_en_voxceleb_16k.onnx'
+    ]
+]
+
+ext.sha256Of = { File source ->
+    def digest = java.security.MessageDigest.getInstance('SHA-256')
+    source.eachByte(8192) { buffer, length -> digest.update(buffer, 0, length) }
+    return digest.digest().collect { String.format('%02x', it) }.join()
+}
+
+tasks.register('prepareDiarizationModels') {
+    def vendorAar = new File(diarizationVendorDir, 'sherpa-onnx-2.0.1.aar')
+    def segmentationOnnx = new File(diarizationAssetsDir, 'segmentation.int8.onnx')
+    def embeddingOnnx = new File(diarizationAssetsDir, 'embedding.onnx')
+
+    inputs.property('artifacts', diarizationArtifacts.collectEntries { key, artifact -> [key, artifact.sha256] })
+    outputs.files(vendorAar, segmentationOnnx, embeddingOnnx)
+
+    doLast {
+        diarizationDownloadDir.mkdirs()
+        diarizationVendorDir.mkdirs()
+        diarizationAssetsDir.mkdirs()
+
+        diarizationArtifacts.each { key, artifact ->
+            def downloaded = new File(diarizationDownloadDir, artifact.fileName)
+            if (!downloaded.exists() || sha256Of(downloaded) != artifact.sha256) {
+                logger.lifecycle("Downloading ${artifact.fileName}")
+                ant.get(src: artifact.url, dest: downloaded, verbose: false)
+            }
+            def actualSha256 = sha256Of(downloaded)
+            if (actualSha256 != artifact.sha256) {
+                throw new GradleException(
+                    "Checksum mismatch for ${artifact.fileName}: expected ${artifact.sha256}, got ${actualSha256}")
+            }
+        }
+
+        copy {
+            from(diarizationDownloadDir) {
+                include diarizationArtifacts.aar.fileName
+            }
+            into diarizationVendorDir
+        }
+
+        copy {
+            from(tarTree(resources.bzip2(
+                new File(diarizationDownloadDir, diarizationArtifacts.segmentationArchive.fileName)))) {
+                include 'sherpa-onnx-pyannote-segmentation-3-0/model.int8.onnx'
+                eachFile { details -> details.path = 'segmentation.int8.onnx' }
+                includeEmptyDirs = false
+            }
+            into diarizationAssetsDir
+        }
+
+        copy {
+            from(diarizationDownloadDir) {
+                include diarizationArtifacts.embedding.fileName
+                rename { 'embedding.onnx' }
+            }
+            into diarizationAssetsDir
+        }
+    }
+}
+
+def asrAssetsDir = file('src/main/assets/asr')
+def asrDownloadDir = layout.buildDirectory.dir('asr-downloads').get().asFile
+def asrArchiveDir = 'sherpa-onnx-nemo-transducer-punct-giga-am-v3-russian-2025-12-16'
+
+def asrArtifacts = [
+    gigaam: [
+        url: "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/${asrArchiveDir}.tar.bz2",
+        sha256: 'f9620a0099019c6afcee26525ef9ed3297fa50dd5691c1902af0c948fc1a470b',
+        fileName: "${asrArchiveDir}.tar.bz2"
+    ],
+    vad: [
+        url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/silero_vad.onnx',
+        sha256: '9e2449e1087496d8d4caba907f23e0bd3f78d91fa552479bb9c23ac09cbb1fd6',
+        fileName: 'silero_vad.onnx'
+    ]
+]
+
+tasks.register('prepareAsrModels') {
+    def encoderOnnx = new File(asrAssetsDir, 'encoder.int8.onnx')
+    def decoderOnnx = new File(asrAssetsDir, 'decoder.onnx')
+    def joinerOnnx = new File(asrAssetsDir, 'joiner.onnx')
+    def tokensTxt = new File(asrAssetsDir, 'tokens.txt')
+    def vadOnnx = new File(asrAssetsDir, 'silero_vad.onnx')
+    def license = new File(asrAssetsDir, 'LICENSE')
+
+    inputs.property('modelSha256', asrArtifacts.gigaam.sha256)
+    inputs.property('vadSha256', asrArtifacts.vad.sha256)
+    outputs.files(encoderOnnx, decoderOnnx, joinerOnnx, tokensTxt, vadOnnx, license)
+
+    doLast {
+        asrDownloadDir.mkdirs()
+        asrAssetsDir.mkdirs()
+
+        asrArtifacts.each { key, artifact ->
+            def downloaded = new File(asrDownloadDir, artifact.fileName)
+            if (!downloaded.exists() || sha256Of(downloaded) != artifact.sha256) {
+                logger.lifecycle("Downloading ${artifact.fileName}")
+                ant.get(src: artifact.url, dest: downloaded, verbose: false)
+            }
+            def actualSha256 = sha256Of(downloaded)
+            if (actualSha256 != artifact.sha256) {
+                throw new GradleException(
+                    "Checksum mismatch for ${artifact.fileName}: expected ${artifact.sha256}, got ${actualSha256}")
+            }
+        }
+
+        copy {
+            from(tarTree(resources.bzip2(
+                new File(asrDownloadDir, asrArtifacts.gigaam.fileName)))) {
+                include "${asrArchiveDir}/encoder.int8.onnx"
+                include "${asrArchiveDir}/decoder.onnx"
+                include "${asrArchiveDir}/joiner.onnx"
+                include "${asrArchiveDir}/tokens.txt"
+                include "${asrArchiveDir}/LICENSE"
+                eachFile { details -> details.path = details.name }
+                includeEmptyDirs = false
+            }
+            into asrAssetsDir
+        }
+
+        copy {
+            from(asrDownloadDir) {
+                include asrArtifacts.vad.fileName
+            }
+            into asrAssetsDir
+        }
+    }
+}
+
+tasks.named('preBuild').configure {
+    dependsOn('prepareDiarizationModels')
+    dependsOn('prepareAsrModels')
+    dependsOn('prepareSummaryModel')
+}
+
+tasks.register('prepareSummaryModel') {
+    def model = layout.buildDirectory.file('generated/summaryAssets/summary/model.litertlm').get().asFile
+    def expected = '2df6821ec12702dafd33915e7a1a1adc7c4b053f3672fd9555dfaf3a114c4139'
+    inputs.property('sha256', expected)
+    outputs.file(model)
+    doLast {
+        model.parentFile.mkdirs()
+        def temporary = new File(model.parentFile, 'model.download')
+        try {
+            if (!model.isFile() || sha256Of(model) != expected) {
+                ant.get(src: 'https://huggingface.co/litert-community/Qwen3-0.6B-int4/resolve/56621f0115eba5781051ef9714c06e16e6d40c0b/qwen3_0.6b_nothink_q4_block32_ekv1280.litertlm', dest: temporary)
+                if (sha256Of(temporary) != expected) {
+                    throw new GradleException('Summary model checksum mismatch')
+                }
+                java.nio.file.Files.move(temporary.toPath(), model.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+            }
+        } finally {
+            temporary.delete()
+        }
+    }
+}
+

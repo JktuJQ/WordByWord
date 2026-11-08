@@ -1,13 +1,9 @@
 package dev.wordbyword.app.ui.view;
 
-import android.app.AlertDialog;
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import dev.wordbyword.app.R;
 import dev.wordbyword.app.core.transcript.Transcript;
@@ -25,9 +21,7 @@ public final class TranscriptView {
   private final ArrayList<CardRange> cards = new ArrayList<>();
   private final ScrollView scroll;
   private int activeCard = -1;
-  private TextView positionLabel;
-  private android.widget.ImageButton playbackToggle;
-  private SeekBar positionSeekbar;
+  private final PlaybackControls controls;
   private Transcript currentTranscript;
 
   private record CardRange(long startMs, long endMs, View card) {}
@@ -37,18 +31,13 @@ public final class TranscriptView {
     this.items = items;
     this.controller = controller;
     this.scroll = root.findViewById(R.id.content_scroll);
-    positionLabel = root.findViewById(R.id.playback_position);
-    playbackToggle = root.findViewById(R.id.playback_toggle);
-    positionSeekbar = root.findViewById(R.id.playback_seekbar);
     playback =
         new TranscriptPlayback(
             items.getContext(),
             this::updatePlaybackUi,
             () ->
                 controller.notifyMessage(items.getContext().getString(R.string.audio_unavailable)));
-    playbackToggle.setOnClickListener(view -> togglePlayback());
-    root.findViewById(R.id.playback_back).setOnClickListener(view -> seek(-5000));
-    root.findViewById(R.id.playback_forward).setOnClickListener(view -> seek(5000));
+    controls = new PlaybackControls(root, this::togglePlayback, this::seek, this::seekTo);
   }
 
   public void release() {
@@ -67,19 +56,6 @@ public final class TranscriptView {
         RecordingLabels.summary(transcript.utterances().size(), transcript.speakers().size()));
     cards.clear();
     activeCard = -1;
-    positionSeekbar.setOnSeekBarChangeListener(
-        new SeekBar.OnSeekBarChangeListener() {
-          @Override
-          public void onProgressChanged(SeekBar bar, int progress, boolean fromUser) {
-            if (fromUser) playback.seekTo(transcript.recording(), progress);
-          }
-
-          @Override
-          public void onStartTrackingTouch(SeekBar bar) {}
-
-          @Override
-          public void onStopTrackingTouch(SeekBar bar) {}
-        });
     var speakers = new HashMap<String, Transcript.Speaker>();
     var colors = new HashMap<String, Integer>();
     for (int index = 0; index < transcript.speakers().size(); index++) {
@@ -108,7 +84,10 @@ public final class TranscriptView {
       edit.setVisibility(participant == null ? View.GONE : View.VISIBLE);
       if (participant != null) edit.setOnClickListener(view -> rename(participant));
       int index = utterance.speakerId().map(id -> colors.getOrDefault(id, 0)).orElse(0);
-      int speakerColor = items.getContext().getColor(index % 2 == 0 ? R.color.accent_text : R.color.secondary_speaker);
+      int speakerColor =
+          items
+              .getContext()
+              .getColor(index % 2 == 0 ? R.color.accent_text : R.color.secondary_speaker);
       speaker.setTextColor(speakerColor);
       speaker.setTag(speakerColor);
       ((TextView) card.findViewById(R.id.timing))
@@ -126,7 +105,10 @@ public final class TranscriptView {
   }
 
   private void rename(Transcript.Speaker speaker) {
-    GlassDialogs.rename(items.getContext(), "Имя участника", speaker.displayName(),
+    GlassDialogs.rename(
+        items.getContext(),
+        "Имя участника",
+        speaker.displayName(),
         name -> controller.renameSpeaker(speaker.id(), name));
   }
 
@@ -142,15 +124,13 @@ public final class TranscriptView {
     if (currentTranscript != null) playback.seek(currentTranscript.recording(), offsetMs);
   }
 
+  private void seekTo(long positionMs) {
+    if (currentTranscript != null) playback.seekTo(currentTranscript.recording(), positionMs);
+  }
+
   private void updatePlaybackUi(TranscriptPlayback.State state) {
     int position = state.positionMs();
-    int durationMs = state.durationMs();
-    positionLabel.setText(
-        items
-            .getContext()
-            .getString(R.string.playback_position_format, time(position), time(durationMs)));
-    positionSeekbar.setMax(Math.max(1, durationMs));
-    positionSeekbar.setProgress(Math.min(position, durationMs));
+    controls.render(state);
     boolean playing = state.playing();
     int newActive = -1;
     for (int index = 0; index < cards.size(); index++) {
@@ -158,16 +138,14 @@ public final class TranscriptView {
       boolean active = playing && position >= range.startMs() && position < range.endMs();
       range.card().setBackgroundResource(active ? R.drawable.active_utterance : R.drawable.card);
       TextView speaker = range.card().findViewById(R.id.speaker);
-      speaker.setTextColor(active ? items.getContext().getColor(R.color.active_accent) : (Integer) speaker.getTag());
-      ((TextView) range.card().findViewById(R.id.utterance_text)).setTextColor(
-          items.getContext().getColor(R.color.ink));
-      ((TextView) range.card().findViewById(R.id.timing)).setTextColor(
-          items.getContext().getColor(active ? R.color.active_muted : R.color.muted));
+      speaker.setTextColor(
+          active ? items.getContext().getColor(R.color.active_accent) : (Integer) speaker.getTag());
+      ((TextView) range.card().findViewById(R.id.utterance_text))
+          .setTextColor(items.getContext().getColor(R.color.ink));
+      ((TextView) range.card().findViewById(R.id.timing))
+          .setTextColor(items.getContext().getColor(active ? R.color.active_muted : R.color.muted));
       if (active) newActive = index;
     }
-    playbackToggle.setImageResource(playing ? R.drawable.ic_pause : R.drawable.ic_play);
-    playbackToggle.setContentDescription(
-        items.getContext().getString(playing ? R.string.pause_utterance : R.string.play_utterance));
     if (newActive != activeCard) {
       activeCard = newActive;
       if (activeCard >= 0) {

@@ -16,7 +16,9 @@ local.properties
 *.jks
 *.keystore
 hs_err_pid*
-nvim.log
+*.log
+.local/
+/presentation-draft.md
 result
 result-*
 
@@ -25,7 +27,6 @@ keystore.properties
 /app/vendor/
 /app/src/main/assets/diarization/
 /app/src/main/assets/asr/
-/app/src/testAndroid/assets/diarization-candidates/
 /local-models/
 
 /docs/asr-results.json
