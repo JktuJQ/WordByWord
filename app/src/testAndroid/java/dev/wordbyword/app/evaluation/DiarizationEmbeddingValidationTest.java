@@ -33,7 +33,7 @@ public class DiarizationEmbeddingValidationTest {
 
   private static final Candidate[] CANDIDATES = {
     new Candidate("baseline", "diarization-candidates/baseline_embedding.onnx", 0.80f),
-    new Candidate("titanetLarge", "diarization-candidates/nemo_en_titanet_large.onnx", 0.65f)
+    new Candidate("titanetLarge", "diarization-candidates/nemo_en_titanet_large.onnx", 0.50f)
   };
 
   private static final String[] RECORDING_IDS = {"rec_0055", "dialogs_msd"};

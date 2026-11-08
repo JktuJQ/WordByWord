@@ -227,7 +227,23 @@ def embeddingCandidates = [
         url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/nemo_en_titanet_large.onnx',
         sha256: 'd51abcf31717ef28162f26acb9d44dd4127c3d44c9b8624f699f3425daca8e77',
         fileName: 'nemo_en_titanet_large.onnx'
+    ],
+    wespeakerResnet34Lm: [
+        url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/wespeaker_en_voxceleb_resnet34_LM.onnx',
+        sha256: 'e9848563da86f263117134dfd7ad63c92355b37de492b55e325400c9d9c39012',
+        fileName: 'wespeaker_en_voxceleb_resnet34_LM.onnx'
+    ],
+    wespeakerCamppLm: [
+        url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/wespeaker_en_voxceleb_CAM++_LM.onnx',
+        sha256: 'e197af7e9d473030cf486b3124149a19bf37014d0e4485e4c70c483b0ec10cb2',
+        fileName: 'wespeaker_en_voxceleb_CAM++_LM.onnx'
     ]
+]
+
+def reverbSegmentation = [
+    url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-segmentation-models/sherpa-onnx-reverb-diarization-v1.tar.bz2',
+    sha256: '615761e980be1688da0ef81618c056134d63aa55ea0a5f1494c47393b9398eab',
+    fileName: 'sherpa-onnx-reverb-diarization-v1.tar.bz2'
 ]
 
 tasks.register('prepareDiarizationEmbeddingCandidates') {
@@ -235,17 +251,21 @@ tasks.register('prepareDiarizationEmbeddingCandidates') {
 
     def baselineEmbeddingCopy = new File(embeddingCandidatesAssetsDir, 'baseline_embedding.onnx')
     def segmentationCopy = new File(embeddingCandidatesAssetsDir, 'segmentation.int8.onnx')
+    def reverbCopy = new File(embeddingCandidatesAssetsDir, 'segmentation-reverb-v1.int8.onnx')
+    def reverbFullCopy = new File(embeddingCandidatesAssetsDir, 'segmentation-reverb-v1.onnx')
+    def pyannoteFullCopy = new File(embeddingCandidatesAssetsDir, 'segmentation.onnx')
 
     onlyIf {
         !(embeddingCandidates.values().every { new File(embeddingCandidatesAssetsDir, it.fileName).exists() } &&
-            baselineEmbeddingCopy.exists() && segmentationCopy.exists())
+            baselineEmbeddingCopy.exists() && segmentationCopy.exists() && reverbCopy.exists() &&
+            reverbFullCopy.exists() && pyannoteFullCopy.exists())
     }
 
     doLast {
         embeddingCandidatesDownloadDir.mkdirs()
         embeddingCandidatesAssetsDir.mkdirs()
 
-        embeddingCandidates.each { key, artifact ->
+        (embeddingCandidates.values() + [reverbSegmentation]).each { artifact ->
             def downloaded = new File(embeddingCandidatesDownloadDir, artifact.fileName)
             if (!downloaded.exists() || sha256Of(downloaded) != artifact.sha256) {
                 logger.lifecycle("Downloading ${artifact.fileName}")
@@ -259,7 +279,37 @@ tasks.register('prepareDiarizationEmbeddingCandidates') {
         }
 
         copy {
-            from(embeddingCandidatesDownloadDir)
+            from(embeddingCandidatesDownloadDir) {
+                include '*.onnx'
+            }
+            into embeddingCandidatesAssetsDir
+        }
+
+        copy {
+            from(tarTree(resources.bzip2(new File(embeddingCandidatesDownloadDir, reverbSegmentation.fileName)))) {
+                include 'sherpa-onnx-reverb-diarization-v1/model.int8.onnx'
+                eachFile { details -> details.path = 'segmentation-reverb-v1.int8.onnx' }
+                includeEmptyDirs = false
+            }
+            into embeddingCandidatesAssetsDir
+        }
+
+        copy {
+            from(tarTree(resources.bzip2(new File(embeddingCandidatesDownloadDir, reverbSegmentation.fileName)))) {
+                include 'sherpa-onnx-reverb-diarization-v1/model.onnx'
+                eachFile { details -> details.path = 'segmentation-reverb-v1.onnx' }
+                includeEmptyDirs = false
+            }
+            into embeddingCandidatesAssetsDir
+        }
+
+        copy {
+            from(tarTree(resources.bzip2(
+                new File(diarizationDownloadDir, diarizationArtifacts.segmentationArchive.fileName)))) {
+                include 'sherpa-onnx-pyannote-segmentation-3-0/model.onnx'
+                eachFile { details -> details.path = 'segmentation.onnx' }
+                includeEmptyDirs = false
+            }
             into embeddingCandidatesAssetsDir
         }
 
