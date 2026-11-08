@@ -42,4 +42,4 @@
 Форматы `Recording`, `Transcript`, `RecognitionResult`, PCM и интерфейсы обработки описаны в [contracts.md](contracts.md).
 Отмена кооперативная, а один блокирующий JNI-вызов не прерывается немедленно.
 Гарантии записи и внутренний формат хранения описаны в [storage.md](storage.md).
-Методика WER/CER, cpWER и DER описана в [документации оценки](testing/evaluation.md).
+Методика WER/CER, cpWER и DER описана в [документации оценки](../evaluation/README.md).
