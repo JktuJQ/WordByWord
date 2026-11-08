@@ -27,6 +27,14 @@ public class ScoreDiarizationTest {
   }
 
   @Test
+  public void collarIgnoresSmallBoundaryShifts() {
+    var reference = List.of(segment(1, 5, "a"), segment(5, 9, "b"));
+    var hypothesis = List.of(segment(1.2, 4.8, "x"), segment(4.8, 9.2, "y"));
+    assertEquals(0.6 / 8, ScoreDiarization.score(reference, hypothesis, 10).der(), 1e-7);
+    assertEquals(0, ScoreDiarization.score(reference, hypothesis, 10, 0.25).der(), 1e-7);
+  }
+
+  @Test
   public void missingAllSpeechCountsAsMissed() {
     check(List.of(segment(0, 5, "a"), segment(5, 10, "b")), List.of(), 1);
   }

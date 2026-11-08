@@ -21,16 +21,29 @@ public class ScoreDiarization {
 
   public static void main(String[] args) {
     try {
+      double collar = 0;
+      var positional = new ArrayList<String>();
+      for (String arg : args) {
+        if (arg.startsWith("--collar=")) {
+          collar = Double.parseDouble(arg.substring("--collar=".length()));
+          if (!Double.isFinite(collar) || collar < 0) {
+            throw new IllegalArgumentException("Expected a non-negative collar: " + arg);
+          }
+        } else {
+          positional.add(arg);
+        }
+      }
+      args = positional.toArray(String[]::new);
       if (args.length < 3 || args.length > 4) {
         throw new IllegalArgumentException(
-            "Usage: ScoreDiarization reference.rttm hypothesis.rttm duration_seconds"
-                + " [processing_seconds]");
+            "Usage: ScoreDiarization [--collar=seconds] reference.rttm hypothesis.rttm"
+                + " duration_seconds [processing_seconds]");
       }
       double duration = positive(args[2]);
       Double processing = args.length == 4 ? positive(args[3]) : null;
       var reference = read(Path.of(args[0]), duration);
       var hypothesis = read(Path.of(args[1]), duration);
-      Result result = score(reference, hypothesis, duration);
+      Result result = score(reference, hypothesis, duration, collar);
       System.out.printf(Locale.ROOT, "DER: %.3f%%%n", 100 * result.der());
       System.out.printf(Locale.ROOT, "Reference speaker-time: %.3f s%n", result.reference());
       System.out.printf(Locale.ROOT, "Missed speech: %.3f s%n", result.missed());
@@ -39,9 +52,11 @@ public class ScoreDiarization {
       System.out.printf(
           "Speakers (reference / hypothesis): %d / %d%n",
           speakers(reference).size(), speakers(hypothesis).size());
-      System.out.println(
-          "Scoring: full recording, collar=0, overlap included, optimal one-to-one speaker"
-              + " mapping");
+      System.out.printf(
+          Locale.ROOT,
+          "Scoring: full recording, collar=%.2f, overlap included, optimal one-to-one speaker"
+              + " mapping%n",
+          collar);
       if (processing != null) {
         System.out.printf(Locale.ROOT, "RTF: %.4f%n", processing / duration);
       }
@@ -109,6 +124,11 @@ public class ScoreDiarization {
   }
 
   static Result score(List<Segment> reference, List<Segment> hypothesis, double duration) {
+    return score(reference, hypothesis, duration, 0);
+  }
+
+  static Result score(
+      List<Segment> reference, List<Segment> hypothesis, double duration, double collar) {
     var referenceIds = speakers(reference);
     var hypothesisIds = speakers(hypothesis);
     int size = Math.max(referenceIds.size(), hypothesisIds.size());
@@ -125,6 +145,18 @@ public class ScoreDiarization {
         boundaries.add(segment.end());
       }
     }
+    var excluded = new ArrayList<double[]>();
+    if (collar > 0) {
+      for (var segment : reference) {
+        for (double edge : new double[] {segment.start(), segment.end()}) {
+          double from = Math.max(0, edge - collar);
+          double to = Math.min(duration, edge + collar);
+          excluded.add(new double[] {from, to});
+          boundaries.add(from);
+          boundaries.add(to);
+        }
+      }
+    }
     var cuts = new ArrayList<>(boundaries);
     double[][] overlap = new double[size][size];
     double total = 0;
@@ -134,6 +166,10 @@ public class ScoreDiarization {
     for (int index = 1; index < cuts.size(); index++) {
       double start = cuts.get(index - 1);
       double length = cuts.get(index) - start;
+      double middle = start + length / 2;
+      if (excluded.stream().anyMatch(range -> range[0] <= middle && middle < range[1])) {
+        continue;
+      }
       var expected = active(reference, start + length / 2);
       var actual = active(hypothesis, start + length / 2);
       total += length * expected.size();
