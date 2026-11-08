@@ -24,15 +24,9 @@ public final class AndroidAudioPreparer implements AudioPreparer {
   private static final String STAGE_DECODING = "Декодирование аудио";
 
   private final Context context;
-  private final boolean antiAliasingFilter;
 
   public AndroidAudioPreparer(Context context) {
-    this(context, false);
-  }
-
-  public AndroidAudioPreparer(Context context, boolean antiAliasingFilter) {
     this.context = context.getApplicationContext();
-    this.antiAliasingFilter = antiAliasingFilter;
   }
 
   @Override
@@ -210,7 +204,7 @@ public final class AndroidAudioPreparer implements AudioPreparer {
 
   private LowPassFilter createAntiAliasingFilter(MediaFormat outputFormat) {
     int sampleRate = outputFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE);
-    if (!antiAliasingFilter || sampleRate <= PcmAudio.SAMPLE_RATE_HZ) {
+    if (sampleRate <= PcmAudio.SAMPLE_RATE_HZ) {
       return null;
     }
     return new LowPassFilter(sampleRate, PcmAudio.SAMPLE_RATE_HZ / 2, 63);
