@@ -2,8 +2,8 @@
 <resources>
     <color name="background">#FAFAFA</color>
     <color name="surface">#FFFFFF</color>
-    <color name="ink">#191C20</color>
-    <color name="muted">#646B74</color>
+    <color name="ink">#111418</color>
+    <color name="muted">#454B53</color>
     <color name="accent">#FF6A00</color>
     <color name="accent_soft">#F0F1F3</color>
     <color name="secondary_speaker">#246B60</color>
