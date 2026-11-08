@@ -99,9 +99,9 @@ def diarizationArtifacts = [
         fileName: 'sherpa-onnx-pyannote-segmentation-3-0.tar.bz2'
     ],
     embedding: [
-        url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/3dspeaker_speech_eres2net_base_sv_zh-cn_3dspeaker_16k.onnx',
-        sha256: '1a331345f04805badbb495c775a6ddffcdd1a732567d5ec8b3d5749e3c7a5e4b',
-        fileName: '3dspeaker_speech_eres2net_base_sv_zh-cn_3dspeaker_16k.onnx'
+        url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/3dspeaker_speech_eres2net_sv_en_voxceleb_16k.onnx',
+        sha256: 'c59158379255ad66e161679cca6af8d52d51e389e3224ab7d7a7baae295c2db5',
+        fileName: '3dspeaker_speech_eres2net_sv_en_voxceleb_16k.onnx'
     ]
 ]
 
@@ -232,9 +232,127 @@ tasks.register('prepareAsrModels') {
     }
 }
 
+def embeddingCandidatesAssetsDir = file('src/testAndroid/assets/diarization-candidates')
+def embeddingCandidatesDownloadDir = layout.buildDirectory.dir('diarization-embedding-candidates-downloads').get().asFile
+
+def embeddingCandidates = [
+    eres2netVoxceleb: [
+        url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/3dspeaker_speech_eres2net_sv_en_voxceleb_16k.onnx',
+        sha256: 'c59158379255ad66e161679cca6af8d52d51e389e3224ab7d7a7baae295c2db5',
+        fileName: '3dspeaker_speech_eres2net_sv_en_voxceleb_16k.onnx'
+    ],
+    campplusZhEn: [
+        url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/3dspeaker_speech_campplus_sv_zh_en_16k-common_advanced.onnx',
+        sha256: 'aa3cfc16963a10586a9393f5035d6d6b57e98d358b347f80c2a30bf4f00ceba2',
+        fileName: '3dspeaker_speech_campplus_sv_zh_en_16k-common_advanced.onnx'
+    ],
+    titanetLarge: [
+        url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/nemo_en_titanet_large.onnx',
+        sha256: 'd51abcf31717ef28162f26acb9d44dd4127c3d44c9b8624f699f3425daca8e77',
+        fileName: 'nemo_en_titanet_large.onnx'
+    ],
+    wespeakerResnet34Lm: [
+        url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/wespeaker_en_voxceleb_resnet34_LM.onnx',
+        sha256: 'e9848563da86f263117134dfd7ad63c92355b37de492b55e325400c9d9c39012',
+        fileName: 'wespeaker_en_voxceleb_resnet34_LM.onnx'
+    ],
+    wespeakerCamppLm: [
+        url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/wespeaker_en_voxceleb_CAM++_LM.onnx',
+        sha256: 'e197af7e9d473030cf486b3124149a19bf37014d0e4485e4c70c483b0ec10cb2',
+        fileName: 'wespeaker_en_voxceleb_CAM++_LM.onnx'
+    ]
+]
+
+def reverbSegmentation = [
+    url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-segmentation-models/sherpa-onnx-reverb-diarization-v1.tar.bz2',
+    sha256: '615761e980be1688da0ef81618c056134d63aa55ea0a5f1494c47393b9398eab',
+    fileName: 'sherpa-onnx-reverb-diarization-v1.tar.bz2'
+]
+
+tasks.register('prepareDiarizationEmbeddingCandidates') {
+    dependsOn('prepareDiarizationModels')
+
+    def baselineEmbeddingCopy = new File(embeddingCandidatesAssetsDir, 'baseline_embedding.onnx')
+    def segmentationCopy = new File(embeddingCandidatesAssetsDir, 'segmentation.int8.onnx')
+    def reverbCopy = new File(embeddingCandidatesAssetsDir, 'segmentation-reverb-v1.int8.onnx')
+    def reverbFullCopy = new File(embeddingCandidatesAssetsDir, 'segmentation-reverb-v1.onnx')
+    def pyannoteFullCopy = new File(embeddingCandidatesAssetsDir, 'segmentation.onnx')
+
+    onlyIf {
+        !(embeddingCandidates.values().every { new File(embeddingCandidatesAssetsDir, it.fileName).exists() } &&
+            baselineEmbeddingCopy.exists() && segmentationCopy.exists() && reverbCopy.exists() &&
+            reverbFullCopy.exists() && pyannoteFullCopy.exists())
+    }
+
+    doLast {
+        embeddingCandidatesDownloadDir.mkdirs()
+        embeddingCandidatesAssetsDir.mkdirs()
+
+        (embeddingCandidates.values() + [reverbSegmentation]).each { artifact ->
+            def downloaded = new File(embeddingCandidatesDownloadDir, artifact.fileName)
+            if (!downloaded.exists() || sha256Of(downloaded) != artifact.sha256) {
+                logger.lifecycle("Downloading ${artifact.fileName}")
+                ant.get(src: artifact.url, dest: downloaded, verbose: false)
+            }
+            def actualSha256 = sha256Of(downloaded)
+            if (actualSha256 != artifact.sha256) {
+                throw new GradleException(
+                    "Checksum mismatch for ${artifact.fileName}: expected ${artifact.sha256}, got ${actualSha256}")
+            }
+        }
+
+        copy {
+            from(embeddingCandidatesDownloadDir) {
+                include '*.onnx'
+            }
+            into embeddingCandidatesAssetsDir
+        }
+
+        copy {
+            from(tarTree(resources.bzip2(new File(embeddingCandidatesDownloadDir, reverbSegmentation.fileName)))) {
+                include 'sherpa-onnx-reverb-diarization-v1/model.int8.onnx'
+                eachFile { details -> details.path = 'segmentation-reverb-v1.int8.onnx' }
+                includeEmptyDirs = false
+            }
+            into embeddingCandidatesAssetsDir
+        }
+
+        copy {
+            from(tarTree(resources.bzip2(new File(embeddingCandidatesDownloadDir, reverbSegmentation.fileName)))) {
+                include 'sherpa-onnx-reverb-diarization-v1/model.onnx'
+                eachFile { details -> details.path = 'segmentation-reverb-v1.onnx' }
+                includeEmptyDirs = false
+            }
+            into embeddingCandidatesAssetsDir
+        }
+
+        copy {
+            from(tarTree(resources.bzip2(
+                new File(diarizationDownloadDir, diarizationArtifacts.segmentationArchive.fileName)))) {
+                include 'sherpa-onnx-pyannote-segmentation-3-0/model.onnx'
+                eachFile { details -> details.path = 'segmentation.onnx' }
+                includeEmptyDirs = false
+            }
+            into embeddingCandidatesAssetsDir
+        }
+
+        copy {
+            from(diarizationAssetsDir) {
+                include 'embedding.onnx'
+                rename { 'baseline_embedding.onnx' }
+            }
+            from(diarizationAssetsDir) {
+                include 'segmentation.int8.onnx'
+            }
+            into embeddingCandidatesAssetsDir
+        }
+    }
+}
+
 tasks.named('preBuild').configure {
     dependsOn('prepareDiarizationModels')
     dependsOn('prepareAsrModels')
+    dependsOn('prepareDiarizationEmbeddingCandidates')
 }
 
 tasks.register('packageDemoApk') {
