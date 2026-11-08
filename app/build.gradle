@@ -59,6 +59,7 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.7.0'
     androidTestImplementation 'androidx.test.ext:junit:1.3.0'
     androidTestImplementation 'com.google.code.gson:gson:2.15.0'
+    androidTestImplementation 'com.google.ai.edge.litertlm:litertlm-android:0.17.1'
 }
 
 def diarizationVendorDir = file('vendor')
