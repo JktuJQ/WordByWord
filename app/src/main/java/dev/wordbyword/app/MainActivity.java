@@ -91,6 +91,7 @@ public final class MainActivity extends Activity {
   }
 
   private void goBack() {
+    if (screen.handleSummaryBack()) return;
     if (controller.state().selectedId() != null) controller.showLibrary();
     else if (screen.handleBack()) return;
     else finish();
