@@ -208,7 +208,7 @@ public final class MainView {
             .map(item -> item.recording().id())
             .collect(java.util.stream.Collectors.toSet()));
     setVisible(R.id.top_toolbar, !home);
-    setVisible(R.id.back, detail || searching || selecting);
+    setVisible(R.id.back, detail || searching);
     setVisible(R.id.home_hero, home);
     setVisible(R.id.page_heading, !home);
     setVisible(R.id.screen_description, detail || !searching && !selecting);
@@ -305,9 +305,9 @@ public final class MainView {
     View content = root.findViewById(R.id.content_scroll);
     content.animate().cancel();
     if (android.animation.ValueAnimator.areAnimatorsEnabled()) {
-      content.setAlpha(0.3f);
+      content.setAlpha(1f);
       content.setTranslationY(12 * activity.getResources().getDisplayMetrics().density);
-      content.animate().alpha(1).translationY(0).setDuration(320).start();
+      content.animate().translationY(0).setDuration(320).start();
     }
   }
 

@@ -18,7 +18,7 @@ public final class HomeGlowLayout extends LinearLayout {
           0,
           0,
           1,
-          new int[] {0xFFFF6A00, 0xEBFF8300, 0x65FFAC24, 0x00FFAC24},
+          new int[] {0xD6FF820D, 0xBEFF970F, 0x58FFAC24, 0x00FFAC24},
           new float[] {0, 0.28f, 0.63f, 1},
           Shader.TileMode.CLAMP);
   private final Shader yellow =
@@ -34,7 +34,7 @@ public final class HomeGlowLayout extends LinearLayout {
           0,
           0,
           1,
-          new int[] {0xD9FF8A00, 0x70FFB21C, 0x00FFB21C},
+          new int[] {0xB3E8D8B8, 0x60F0E4CE, 0x00F0E4CE},
           new float[] {0, 0.4f, 1},
           Shader.TileMode.CLAMP);
   private ValueAnimator animator;
@@ -92,29 +92,29 @@ public final class HomeGlowLayout extends LinearLayout {
     }
     float width = getWidth();
     float height = getHeight();
-    float drift = (float) Math.sin(phase);
-    float sway = (float) Math.cos(phase);
+    float drift = (float) (0.72 * Math.sin(phase) + 0.28 * Math.sin(phase * 2 + 0.8));
+    float sway = (float) (0.65 * Math.sin(phase * 2 + 0.4) + 0.35 * Math.cos(phase * 3));
     drawGlow(
         canvas,
         orange,
-        width * (0.26f + 0.28f * drift),
-        height * (0.45f + 0.16f * sway),
+        width * (0.5f + 0.40f * drift),
+        height * (0.5f + 0.34f * sway),
         width * 0.78f,
         height * 0.29f);
     drawGlow(
         canvas,
         yellow,
-        width * (0.73f + 0.3f * sway),
-        height * (0.38f + 0.2f * drift),
+        width * (0.5f + 0.40f * (float) (0.75 * Math.sin(phase + 2.1) + 0.25 * Math.cos(phase * 3 + 0.5))),
+        height * (0.5f + 0.34f * (float) (0.7 * Math.sin(phase * 2 + 3.3) + 0.3 * Math.cos(phase + 0.7))),
         width * 0.72f,
         height * 0.28f);
     drawGlow(
         canvas,
         amber,
-        width * (0.5f + 0.08f * drift),
-        height * 0.82f,
-        width * 1.05f,
-        height * 0.24f);
+        width * (0.5f + 0.40f * (float) (0.7 * Math.cos(phase + 4.2) + 0.3 * Math.sin(phase * 2 + 1.2))),
+        height * (0.5f + 0.34f * (float) (0.75 * Math.sin(phase * 3 + 4.2) + 0.25 * Math.cos(phase * 2))),
+        width * 0.80f,
+        height * 0.27f);
   }
 
   private void drawGlow(Canvas canvas, Shader shader, float x, float y, float rx, float ry) {
@@ -156,7 +156,7 @@ public final class HomeGlowLayout extends LinearLayout {
     }
     if (animator != null) return;
     animator = ValueAnimator.ofFloat(phase, phase + (float) (Math.PI * 2));
-    animator.setDuration(26000);
+    animator.setDuration(68000);
     animator.setRepeatCount(ValueAnimator.INFINITE);
     animator.setInterpolator(new LinearInterpolator());
     animator.addUpdateListener(
