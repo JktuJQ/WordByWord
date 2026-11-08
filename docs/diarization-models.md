@@ -1,35 +1,42 @@
-# Модели и runtime для диаризации (issue #6)
+# Модели и runtime для диаризации (issue #6, назначение говорящих переработано в #33)
 
-Диаризация реализована через `sherpa-onnx` v2.0.1: `OfflineSpeakerDiarization`
-(сегментация pyannote/segmentation-3.0 + эмбеддинги 3D-Speaker + кластеризация).
-Модель сама выполняет VAD как часть совместного вывода сегментации — отдельного
-шага VAD в этом конвейере нет.
+Диаризация реализована через `sherpa-onnx` v2.0.1: сегментация pyannote/segmentation-3.0
+даёт только временные границы речи, итоговый говорящий назначается отдельным шагом —
+один голосовой эмбеддинг на найденный интервал (центральный участок до 8 секунд),
+слияние близких интервалов average-linkage с порогом 0,45, интервалы без собственного
+эмбеддинга (короче 0,3с) получают метку ближайшего по времени уже назначенного интервала.
+Собственная кластеризация `OfflineSpeakerDiarization` в этой схеме не используется —
+её результат отбрасывается, из прогона берутся только границы. Подробности и измерения,
+обосновавшие эту схему, — в [diarization-diagnostics.md](diarization-diagnostics.md).
+Модель сама выполняет VAD как часть совместного вывода сегментации — отдельного шага VAD
+в этом конвейере нет.
 
 ## Файлы
 
 | Файл | Источник | Лицензия | Назначение |
 | --- | --- | --- | --- |
 | `sherpa-onnx-2.0.1.aar` | [релиз v2.0.1](https://github.com/k2-fsa/sherpa-onnx/releases/download/v2.0.1/sherpa-onnx-2.0.1.aar) | Apache-2.0 | Android-биндинги sherpa-onnx (та же версия, что уже проверена в #2) |
-| `segmentation.int8.onnx` | [sherpa-onnx-pyannote-segmentation-3-0.tar.bz2](https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-segmentation-models/sherpa-onnx-pyannote-segmentation-3-0.tar.bz2), файл `model.int8.onnx` | MIT (CNRS, из архива — исходник [pyannote/segmentation-3.0](https://huggingface.co/pyannote/segmentation-3.0)) | Сегментация говорящих + VAD |
-| `embedding.onnx` | [3dspeaker_speech_eres2net_base_sv_zh-cn_3dspeaker_16k.onnx](https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/3dspeaker_speech_eres2net_base_sv_zh-cn_3dspeaker_16k.onnx) | Apache-2.0 ([3D-Speaker](https://github.com/alibaba-damo-academy/3D-Speaker), подтверждено через ModelScope) | Спикер-эмбеддинги |
+| `segmentation.int8.onnx` | [sherpa-onnx-pyannote-segmentation-3-0.tar.bz2](https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-segmentation-models/sherpa-onnx-pyannote-segmentation-3-0.tar.bz2), файл `model.int8.onnx` | MIT (CNRS, из архива — исходник [pyannote/segmentation-3.0](https://huggingface.co/pyannote/segmentation-3.0)) | Границы речи говорящих + VAD |
+| `embedding.onnx` | [3dspeaker_speech_eres2net_sv_en_voxceleb_16k.onnx](https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/3dspeaker_speech_eres2net_sv_en_voxceleb_16k.onnx) | Apache-2.0 ([3D-Speaker](https://github.com/alibaba-damo-academy/3D-Speaker), подтверждено через ModelScope) | Голосовые эмбеддинги для назначения говорящего |
 
 Контрольные суммы — в таске `prepareDiarizationModels` в `app/build.gradle`.
 
 ## Известное ограничение: язык обучения эмбеддинга
 
-`embedding.onnx` обучен на китайском (мандарин) корпусе 3D-Speaker — русской или
-мультиязычной модели эмбеддинга с открытыми весами не нашли; GigaAM (ASR-модель,
-уже выбранная для #5) спикер-эмбеддингов не предоставляет. `sherpa-onnx` технически
-принимает только модели эмбеддинга с ONNX-метаданными `framework` ∈
-{`wespeaker`, `3d-speaker`, `nemo`} — свою модель без переобучения в одном из этих
-форматов не подключить.
+`embedding.onnx` обучен на английском корпусе VoxCeleb — русской или мультиязычной
+модели эмбеддинга с открытыми весами не нашли; GigaAM (ASR-модель, уже выбранная для
+#5) спикер-эмбеддингов не предоставляет. `sherpa-onnx` технически принимает только
+модели эмбеддинга с ONNX-метаданными `framework` ∈ {`wespeaker`, `3d-speaker`, `nemo`} —
+свою модель без переобучения в одном из этих форматов не подключить.
 
 Спикер-эмбеддинги в целом переносятся между языками лучше, чем ASR (кодируют
-голос/тембр, а не фонетику) — на этом основан выбор, и так же поступают
-независимо найденные сторонние проекты русской диаризации на базе GigaAM
-(`protocolvoice/asr-models`, `TimHdm/slovami-ai-models` на HuggingFace, оба берут
-тот же 3D-Speaker эмбеддинг). Качество на реальной русской речи не подтверждено
-отдельно — проверяется эмпирически на `evaluation/fixtures/diarization/` в рамках #6.
+голос/тембр, а не фонетику) — на этом основан выбор. Предыдущий выбор (3D-Speaker
+ERes2Net, обученный на китайском корпусе) заменён на VoxCeleb по результатам
+исследования #33: на полном диагностическом протоколе из 16 случаев VoxCeleb с
+переназначением говорящего по реальным границам дал 231/254 верных полных клипов и
+DER 10,32% против 190/254 и DER 22,27% у исходной конфигурации — подробности в
+[diarization-diagnostics.md](diarization-diagnostics.md). Качество на реальной русской
+речи проверяется эмпирически на `evaluation/fixtures/diarization/` и `dialogs/`.
 
 ## Подготовка
 
@@ -112,3 +119,13 @@ DVBx предоставляет [рецепт дискриминативного
 Ближайшая проверка: на одном проблемном коротком файле и одном удачном контроле сравнить локальные сигналы текущей pyannote int8, её уже имеющейся FP32-версии и Reverb v1, сохранив извлечение эмбеддингов и глобальное объединение одинаковыми.
 Если нужный короткий голос виден локально и исчезает только после объединения, сначала исправляется перенос локальных меток и ограничений; смена сегментационной модели тогда не является первым шагом.
 Если голос не виден уже в локальной маске, следующий независимый архитектурный ориентир — один короткий прогон Nemotron через официальный native runtime, после согласованного получения весов.
+
+Nemotron 3 теперь проверена на компьютере через официальный NeMo-Speech.cpp 0.3.0 CPU runtime: шесть случаев, фиксированный профиль `v3-offline`, без подбора порогов.
+На четырёх окнах Veche получено 110/110 верных полных клипов и правильное число участников, но на Dialogs MS модель слила двух участников в одного и дала 6/12.
+Это перспективный сравнительный ориентир; превосходство над Community-1 и другими не запущенными системами не проверено, Android/JNI ещё не реализованы.
+Подробности и ограничения оценки — в [восьмом этапе диагностики](diarization-diagnostics.md#восьмой-этап-готовая-nemotron-3-diarization).
+
+Расширение до полного протокола из 16 случаев завершено для Nemotron и 3D-Speaker CAM++ zh/en.
+На основных 13 окнах Nemotron дала 243/254 верных полных клипа, 33/33 коротких и DER 12,09%; CAM++ с повторными признаками и фиксированным порогом 0,45 — 226/254, 24/33 и DER 11,80%.
+VoxCeleb в том же процессе повторного назначения дала 231/254 и DER 10,32%; порог 0,45 ранее выбирался именно на VoxCeleb.
+Состав тестов, сравнение целых процессов и ограничения — в [девятом этапе диагностики](diarization-diagnostics.md#девятый-этап-cam-и-расширенная-проверка-nemotron).
