@@ -38,6 +38,7 @@ android {
     }
 
     sourceSets {
+        main.assets.srcDir(layout.buildDirectory.dir('generated/summaryAssets'))
         androidTest {
             java.srcDirs = ['src/testAndroid/java']
             assets.srcDirs = [
@@ -52,6 +53,7 @@ android {
 }
 
 dependencies {
+    implementation 'com.google.ai.edge.litertlm:litertlm-android:0.17.1'
     implementation 'com.google.code.gson:gson:2.15.0'
     implementation files('vendor/sherpa-onnx-2.0.1.aar')
     implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.2.0'
@@ -352,7 +354,30 @@ tasks.register('prepareDiarizationEmbeddingCandidates') {
 tasks.named('preBuild').configure {
     dependsOn('prepareDiarizationModels')
     dependsOn('prepareAsrModels')
+    dependsOn('prepareSummaryModel')
     dependsOn('prepareDiarizationEmbeddingCandidates')
+}
+
+tasks.register('prepareSummaryModel') {
+    def model = layout.buildDirectory.file('generated/summaryAssets/summary/model.litertlm').get().asFile
+    def expected = '2df6821ec12702dafd33915e7a1a1adc7c4b053f3672fd9555dfaf3a114c4139'
+    inputs.property('sha256', expected)
+    outputs.file(model)
+    doLast {
+        model.parentFile.mkdirs()
+        def temporary = new File(model.parentFile, 'model.download')
+        try {
+            if (!model.isFile() || sha256Of(model) != expected) {
+                ant.get(src: 'https://huggingface.co/litert-community/Qwen3-0.6B-int4/resolve/56621f0115eba5781051ef9714c06e16e6d40c0b/qwen3_0.6b_nothink_q4_block32_ekv1280.litertlm', dest: temporary)
+                if (sha256Of(temporary) != expected) {
+                    throw new GradleException('Summary model checksum mismatch')
+                }
+                java.nio.file.Files.move(temporary.toPath(), model.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+            }
+        } finally {
+            temporary.delete()
+        }
+    }
 }
 
 tasks.register('packageDemoApk') {

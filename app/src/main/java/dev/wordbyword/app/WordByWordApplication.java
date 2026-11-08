@@ -12,6 +12,9 @@ import dev.wordbyword.app.core.storage.TranscriptRepository;
 import dev.wordbyword.app.core.transcript.OverlapTranscriptAssembler;
 import dev.wordbyword.app.processing.LocalTranscriptionPipeline;
 import dev.wordbyword.app.storage.FileTranscriptRepository;
+import dev.wordbyword.app.summary.LocalSummarizer;
+import dev.wordbyword.app.summary.SummaryRunner;
+import dev.wordbyword.app.summary.SummaryStore;
 import dev.wordbyword.app.ui.AppController;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -47,6 +50,9 @@ public final class WordByWordApplication extends Application {
                     () -> controller.notifyMessage("Некоторые записи повреждены и не загружены")));
     controller =
         new AppController(repository, pipeline, processing, io, runnable -> handler.post(runnable));
+    controller.configureSummaries(new SummaryRunner(new LocalSummarizer(this),
+        new SummaryStore(getFilesDir().toPath().resolve("library")), processing,
+        runnable -> handler.post(runnable)));
     controller.load();
   }
 
