@@ -6,9 +6,13 @@ An Android app for offline transcription of Russian conversations with speaker d
 
 [Download the APK from Google Drive](https://drive.google.com/drive/folders/1ZYgRJRdBaZq9iS3Q1PHWbhk9aVXv3mPC?usp=sharing).
 
-## Video
+## Demo
 
-[Video on Google Drive](https://drive.google.com/drive/folders/1ZYgRJRdBaZq9iS3Q1PHWbhk9aVXv3mPC?usp=sharing).
+[Watch the full demo on Google Drive](https://drive.google.com/file/d/12FYlB7ZGbI-Oy_wZ1cP2QqgHO_Sz4Hw2/view).
+
+| Recording | Transcript and playback | Summary |
+| :---: | :---: | :---: |
+| <img src="docs/images/recording.png" width="240" alt="Recording a conversation with a voice-reactive animation"> | <img src="docs/images/transcript.png" width="240" alt="Transcript with speaker labels, timestamps, playback controls, and JSON export"> | <img src="docs/images/summary.png" width="240" alt="Key passages selected from the transcript by the local model"> |
 
 ## Installation and usage
 
