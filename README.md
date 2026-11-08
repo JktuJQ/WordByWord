@@ -1,115 +1,108 @@
 # Слово в слово · WordByWord
 
-Android-приложение для локальной расшифровки русскоязычных разговоров с разделением по говорящим и экспортом JSON.
+An Android app for offline transcription of Russian conversations with speaker diarization and JSON export.
 
 ## APK
 
-[Скачать APK с Google Drive](https://drive.google.com/drive/folders/1ZYgRJRdBaZq9iS3Q1PHWbhk9aVXv3mPC?usp=sharing).
+[Download the APK from Google Drive](https://drive.google.com/drive/folders/1ZYgRJRdBaZq9iS3Q1PHWbhk9aVXv3mPC?usp=sharing).
 
-## Видео
+## Video
 
-[Видео в Google Drive](https://drive.google.com/drive/folders/1ZYgRJRdBaZq9iS3Q1PHWbhk9aVXv3mPC?usp=sharing).
+[Video on Google Drive](https://drive.google.com/drive/folders/1ZYgRJRdBaZq9iS3Q1PHWbhk9aVXv3mPC?usp=sharing).
 
-## Установка и использование
+## Installation and usage
 
-Требования: Android 8.0 или новее, процессор ARM64 или x86-64.
-Модели включены в APK; обработка работает без интернета.
+Requirements: Android 8.0 or later, ARM64 or x86-64 processor.
+Models are bundled in the APK; processing works without internet access.
 
-1. Скачайте APK на телефон и откройте файл.
-2. Разрешите установку приложений из выбранного источника и установите приложение.
-3. На главном экране нажмите «Загрузить аудио» и выберите запись.
-4. Запустите обработку и дождитесь стенограммы.
-5. Откройте реплику для перехода к соответствующему моменту аудио.
-6. Нажмите «Экспорт» и сохраните JSON через системное меню.
+1. Download the APK to your phone and open it.
+2. Allow installation from the selected source and install the app.
+3. Tap “Загрузить аудио” (Import audio) on the home screen and select a recording.
+4. Start processing and wait for the transcript.
+5. Tap an utterance to jump to the corresponding audio position.
+6. Tap “Экспорт” (Export) and save the JSON file through the system picker.
 
-Для записи с микрофона нажмите «Записать разговор» и предоставьте разрешение на запись звука.
-Записи и готовые стенограммы доступны в библиотеке.
-Имена участников можно изменить в стенограмме.
-Кнопка «Подытожить» открывает создание краткого содержания готовой стенограммы.
-Генерация выполняется на устройстве; результат сохраняется вместе с записью.
-Модель выбирает ключевые фрагменты, которые выводятся дословно из стенограммы.
-Экспорт содержит массив `transcript` с полями `speaker_id`, `start_ms`, `end_ms`, `text`.
+To record with the microphone, tap “Записать разговор” (Record a conversation) and grant audio recording permission.
+Recordings and completed transcripts are available in the library.
+Speaker names can be changed in the transcript.
+The “Подытожить” (Summarize) button opens summary generation for a completed transcript.
+Generation runs on the device; the result is saved with the recording.
+The model selects key passages, displayed verbatim from the transcript.
+The export contains a `transcript` array with `speaker_id`, `start_ms`, `end_ms`, and `text` fields.
 
-## Архитектура и модели
+## Architecture and models
 
-Приложение написано на Java, интерфейс — XML.
-Распознавание речи и диаризация выполняются на CPU устройства через sherpa-onnx 2.0.1.
-Аудио и текст не передаются внешним сервисам.
+The app is written in Java with an XML interface.
+Speech recognition and diarization run on the device CPU through sherpa-onnx 2.0.1.
+Audio and text are not sent to external services.
 
-Конвейер обработки:
+Processing pipeline:
 
-1. Импорт и сохранение копии аудио во внутреннем хранилище приложения.
-2. Декодирование через Android MediaExtractor/MediaCodec, преобразование в PCM 16 кГц, моно.
-3. Параллельное распознавание речи и определение говорящих.
-4. Сопоставление текстовых фрагментов с интервалами говорящих по временному перекрытию.
-5. Сохранение стенограммы, просмотр и экспорт JSON.
+1. Import and save a private copy of the audio in application storage.
+2. Decode with Android MediaExtractor/MediaCodec and convert to 16 kHz mono PCM.
+3. Run speech recognition and diarization in parallel.
+4. Assign text fragments to speaker intervals by temporal overlap.
+5. Save, display, and export the transcript as JSON.
 
-| Задача | Модель |
+| Task | Model |
 | --- | --- |
-| Выделение речи перед ASR | Silero VAD |
-| Распознавание русского текста и пунктуации | GigaAM v3 RNNT int8 |
-| Сегментация говорящих | pyannote/segmentation-3.0 int8 |
-| Голосовые эмбеддинги для кластеризации участников | 3D-Speaker ERes2Net VoxCeleb |
-| Краткое содержание | Qwen3-0.6B INT4, LiteRT-LM 0.17.1 |
+| Speech detection before ASR | Silero VAD |
+| Russian speech recognition and punctuation | GigaAM v3 RNNT int8 |
+| Speaker segmentation | pyannote/segmentation-3.0 int8 |
+| Speaker embeddings for clustering | 3D-Speaker ERes2Net VoxCeleb |
+| Summarization | Qwen3-0.6B INT4, LiteRT-LM 0.17.1 |
 
-Обработка и файловые операции выполняются вне потока интерфейса.
-Аудио хранится в файлах, стенограммы и пользовательские изменения — в JSON.
+Processing and file operations run off the UI thread.
+Audio is stored in files; transcripts and user changes are stored in JSON.
 
-Подробности: [архитектура](docs/ARCHITECTURE.md), [ASR и VAD](docs/asr-models.md), [диаризация](docs/diarization-models.md), [формат экспорта](docs/PROTOCOL.md).
+Details: [architecture](docs/ARCHITECTURE.md), [ASR and VAD](docs/asr-models.md), [diarization](docs/diarization-models.md), [export format](docs/PROTOCOL.md).
 
-## Ограничения
+## Limitations
 
-- Плохое качество аудио (шумы, помехи, накладывающиеся голоса) портят качество ASR и диаризации.
-- Прерванная завершением процесса обработка автоматически не возобновляется.
-- APK подписан debug-ключом.
-Установка поверх версии с другой подписью может потребовать удаления приложения и его локальных данных.
+- Poor audio quality, noise, interference, and overlapping voices reduce ASR and diarization accuracy.
+- Processing interrupted by process termination does not resume automatically.
+- The APK uses a debug signing key.
+Installing it over a version signed with another key may require removing the app and its local data.
 
-[Подробное описание ограничений](docs/LIMITATIONS.md).
+[Detailed limitations](docs/LIMITATIONS.md).
 
-## Результаты собственных тестов
+## Test results
 
-### Распознавание речи — WER
+### Speech recognition — WER
 
-**GigaAM v3 int8: WER 3,40% на 30 записях FLEURS validation без учёта пунктуации.**
-Модель распознаёт русский текст и расставляет знаки препинания без отдельного постпроцессора.
+**GigaAM v3 int8: 3.40% WER on 30 FLEURS validation recordings, excluding punctuation.**
+The model recognizes Russian speech and adds punctuation without a separate postprocessor.
 
-| Набор | Объём | WER |
+| Dataset | Size | WER |
 | --- | ---: | ---: |
-| FLEURS validation | 30 записей | 3,40% |
-| MINDS-14 | 120 записей | 15,59% |
-| Astrology | 189,778 с | 9,23% |
-| Movie | 183,125 с | 14,54% |
+| FLEURS validation | 30 recordings | 3.40% |
+| MINDS-14 | 120 recordings | 15.59% |
+| Astrology | 189.778 s | 9.23% |
+| Movie | 183.125 s | 14.54% |
 
-WER (Word Error Rate) учитывает замены, пропуски и лишние слова; меньше — лучше.
-В таблице пунктуация не учитывается; это правило нормализации, а не отдельная метрика.
+WER (Word Error Rate) counts substitutions, deletions, and insertions; lower is better.
+Punctuation is excluded in this table; this is a normalization rule, not a separate metric.
 
-### Разделение по говорящим — DER
+### Speaker diarization — DER
 
-**Pyannote + ERes2Net VoxCeleb: DER 16,01–22,62% на двух приведённых разговорных записях.**
-Использованы первые фрагменты тех же источников и той же длительности, что в таблице WER.
+**Pyannote + ERes2Net VoxCeleb: 16.01–22.62% DER on the two conversation recordings below.**
+The evaluated prefixes use the same sources and durations as the WER table.
 
-| Набор | Объём | DER |
+| Dataset | Size | DER |
 | --- | ---: | ---: |
-| Astrology | 189,778 с | 16,01% |
-| Movie | 183,125 с | 22,62% |
+| Astrology | 189.778 s | 16.01% |
+| Movie | 183.125 s | 22.62% |
 
-DER (Diarization Error Rate) учитывает пропущенную речь, лишнюю речь и путаницу участников; меньше — лучше.
-Оценка выполнена без исключения окрестностей границ, с учётом одновременной речи и оптимальным сопоставлением идентификаторов участников.
-Это отдельный запуск текущего алгоритма диаризации на компьютере, до совмещения с ASR; WER и RTF получены в прежнем прогоне приложения.
-Исходные WAV прежнего прогона не сохранились, поэтому совпадение файлов до байта не подтверждено.
-Эталонная разметка взята из опубликованного датасета и независимо вручную не проверена.
-[Результаты, настройки и контрольные суммы](artifacts/test-results/diarization-prefixes-2026-11-08/report.json).
+DER (Diarization Error Rate) counts missed speech, false speech, and speaker confusion; lower is better.
+Evaluation uses zero boundary collar, includes overlapping speech, and optimally maps speaker IDs.
 
-### Скорость обработки — RTF
+### Processing speed — RTF
 
-**В опубликованном прогоне полная обработка двух приведённых разговорных записей выполнялась быстрее реального времени: RTF 0,53–0,56.**
-RTF (Real-Time Factor) — отношение времени обработки к длительности аудио; значение ниже 1 означает обработку быстрее реального времени.
-Время включает импорт, ASR, диаризацию, сохранение и экспорт.
+**In the published run, full processing of the two conversation recordings was faster than real time: RTF 0.53–0.56.**
+RTF (Real-Time Factor) is processing time divided by audio duration; values below 1 indicate faster-than-real-time processing.
+Timing includes import, ASR, diarization, saving, and export.
 
-| Запись | Длительность аудио | Время обработки | RTF |
+| Recording | Audio duration | Processing time | RTF |
 | --- | ---: | ---: | ---: |
-| Astrology | 189,78 с | 100,63 с | 0,530 |
-| Movie | 183,13 с | 103,18 с | 0,563 |
-
-RTF получен на Android-эмуляторе API 36 x86-64 в прежней версии приложения, до изменений диаризации в задаче №33.
-Новый замер полной обработки не выполнялся.
+| Astrology | 189.78 s | 100.63 s | 0.530 |
+| Movie | 183.13 s | 103.18 s | 0.563 |

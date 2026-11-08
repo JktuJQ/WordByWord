@@ -1,61 +1,61 @@
-# Архитектура
+# Architecture
 
-Android-приложение написано на Java, интерфейс — XML.
-Весь пользовательский сценарий выполняется на устройстве без отправки аудио или текста на сервер.
+The Android app is written in Java with an XML interface.
+The entire user workflow runs on the device without sending audio or text to a server.
 
-## Компоненты
+## Components
 
-| Пакет | Назначение |
+| Package | Responsibility |
 | --- | --- |
-| `core` | Типы данных, обработка аудио, ASR, диаризация и совмещение реплик |
-| `processing` | Запуск конвейера, прогресс и отмена |
-| `storage`, `json` | Файловое хранилище и сериализация |
-| `export` | JSON для внешнего использования |
-| `summary` | Выбор ключевых фрагментов стенограммы локальной LLM |
-| `ui` | Состояние приложения, документы, воспроизведение и экраны |
-| `ui/widget` | Декоративные Android View |
+| `core` | Data types, audio preparation, ASR, diarization, and utterance alignment |
+| `processing` | Pipeline execution, progress, and cancellation |
+| `storage`, `json` | File storage and serialization |
+| `export` | JSON for external use |
+| `summary` | Selection of key transcript passages using a local LLM |
+| `ui` | Application state, documents, playback, and screens |
+| `ui/widget` | Decorative Android views |
 
-`WordByWordApplication` создаёт контроллер, репозиторий и исполнители.
-Activity подключаются к состоянию контроллера и передают пользовательские действия.
-`PlaybackControls` связывает кнопки и SeekBar с `TranscriptPlayback` на экранах записи и стенограммы.
+`WordByWordApplication` creates the controller, repository, and executors.
+Activities observe controller state and forward user actions.
+`PlaybackControls` connects buttons and the SeekBar to `TranscriptPlayback` on the recording and transcript screens.
 
-## Конвейер
+## Pipeline
 
-1. Импорт сохраняет приватную копию аудио через `FileTranscriptRepository`.
-2. `AndroidAudioPreparer` декодирует запись через MediaExtractor/MediaCodec в PCM 16 кГц, моно.
-При понижении частоты применяется фильтр перед ресэмплингом.
-3. `SherpaSpeechRecognizer` использует Silero VAD и GigaAM v3 RNNT int8.
-4. `SherpaOnnxSpeakerDiarizer` получает речевые интервалы и объединяет голосовые признаки ERes2Net VoxCeleb по участникам.
-5. `OverlapTranscriptAssembler` назначает текст участникам по временному перекрытию и объединяет соседние фрагменты одного говорящего.
-6. Результат сохраняется, отображается в интерфейсе и экспортируется через `TranscriptJsonExporter`.
+1. Import saves a private audio copy through `FileTranscriptRepository`.
+2. `AndroidAudioPreparer` decodes the recording with MediaExtractor/MediaCodec into 16 kHz mono PCM.
+A filter is applied before downsampling.
+3. `SherpaSpeechRecognizer` uses Silero VAD and GigaAM v3 RNNT int8.
+4. `SherpaOnnxSpeakerDiarizer` obtains speech intervals and groups ERes2Net VoxCeleb voice features by speaker.
+5. `OverlapTranscriptAssembler` assigns text to speakers by temporal overlap and merges adjacent fragments from the same speaker.
+6. The result is saved, displayed, and exported through `TranscriptJsonExporter`.
 
-По умолчанию ASR и диаризация выполняются параллельно.
-Параметр сборки `-PparallelInference=false` включает последовательный режим.
-Вычисления и файловые операции выполняются вне UI-потока.
-Отмена проверяется между операциями и этапами; один JNI-вызов не прерывается немедленно.
+ASR and diarization run in parallel by default.
+The `-PparallelInference=false` build option enables sequential execution.
+Computation and file operations run off the UI thread.
+Cancellation is checked between operations and stages; an individual JNI call is not interrupted immediately.
 
-## Данные и хранение
+## Data and storage
 
-`Recording` содержит ID, URI, название и доступную длительность записи.
-`Transcript` объединяет запись, участников и реплики с текстом и временными границами.
-`RecognitionResult` передаёт текст и временные фрагменты из распознавания в совмещение.
+`Recording` contains the recording ID, URI, title, and duration when available.
+`Transcript` combines the recording, speakers, and utterances with text and time boundaries.
+`RecognitionResult` passes text and timed fragments from recognition to alignment.
 
-Хранилище создаёт отдельный каталог на запись с копией аудио и `recording.json` версии 2.
-Прежний формат версии 1 читается для совместимости.
-Изменения метаданных записываются через временный файл и атомарное переименование.
-Незавершённая обработка после остановки процесса автоматически не восстанавливается.
-Внешняя схема JSON описана в [PROTOCOL.md](PROTOCOL.md).
+Storage creates a directory per recording with an audio copy and version 2 `recording.json`.
+The previous version 1 format remains readable for compatibility.
+Metadata changes use a temporary file and atomic rename.
+Incomplete processing does not resume automatically after process termination.
+The external JSON schema is described in [PROTOCOL.md](PROTOCOL.md).
 
-## Краткое содержание
+## Summarization
 
-`SummaryRunner` управляет операцией, `LocalSummarizer` выбирает выдержки текста через Qwen3-0.6B INT4, `SummaryStore` сохраняет `summary.json` рядом с записью.
-Суммаризация не выполняется одновременно с обработкой аудио.
-Результат привязан к тексту, именам участников и версии алгоритма.
-Исходная стенограмма и обязательный экспорт не меняются.
+`SummaryRunner` manages the operation, `LocalSummarizer` selects passages through Qwen3-0.6B INT4, and `SummaryStore` saves `summary.json` beside the recording.
+Summarization does not run concurrently with audio processing.
+The result is keyed to the text, speaker names, and algorithm version.
+The original transcript and required export remain unchanged.
 
-## Сборка и проверка
+## Build and validation
 
-`app/gradle/models.gradle` подготавливает модели с проверкой SHA-256, `app/gradle/distribution.gradle` упаковывает APK и сведения о сборке.
-JVM-модуль `evaluation` содержит скореры и не включается в APK.
-Android-проверки запускают используемые приложением модели и конвейер.
-Условия и результаты измерений приведены в [TEST_RESULTS.md](TEST_RESULTS.md).
+`app/gradle/models.gradle` prepares models with SHA-256 verification; `app/gradle/distribution.gradle` packages the APK and build metadata.
+The `evaluation` JVM module contains scorers and is not included in the APK.
+Android checks run the application's models and pipeline.
+Measurement conditions and results are recorded in [TEST_RESULTS.md](TEST_RESULTS.md).

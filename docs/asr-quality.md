@@ -1,105 +1,105 @@
-# Качество ASR — #32
+# ASR quality — #32
 
-Целевое устройство — Sony Xperia 10 V.
-Версию Android, RAM и результаты на телефоне фиксируем после прогона.
-Ниже приведены измерения на Linux x86-64, а не скорость телефона.
+The target device is Sony Xperia 10 V.
+Record the Android version, RAM, and phone results after testing.
+The measurements below are from Linux x86-64, not phone timing.
 
-## Сравнение текста
+## Text comparison
 
-Презентация хакатона требует WER, но не задаёт нормализацию и токенизацию.
-Для собственных измерений команда использует `ru-punctuation-v2-cardinal-integers`:
+The hackathon presentation requires WER but does not specify normalization or tokenization.
+For team measurements, we use `ru-punctuation-v2-cardinal-integers`:
 
-- Основные WER/CER учитывают пунктуацию; знаки считаются отдельными токенами WER.
-- Регистр и различие е/ё не учитываются; варианты кавычек и тире приводятся к одному виду.
-- Целые неотрицательные количественные числительные сравниваются по значению, включая распространённые падежные формы.
-- `4 892` и «четыре тысячи восемьсот девяносто два», `2 млн` и «двух миллионов» эквивалентны.
-- `%` и слово «процент» после числа эквивалентны; единица сохраняется и в лексической оценке.
-- Ведущие нули сохраняются; «тысячи лет» не превращается в «1000 лет».
-- Порядковые числительные, дроби и неоднозначные отдельные формы вроде «сорока» автоматически не приравниваются к цифрам.
+- Primary WER/CER include punctuation; punctuation marks are separate WER tokens.
+- Case and the distinction between Russian е/ё are ignored; quotation marks and dashes are canonicalized.
+- Non-negative cardinal integers are compared by value, including common Russian inflected forms.
+- `4 892` and “четыре тысячи восемьсот девяносто два”, or `2 млн` and “двух миллионов”, are equivalent.
+- `%` and the Russian word “процент” after a number are equivalent; the unit is preserved in lexical scoring too.
+- Leading zeros are preserved; “тысячи лет” is not converted to “1000 лет”.
+- Ordinals, fractions, and ambiguous standalone forms such as “сорока” are not automatically mapped to digits.
 
-Нормализация применяется к обеим сторонам только при оценке и не меняет стенограмму или экспорт.
-Дополнительные `lexical_wer`/`lexical_cer` исключают пунктуацию и помогают отделить ошибки слов от оформления.
-Исторические метрики, полученные с удалением пунктуации, напрямую с новым основным WER не сравниваются.
+Normalization is applied to both sides only during scoring and does not change the transcript or export.
+Additional `lexical_wer`/`lexical_cer` metrics exclude punctuation and separate word errors from formatting errors.
+Historical punctuation-free metrics are not directly comparable with the new primary WER.
 
-## Эталоны
+## References
 
-В FLEURS `reference` содержит нормализованную транскрипцию без пунктуации.
-Для основного WER добавлено `reference_raw` из исходного `raw_transcription` того же примера.
-Для всех 30 записей сверены ID и совпадение исходной нормализованной транскрипции с сохранённым эталоном.
-Источник указан в `evaluation/fixtures/asr/fleurs-validation.json`.
-Основной WER/CER использует `reference_raw`, лексические метрики — прежний `reference`.
+In FLEURS, `reference` contains normalized transcription without punctuation.
+For primary WER, `reference_raw` was added from the same sample's original `raw_transcription`.
+For all 30 recordings, IDs and the original normalized transcription were checked against the stored reference.
+The source is recorded in `evaluation/fixtures/asr/fleurs-validation.json`.
+Primary WER/CER use `reference_raw`; lexical metrics use the previous `reference`.
 
-У MINDS-14 нет проверенного пунктуационного эталона.
-На нём сравниваем лексические метрики; основной WER технически вычисляется, но не используется для выбора модели.
-Ошибки исходной разметки не исправляем по выводу кандидата.
+MINDS-14 has no verified punctuation reference.
+We compare lexical metrics on that dataset; primary WER is calculated but is not used for model selection.
+Source annotation errors are not corrected to match a candidate's output.
 
-## Условия
+## Conditions
 
-sherpa-onnx 2.0.1, CPU, два потока ASR, Silero VAD, максимум речи 15 с, контекст 200 мс.
-Вход — одинаковый PCM16 LE, 16 кГц, моно.
-Время включает VAD и загрузку ASR для каждого файла, но исключает внешнюю подготовку PCM.
-Прогоны последовательные, с ограничением 3 ГБ RAM и двух CPU, без эмулятора.
-Параметры VAD между кандидатами не менялись.
+sherpa-onnx 2.0.1, CPU, two ASR threads, Silero VAD, maximum speech duration 15 s, context 200 ms.
+Input is identical PCM16 LE, 16 kHz, mono.
+Timing includes VAD and ASR loading for each file but excludes external PCM preparation.
+Runs are sequential, limited to 3 GB RAM and two CPUs, without an emulator.
+VAD settings were unchanged between candidates.
 
-Все таблицы рассчитаны одним финальным скорером по сохранённым гипотезам.
-Отчёты пересчёта находятся в `evaluation/results/asr32/*-score.json`.
-Исходные файлы без суффикса `-score` содержат гипотезы, интервалы, время и SHA-256 моделей; встроенные в них промежуточные метрики могут отличаться.
-Каталог результатов исключён из Git.
+All tables were calculated with the same final scorer from saved hypotheses.
+Rescoring reports are in `evaluation/results/asr32/*-score.json`.
+Original files without the `-score` suffix contain hypotheses, intervals, timing, and model SHA-256 hashes; their embedded intermediate metrics may differ.
+The results directory is excluded from Git.
 
 ## FLEURS validation
 
-30 записей, 358,44 с; не полный официальный тест и не многоголосые разговоры.
+30 recordings, 358.44 s; not the full official test or multi-speaker conversations.
 
-| Модель | WER с пунктуацией | CER с пунктуацией | Лексический WER | Лексический CER | Время | RTF |
+| Model | WER with punctuation | CER with punctuation | Lexical WER | Lexical CER | Time | RTF |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| GigaAM v2 RNNT int8 | 18,23% | 4,75% | 4,25% | 2,10% | 66,64 с | 0,186 |
-| GigaAM v3 RNNT int8, punctuation | 7,09% | 2,31% | 3,74% | 1,63% | 51,89 с | 0,145 |
-| Parakeet TDT 0.6B v3 int8 | 9,99% | 3,14% | 6,97% | 2,45% | 88,16 с | 0,246 |
+| GigaAM v2 RNNT int8 | 18.23% | 4.75% | 4.25% | 2.10% | 66.64 s | 0.186 |
+| GigaAM v3 RNNT int8, punctuation | 7.09% | 2.31% | 3.74% | 1.63% | 51.89 s | 0.145 |
+| Parakeet TDT 0.6B v3 int8 | 9.99% | 3.14% | 6.97% | 2.45% | 88.16 s | 0.246 |
 
-V3 улучшает суммарные метрики, но отдельные слова распознаёт хуже: например, «оцелоты» у v2 превращаются в «ацелоты».
-Остаются лишние точки на границах VAD-фрагментов: «ночного видения. И почти незаметно передвигаться» вместо единого предложения.
+V3 improves aggregate metrics, but individual words can still be misrecognized; for example, v2 renders “оцелоты” as “ацелоты”.
+Extra periods remain at VAD boundaries: “ночного видения. И почти незаметно передвигаться” instead of a single sentence.
 
 ## MINDS-14
 
-Development: 30 записей, 271,41 с; evaluation: отдельные 60 записей, 470,78 с.
-Разделение сделано до этих экспериментов и не менялось по результатам кандидатов.
-Эти выборки разделены по записям; независимость говорящих не установлена.
+Development: 30 recordings, 271.41 s; evaluation: a separate 60 recordings, 470.78 s.
+The split was made before these experiments and was not adjusted based on candidate results.
+These splits separate recordings; speaker independence has not been established.
 
-| Модель | Dev: лексический WER / CER | Evaluation: лексический WER / CER | Evaluation: время / RTF |
+| Model | Dev: lexical WER / CER | Evaluation: lexical WER / CER | Evaluation: time / RTF |
 | --- | ---: | ---: | ---: |
-| GigaAM v2 int8 | 22,43% / 13,83% | 11,89% / 5,65% | 111,16 с / 0,236 |
-| GigaAM v3 punct int8 | 22,90% / 13,55% | 11,66% / 5,82% | 82,43 с / 0,175 |
-| Parakeet v3 int8 | 23,13% / 14,84% | 19,00% / 11,05% | 151,17 с / 0,321 |
+| GigaAM v2 int8 | 22.43% / 13.83% | 11.89% / 5.65% | 111.16 s / 0.236 |
+| GigaAM v3 punct int8 | 22.90% / 13.55% | 11.66% / 5.82% | 82.43 s / 0.175 |
+| Parakeet v3 int8 | 23.13% / 14.84% | 19.00% / 11.05% | 151.17 s / 0.321 |
 
-На MINDS преимущество v3 неоднородно и невелико; статистическую значимость не оценивали.
-Увеличение модели до Parakeet в этих условиях не улучшило результат.
+V3's advantage on MINDS is small and inconsistent; statistical significance was not assessed.
+Using the larger Parakeet model did not improve results under these conditions.
 
-## Решение
+## Decision
 
-В этой ветке подготовлена GigaAM v3 punctuation int8 вместо v2.
-Основание — снижение ошибок пунктуации и слов на FLEURS без заметного ухудшения лексического WER на MINDS.
-Проверка на Xperia остаётся условием принятия сборки; issue пока не закрываем.
+This work prepared GigaAM v3 punctuation int8 as a replacement for v2.
+The basis was fewer punctuation and word errors on FLEURS without a substantial lexical WER regression on MINDS.
+Xperia validation remains a condition for accepting the build; the issue was left open at this stage.
 
-## Проверка Android
+## Android validation
 
-Изолированный эмулятор API 36, x86-64, 4096 МиБ RAM, два виртуальных CPU; процесс эмулятора ограничен двумя CPU и 6 ГБ памяти хоста.
-Проверка выполнена с выключенными Wi-Fi и мобильными данными, модели взяты из APK через `AssetManager`.
-Gradle во время прогона не работал.
+An isolated API 36 x86-64 emulator with 4096 MiB RAM and two virtual CPUs; the emulator process was limited to two CPUs and 6 GB host memory.
+Wi-Fi and mobile data were disabled; models were read from the APK through `AssetManager`.
+Gradle was not running during the test.
 
-FLEURS: 30/30 успешных обработок; WER с пунктуацией 6,95%, CER 2,28%, лексический WER 3,40%, лексический CER 1,57%.
-Суммарное время ASR-прогона — 119,02 с, RTF 0,332; включает AndroidAudioPreparer, VAD и загрузку модели для каждого файла.
-`VmHWM` процесса — 809,88 МиБ; это пик RSS ASR-прогона, а не PSS полного pipeline.
-Отчёты: `evaluation/results/asr32/android-fleurs-v3.json` и `android-fleurs-v3-score.json`.
+FLEURS: 30/30 successful runs; WER with punctuation 6.95%, CER 2.28%, lexical WER 3.40%, lexical CER 1.57%.
+Total ASR run time was 119.02 s, RTF 0.332; this includes AndroidAudioPreparer, VAD, and model loading for each file.
+Process `VmHWM` was 809.88 MiB; this is peak RSS for the ASR run, not PSS for the full pipeline.
+Reports: `evaluation/results/asr32/android-fleurs-v3.json` and `android-fleurs-v3-score.json`.
 
-Полный pipeline с параллельными ASR и диаризацией обработал `rec_0055.flac` за 32,736 с, RTF 0,546.
-Instrumentation-проверка завершилась успешно; экспорт содержит корневой массив `transcript` и четыре реплики.
-Это функциональная проверка: эталона текста для оценки WER этой записи здесь нет.
-Время и память телефона ещё не измерены; отмена с новой моделью отдельно на Android не проверена.
-JVM-тесты и `lintDebug` прошли; lint оставил существующие предупреждения интерфейса.
+The full pipeline with parallel ASR and diarization processed `rec_0055.flac` in 32.736 s, RTF 0.546.
+Instrumentation completed successfully; the export contains a root `transcript` array and four utterances.
+This is a functional check: no text reference for WER scoring of this recording is available here.
+Phone timing and memory have not yet been measured; cancellation with the new model was not separately checked on Android.
+JVM tests and `lintDebug` passed; lint retained existing UI warnings.
 
-Кандидаты загружены из официальных релизов sherpa-onnx:
+Candidates were downloaded from official sherpa-onnx releases:
 
 - [GigaAM v3 RNNT punctuation](https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-nemo-transducer-punct-giga-am-v3-russian-2025-12-16.tar.bz2), MIT; SHA-256 `f9620a0099019c6afcee26525ef9ed3297fa50dd5691c1902af0c948fc1a470b`.
-- [Parakeet v3 int8](https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8.tar.bz2), [модель NVIDIA](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3), CC-BY-4.0; SHA-256 `1495e91b59d7fc53ddca91f3431758ec99f8fa253fdb0e1e851be0f72b14b0f9`.
+- [Parakeet v3 int8](https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8.tar.bz2), [NVIDIA model](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3), CC-BY-4.0; SHA-256 `1495e91b59d7fc53ddca91f3431758ec99f8fa253fdb0e1e851be0f72b14b0f9`.
 
-Для PR #44 требуется проверить BPE-токены v3: прежние предположения о посимвольных токенах v2 переносить нельзя.
+PR #44 requires checking v3 BPE tokens: assumptions about v2 character tokens cannot be reused unchanged.

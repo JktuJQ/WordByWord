@@ -1,20 +1,20 @@
-# Сборка и установка
+# Building and installation
 
 ## Android Studio
 
-Откройте корень проекта и выберите Gradle JDK 21.
-В SDK Manager установите Android SDK Platform 36, Build Tools 36.0.0 и Platform Tools.
-Путь к SDK хранится в `local.properties`.
-Для эмулятора также установите Android Emulator и системный образ API 36.
-На Windows можно собрать и запустить приложение кнопкой Run.
-Для командной строки используйте `gradlew.bat`.
+Open the project root and select Gradle JDK 21.
+In SDK Manager, install Android SDK Platform 36, Build Tools 36.0.0, and Platform Tools.
+The SDK path is stored in `local.properties`.
+For an emulator, also install Android Emulator and an API 36 system image.
+On Windows, use the Run button to build and launch the app.
+Use `gradlew.bat` for command-line builds.
 
-## Командная строка без Nix
+## Command line without Nix
 
-Установите JDK 21 и [Android SDK Command-line Tools](https://developer.android.com/studio#command-tools).
-Укажите путь JDK в `JAVA_HOME`, путь SDK — в `ANDROID_HOME`.
-Обычный путь SDK в Linux — `$HOME/Android/Sdk`, в macOS — `$HOME/Library/Android/sdk`.
-Команды ниже рассчитаны на Bash и Command-line Tools в `cmdline-tools/latest`:
+Install JDK 21 and [Android SDK Command-line Tools](https://developer.android.com/studio#command-tools).
+Set `JAVA_HOME` to the JDK path and `ANDROID_HOME` to the SDK path.
+Typical SDK locations are `$HOME/Android/Sdk` on Linux and `$HOME/Library/Android/sdk` on macOS.
+The commands below use Bash and Command-line Tools installed under `cmdline-tools/latest`:
 
 ```sh
 export ANDROID_HOME="$HOME/Android/Sdk"
@@ -24,47 +24,47 @@ sdkmanager "platforms;android-36" "build-tools;36.0.0" "platform-tools"
 ./gradlew --no-daemon --no-parallel --max-workers=1 :app:packageDemoApk
 ```
 
-Проект использует Java/XML, AGP 8.13.2 и Gradle 8.14.6.
-Для первой сборки нужен интернет.
-Задачи `prepareAsrModels` и `prepareDiarizationModels` скачивают модели, проверяют SHA-256 и включают их в APK.
-Дополнительная установка моделей на телефон не требуется.
-sherpa-onnx подключён как AAR с JNI-библиотеками, поэтому NDK и CMake для сборки не нужны.
-Python и FFmpeg также не требуются.
-Источники и версии моделей указаны в документации [ASR](asr-models.md) и [диаризации](diarization-models.md).
+The project uses Java/XML, AGP 8.13.2, and Gradle 8.14.6.
+The first build requires internet access.
+`prepareAsrModels` and `prepareDiarizationModels` download models, verify SHA-256 checksums, and bundle them in the APK.
+No additional model installation on the phone is required.
+sherpa-onnx is included as an AAR with JNI libraries, so NDK and CMake are not required for the build.
+Python and FFmpeg are not required either.
+Model sources and versions are documented under [ASR](asr-models.md) and [diarization](diarization-models.md).
 
-## Результат сборки
+## Build output
 
-Задача `:app:packageDemoApk` записывает в `artifacts/apk/`:
+`:app:packageDemoApk` writes the following files to `artifacts/apk/`:
 
-- `wordbyword-0.1.0-debug.apk` с debug-подписью;
-- файл `.sha256` с контрольной суммой;
-- JSON с commit, состоянием исходников, ABI, параметрами сборки и хешами моделей.
+- `wordbyword-0.1.0-debug.apk`, signed with a debug key;
+- a `.sha256` checksum file;
+- JSON containing the commit, source state, ABIs, build options, and model hashes.
 
-Проверка суммы из `artifacts/apk/`:
+Verify the checksum from `artifacts/apk/`:
 
 ```sh
 sha256sum -c wordbyword-0.1.0-debug.apk.sha256
 ```
 
-В macOS используйте `shasum -a 256 -c wordbyword-0.1.0-debug.apk.sha256`.
-Бинарные файлы исключены из Git; GitHub не принимает обычные Git-файлы больше 100 МиБ, поэтому готовый APK следует публиковать отдельным артефактом с постоянной ссылкой.
-Повторная сборка той же версии заменяет эти файлы.
-Стандартный результат `assembleDebug` находится в `app/build/outputs/apk/debug/app-debug.apk`.
-Параллельная обработка включена по умолчанию.
-Для последовательной сборки передайте `-PparallelInference=false`.
-Условия измерений приведены в [TEST_RESULTS.md](TEST_RESULTS.md).
+On macOS, use `shasum -a 256 -c wordbyword-0.1.0-debug.apk.sha256`.
+Binaries are excluded from Git; GitHub does not accept regular Git files larger than 100 MiB, so publish the APK separately with a permanent link.
+Rebuilding the same version replaces these files.
+The standard `assembleDebug` output is `app/build/outputs/apk/debug/app-debug.apk`.
+Parallel processing is enabled by default.
+Pass `-PparallelInference=false` to build with sequential processing.
+Measurement conditions are in [TEST_RESULTS.md](TEST_RESULTS.md).
 
-Debug-подпись использует ключ `~/.android/debug.keystore`.
-Для release-сборки нужен постоянный ключ, который не хранится в Git.
-Если подпись новой APK отличается, Android не разрешит обновить установленное приложение.
-Перед удалением старой версии экспортируйте нужные результаты: удаление приложения стирает библиотеку.
+Debug signing uses `~/.android/debug.keystore`.
+A release build requires a persistent signing key kept outside Git.
+Android will not update an installed app if the new APK has a different signature.
+Export any needed results before uninstalling the old version: uninstalling deletes the library.
 
-## Эмулятор
+## Emulator
 
-Установите системный образ и создайте AVD.
-Команды ниже используют x86-64.
-На Apple Silicon замените `x86_64` на `arm64-v8a` в обеих строках с образом.
-Требования к виртуализации приведены в [документации Android Emulator](https://developer.android.com/studio/run/emulator-acceleration).
+Install a system image and create an AVD.
+The commands below use x86-64.
+On Apple Silicon, replace `x86_64` with `arm64-v8a` in both system image references.
+Virtualization requirements are in the [Android Emulator documentation](https://developer.android.com/studio/run/emulator-acceleration).
 
 ```sh
 sdkmanager "emulator" "system-images;android-36;google_apis;x86_64"
@@ -72,8 +72,8 @@ avdmanager create avd --name wordbyword-api36 --package "system-images;android-3
 emulator -avd wordbyword-api36 -memory 4096 -cores 2 -no-snapshot
 ```
 
-На вопрос о custom hardware profile ответьте `no`.
-Параметры экрана можно задать в Device Manager или в `~/.android/avd/wordbyword-api36.avd/config.ini` при выключенном эмуляторе:
+Answer `no` when asked about a custom hardware profile.
+Display settings can be changed in Device Manager or in `~/.android/avd/wordbyword-api36.avd/config.ini` while the emulator is stopped:
 
 ```ini
 hw.lcd.width=1080
@@ -81,48 +81,48 @@ hw.lcd.height=1920
 hw.lcd.density=420
 ```
 
-После загрузки Android установите и откройте приложение из другого терминала с тем же SDK PATH:
+After Android boots, install and open the app from another terminal with the same SDK PATH:
 
 ```sh
 adb -e install -r artifacts/apk/wordbyword-0.1.0-debug.apk
 adb -e shell am start -n dev.wordbyword.app/.MainActivity
 ```
 
-При нескольких подключённых устройствах используйте `adb -s SERIAL`.
-Список устройств выводит `adb devices`.
-С Nix AVD создаёт и запускает команда `nix run .#start-emulator`.
-На машине с ограниченной RAM собирайте APK при выключенном эмуляторе.
+With multiple connected devices, use `adb -s SERIAL`.
+List devices with `adb devices`.
+With Nix, `nix run .#start-emulator` creates and launches the AVD.
+On a memory-constrained machine, build the APK while the emulator is stopped.
 
-## Приёмка на телефоне
+## Phone acceptance checklist
 
-Установите APK на 64-битный телефон с Android 8.0+ и включите режим полёта.
-Контрольные записи находятся в [dialogs](../evaluation/fixtures/dialogs/SOURCE.md) и [diarization](../evaluation/fixtures/diarization/SOURCE.md).
+Install the APK on a 64-bit phone running Android 8.0+ and enable airplane mode.
+Test recordings are documented under [dialogs](../evaluation/fixtures/dialogs/SOURCE.md) and [diarization](../evaluation/fixtures/diarization/SOURCE.md).
 
-1. Импортируйте запись и запустите обработку.
-2. Проверьте текст, участников и таймкоды.
-3. Экспортируйте JSON и проверьте массив `transcript` с полями `speaker_id`, `start_ms`, `end_ms`, `text`.
-4. Нажмите на реплику и проверьте позицию воспроизведения.
-5. Переименуйте участника и проверьте остальные его реплики.
-6. Перезапустите приложение и откройте сохранённую запись.
-7. Проверьте поворот экрана, сворачивание и отмену обработки.
-8. Проверьте тишину и повреждённый файл.
+1. Import a recording and start processing.
+2. Check the text, speakers, and timestamps.
+3. Export JSON and verify the `transcript` array with `speaker_id`, `start_ms`, `end_ms`, and `text` fields.
+4. Tap an utterance and check the playback position.
+5. Rename a speaker and check their other utterances.
+6. Restart the app and open the saved recording.
+7. Check screen rotation, backgrounding, and processing cancellation.
+8. Test silence and a corrupted file.
 
-В отчёте укажите commit и SHA-256 APK, модель телефона, Android, RAM, файл и его длительность.
-Отдельно запишите время обработки, RTF, память и обнаруженные ошибки.
-Сводные результаты и требования к отчёту собраны в [TEST_RESULTS.md](TEST_RESULTS.md).
-Сырые локальные отчёты и JSON-гипотезы размещаются в `evaluation/results/` или `artifacts/test-results/`.
-Правила оценки описаны в [методике тестирования](../evaluation/README.md).
+Record the commit and APK SHA-256, phone model, Android version, RAM, file, and duration.
+Also record processing time, RTF, memory use, and discovered errors.
+Results and reporting requirements are collected in [TEST_RESULTS.md](TEST_RESULTS.md).
+Place raw local reports and JSON hypotheses in `evaluation/results/` or `artifacts/test-results/`.
+Scoring rules are described in the [evaluation guide](../evaluation/README.md).
 
-`measure-on-device.sh` удаляет установленное приложение при выходе.
-Не запускайте его на устройстве с библиотекой, которую нужно сохранить.
+`measure-on-device.sh` uninstalls the app on exit.
+Do not run it on a device whose library you need to preserve.
 
-## Проверки
+## Validation
 
 ```sh
 ./gradlew :evaluation:test :app:testDebugUnitTest :app:assembleDebug :app:lintDebug
 ./gradlew :app:assembleDebugAndroidTest
 ```
 
-CI выполняет основные проверки и публикует APK и отчёты как артефакты workflow.
-Конфигурация находится в [.github/workflows/android.yml](../.github/workflows/android.yml).
-Подготовка моделей и упаковка APK вынесены в `app/gradle/models.gradle` и `app/gradle/distribution.gradle`.
+CI runs the main checks and publishes APKs and reports as workflow artifacts.
+Configuration is in [.github/workflows/android.yml](../.github/workflows/android.yml).
+Model preparation and APK packaging are defined in `app/gradle/models.gradle` and `app/gradle/distribution.gradle`.

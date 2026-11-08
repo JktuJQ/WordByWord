@@ -104,7 +104,7 @@ commercially**, subject only to the standard OpenRAIL use restrictions (no
 unlawful use, no harming minors, no harmful disinformation, no harassment or
 defamation, etc.). Full terms: [LICENSE.md](LICENSE.md). The voice actors gave
 written informed consent for open release and lawful use, including commercial.
-**Запрещено использовать данные материалы в целях нарушающих закон и УК РФ**.
+**Using these materials for purposes that violate the law or the Criminal Code of the Russian Federation is prohibited** (translated from Russian).
 
 If Dialogs is useful to you, please **cite the paper** (below).
 

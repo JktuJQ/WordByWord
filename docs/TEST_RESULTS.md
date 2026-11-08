@@ -1,63 +1,63 @@
-# Методика и результаты тестирования
+# Test methodology and results
 
-## Что означают результаты
+## Interpreting the results
 
-WER/CER оценивают ошибки слов/символов; lexical метрики исключают пунктуацию.
-cpWER учитывает принадлежность текста участникам с оптимальным соответствием ID на всю запись.
-DER оценивает пропуски речи, ложную речь и путаницу участников; при оценке итогового JSON он зависит также от длительности экспортированных реплик.
-Меньшие значения ошибок лучше, но проценты разных наборов и правил нормализации напрямую не сравниваются.
+WER/CER measure word/character errors; lexical metrics exclude punctuation.
+cpWER accounts for speaker attribution using an optimal ID mapping over the entire recording.
+DER measures missed speech, false speech, and speaker confusion; when evaluated from final JSON, it also depends on exported utterance durations.
+Lower error values are better, but percentages from different datasets and normalization rules are not directly comparable.
 
-Полная методика, параметры нормализации, происхождение данных, команды и исторические замеры сохранены в [evaluation/README.md](../evaluation/README.md).
-Сравнение моделей и проверка GigaAM v3 — в [asr-quality.md](asr-quality.md), команды измерений — в [evaluation/README.md](../evaluation/README.md).
+Methods, normalization parameters, data provenance, commands, and historical measurements are documented in [evaluation/README.md](../evaluation/README.md).
+Model comparisons and GigaAM v3 validation are in [asr-quality.md](asr-quality.md); measurement commands are in [evaluation/README.md](../evaluation/README.md).
 
 ## ASR
 
-| Набор | Объём | Lexical WER | WER со знаками | Условия и источник |
+| Dataset | Size | Lexical WER | WER with punctuation | Conditions and source |
 | --- | ---: | ---: | ---: | --- |
-| FLEURS validation | 30 записей | 3,40% | 6,95% | GigaAM v3 int8, Android API 36 x86-64; [отчёт сравнения](asr-quality.md#проверка-android) |
-| MINDS-14 | 120 записей | 15,59% | 40,00% | Пользовательский прогон 8 ноября; у MINDS нет проверенного пунктуационного эталона |
-| Astrology | 189,778 с | 9,23% | 18,71% | Development, полный pipeline на эмуляторе, [CSV](../artifacts/test-results/results.csv) |
-| Movie | 183,125 с | 14,54% | 24,03% | Контрольная запись, тот же прогон |
-| Mavrodi | 193,739 с | 22,83% | 29,89% | Контрольная запись, тот же прогон |
+| FLEURS validation | 30 recordings | 3.40% | 6.95% | GigaAM v3 int8, Android API 36 x86-64; [comparison report](asr-quality.md#android-validation) |
+| MINDS-14 | 120 recordings | 15.59% | 40.00% | User run on November 8; MINDS has no verified punctuation reference |
+| Astrology | 189.778 s | 9.23% | 18.71% | Development, full emulator pipeline, [CSV](../artifacts/test-results/results.csv) |
+| Movie | 183.125 s | 14.54% | 24.03% | Evaluation recording, same run |
+| Mavrodi | 193.739 s | 22.83% | 29.89% | Evaluation recording, same run |
 
-Две контрольные разговорные записи вместе дали lexical WER 18,92% и WER со знаками 27,09%; development в это среднее не включён.
-Эталоны разговоров предварительные, включая пунктуацию; значения не являются окончательной оценкой точности на ручной разметке.
-Выборка состоит из непрерывных префиксов источников PR #48, а не склейки коротких независимых клипов.
-Они уже просмотрены при разборе ошибок и не считаются новым слепым тестом для дальнейшего подбора параметров.
-Инструментальный runner этого прогона не входит в пользовательский APK.
+The two evaluation conversation recordings together yielded 18.92% lexical WER and 27.09% WER with punctuation; development is excluded from this aggregate.
+Conversation references are provisional, including punctuation; these values are not a final accuracy assessment against manually verified annotations.
+The samples are continuous prefixes of sources from PR #48, not concatenations of short independent clips.
+They have already been reviewed during error analysis and are not a new blind test for further parameter tuning.
+The instrumentation runner used for this run is not included in the user APK.
 
-## Полный pipeline: участники и ресурсы
+## Full pipeline: speakers and resources
 
-| Запись | Участники: эталон / результат | cpWER | DER по репликам JSON | Время | RTF |
+| Recording | Speakers: reference / result | cpWER | DER from JSON utterances | Time | RTF |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Astrology | 3 / 4 | 46,88% | 22,10% | 100,63 с | 0,530 |
-| Movie | 3 / 4 | 28,83% | 16,16% | 103,18 с | 0,563 |
-| Mavrodi | 3 / 3 | 89,27% | 50,30% | 79,54 с | 0,411 |
+| Astrology | 3 / 4 | 46.88% | 22.10% | 100.63 s | 0.530 |
+| Movie | 3 / 4 | 28.83% | 16.16% | 103.18 s | 0.563 |
+| Mavrodi | 3 / 3 | 89.27% | 50.30% | 79.54 s | 0.411 |
 
-Условия: Android 16 / API 36, x86-64, четыре online CPU, `parallelInference=true`, Wi-Fi и мобильные данные отключены.
-Android сообщил MemTotal 2 531 836 КиБ; это объём гостевой системы, а не доступный heap приложения.
-Суммарное аудио — 566,642 с, время трёх обработок — 283,341 с.
-Время включает импорт во внутреннее хранилище, production pipeline, сохранение и экспорт, но исключает передачу adb и старт instrumentation.
-Максимальный VmHWM процесса — 863 468 КиБ, около 843,2 МиБ RSS; периодические PSS/RSS могут пропустить пик.
-Это результаты эмулятора, не Sony Xperia 10 V.
+Conditions: Android 16 / API 36, x86-64, four online CPUs, `parallelInference=true`, Wi-Fi and mobile data disabled.
+Android reported MemTotal of 2,531,836 KiB; this is guest system memory, not the application's available heap.
+Total audio duration was 566.642 s; the three processing runs took 283.341 s.
+Timing includes import into private storage, the production pipeline, saving, and export, but excludes adb transfer and instrumentation startup.
+Maximum process VmHWM was 863,468 KiB, approximately 843.2 MiB RSS; periodic PSS/RSS sampling can miss the peak.
+These are emulator results, not Sony Xperia 10 V measurements.
 
-Commit исходной базы приложения — `9b2ce73a2c15410a5e43ad63572514734b904950`, тестовый runner имел локальные изменения.
-SHA-256 проверенного APK — `5120dcf7ae44d48efaae1bfa09b3e19149c04623dd7e28b80302a964f1cab5be`.
-Привязка к этому APK не означает, что любой последующий APK автоматически получает те же результаты.
-Численные строки сохранены в [artifacts/test-results/results.csv](../artifacts/test-results/results.csv); гипотезы и полные локальные отчёты в Git не включаются.
+The application base commit was `9b2ce73a2c15410a5e43ad63572514734b904950`; the test runner had local changes.
+The tested APK SHA-256 was `5120dcf7ae44d48efaae1bfa09b3e19149c04623dd7e28b80302a964f1cab5be`.
+Association with this APK does not automatically extend these results to later builds.
+Numerical rows are retained in [artifacts/test-results/results.csv](../artifacts/test-results/results.csv); hypotheses and complete local reports are not committed.
 
-## Проверки сборки и телефона
+## Build and phone validation
 
-Владелец подтвердил установку и работу приложения на телефоне, но модель устройства, Android, RAM, перечень сценариев и метрики этого подтверждения не записаны.
-Финальная проверка на телефоне выполняется по [чек-листу приёмки](build.md#приёмка-на-телефоне).
+The owner confirmed installation and operation on a phone, but its model, Android version, RAM, checked scenarios, and metrics were not recorded for that confirmation.
+Final phone validation follows the [acceptance checklist](build.md#phone-acceptance-checklist).
 
-В новом отчёте нужно фиксировать:
+A new report must record:
 
-- commit и SHA-256 APK, версии и хеши моделей;
-- модель телефона, Android, RAM и настройки выполнения;
-- запись, её длительность, эталон и статус его проверки;
-- время, RTF, способ измерения памяти и её пик;
-- качество текста, участников и таймкодов;
-- проверенные сценарии, найденные дефекты и невыполненные проверки.
+- commit and APK SHA-256, model versions and hashes;
+- phone model, Android version, RAM, and execution settings;
+- recording, duration, reference, and reference verification status;
+- time, RTF, memory measurement method, and peak memory;
+- text, speaker, and timestamp quality;
+- checked scenarios, discovered defects, and unperformed checks.
 
-Прохождение JVM-тестов и успешное выполнение instrumentation не заменяют измерения качества моделей.
+Passing JVM tests and successful instrumentation do not replace model quality measurements.

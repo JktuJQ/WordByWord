@@ -1,5 +1,5 @@
 # APK
 
-Команда сборки, состав APK и файлов метаданных, проверка суммы, установка и ограничения подписи описаны в [инструкции сборки](../../docs/build.md).
-Готовые APK и сопутствующие файлы создаются здесь задачей `:app:packageDemoApk` и исключены из Git.
-Документация не заменяет постоянную ссылку на опубликованный APK; публикация бинарника не входит в перенос документов.
+Build commands, APK and metadata contents, checksum verification, installation, and signing limitations are described in the [build guide](../../docs/build.md).
+`:app:packageDemoApk` creates APKs and accompanying files here; they are excluded from Git.
+Documentation does not replace a permanent download link; moving documentation does not publish the binary.

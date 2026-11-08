@@ -1,18 +1,18 @@
-# Непрерывные русские разговоры
+# Continuous Russian conversations
 
-Источник: [leshinsky/ru-youtube-diarization](https://huggingface.co/datasets/leshinsky/ru-youtube-diarization), ревизия `e3aaa8a28211afe56c913fcacb26db029b1fb10e`.
-В карточке заявлена Apache-2.0; права на исходные видео независимо не проверены.
-Аудио скачивается локально и не хранится в Git.
-В `sources.json` сохранены пути источников, контрольные суммы и результаты проверки аннотаций.
+Source: [leshinsky/ru-youtube-diarization](https://huggingface.co/datasets/leshinsky/ru-youtube-diarization), revision `e3aaa8a28211afe56c913fcacb26db029b1fb10e`.
+The dataset card declares Apache-2.0; rights to the original videos have not been independently verified.
+Audio is downloaded locally and is not stored in Git.
+`sources.json` records source paths, checksums, and annotation validation results.
 
-Подготовлены 24 случая из пяти исходных разговоров: 20 коротких фрагментов и четыре длинных файла.
-Для больших WAV используются только первые десять минут с окончанием на границе реплики.
-Для Opus сохраняется исходный файл целиком, если его аннотации проходят структурную проверку.
-Короткие фрагменты начинаются после 30, 150, 300 и 450 секунд; целевая длительность — 90 секунд.
-Границы сдвигаются к ближайшим безопасным границам реплик, без разрезания текста и активной речи по опубликованной разметке.
-Выбор сделан до запуска моделей, без отбора по WER/DER.
+There are 24 cases from five source conversations: 20 short excerpts and four long files.
+For large WAVs, only the first ten minutes are used, ending at an utterance boundary.
+Opus files are retained in full if their annotations pass structural validation.
+Short excerpts start after 30, 150, 300, and 450 seconds, with a target duration of 90 seconds.
+Boundaries are shifted to the nearest safe utterance boundaries without cutting text or active speech according to the published annotations.
+Selection was made before running models, without filtering by WER/DER.
 
-| Источник | Часть | Группа | Случаи |
+| Source | Split | Group | Cases |
 | --- | --- | --- | ---: |
 | `astrology` | development | interview-shared-hosts | 4 short + 1 long |
 | `yCX4MRy14zw` | development | interview-shared-hosts | 4 short |
@@ -20,59 +20,59 @@
 | `movie` | evaluation | movie | 4 short + 1 long |
 | `mavrodi` | evaluation | mavrodi | 4 short + 1 long |
 
-Объединение трёх интервью в development — консервативная защита от повторения ведущих и близких выпусков.
-Независимость голосов между всеми источниками не проверена биометрически.
-Нет гарантии отсутствия этих публичных записей в обучающих данных моделей.
-Разделение на части относится только к нашему подбору параметров.
+Grouping three interviews in development is a conservative safeguard against shared hosts and related episodes.
+Voice independence across all sources has not been checked biometrically.
+There is no guarantee that these public recordings are absent from model training data.
+The split applies only to our parameter tuning.
 
-## Качество эталонов
+## Reference quality
 
-Исходник содержит экспорт Label Studio с `manual`, `prediction` и `prediction-changed`.
-Это опубликованные аннотации с правками предсказаний, а не независимо проверенный нами эталон.
-Тексты сохраняются без исправления по выходу оцениваемой модели.
-Таймкоды JSON и RTTM получены из одних интервалов и остаются предварительными.
-DER по ним нельзя выдавать за точность до миллисекунды.
+The source contains a Label Studio export with `manual`, `prediction`, and `prediction-changed` entries.
+These are published annotations with edited predictions, not references independently verified by our team.
+Texts are retained without correction based on the evaluated model's output.
+JSON and RTTM timestamps come from the same intervals and remain provisional.
+Their DER must not be presented as millisecond-accurate evaluation.
 
-При проверке найдены обратные интервалы:
+Validation found reversed intervals:
 
-- `yCX4MRy14zw`: один интервал 296.423–296.403 с.
-  Он не попадает в выбранные короткие окна; полный файл исключён из оценки.
-- `sFt2qKDPrj4`: восемь обратных интервалов, включая расхождения более десяти секунд.
-  Этот источник полностью исключён; причины и исходные значения сохранены в `sources.json`.
+- `yCX4MRy14zw`: one interval at 296.423–296.403 s.
+It lies outside the selected short windows; the full file is excluded from scoring.
+- `sFt2qKDPrj4`: eight reversed intervals, including discrepancies exceeding ten seconds.
+This source is excluded entirely; reasons and original values are retained in `sources.json`.
 
-Интервалы не переставляются и не растягиваются автоматически.
-Короткие окна, пересекающие повреждённую область, отклоняются.
-Перед финальными выводами сверить на слух текст, принадлежность коротких ответов, наложения, музыку и речевые границы на всей оцениваемой части.
-После проверки обновить эталоны и их суммы; не менять их ради совпадения с моделью.
+Intervals are not automatically reordered or stretched.
+Short windows intersecting a corrupted region are rejected.
+Before drawing final conclusions, check text, short-answer attribution, overlaps, music, and speech boundaries by listening across the entire evaluated section.
+After verification, update references and checksums; do not change them to match the model.
 
-## Получение
+## Download and preparation
 
-Python 3.11+ со стандартной библиотекой и FFmpeg/FFprobe в PATH.
-Новых Python-пакетов нет.
-Из корня:
+Python 3.11+ with the standard library and FFmpeg/FFprobe on PATH are required.
+No additional Python packages are needed.
+From the repository root:
 
 ```sh
 python3 evaluation/scripts/prepare_podcasts.py
 python3 evaluation/scripts/check_corpus.py evaluation/fixtures/podcasts/manifest.json --audio
 ```
 
-Скачивается около 263 МБ: два префикса PCM WAV и три небольших Opus, плюс аннотации.
-Сервер обязан поддержать HTTP Range; при игнорировании диапазона загрузка полного гигабайтного WAV запрещена.
-Проверяются суммы аннотаций, Opus и запрошенных диапазонов WAV.
-Суммы целых исходных WAV приведены из upstream, но весь WAV не скачивался и локально не проверялся.
-Кэш и аудио находятся в игнорируемых `cache/` и `audio/`.
-Подготовка использовала FFmpeg 8.1.3.
-Различие с зафиксированным manifest останавливает подготовку; `--refresh-manifest` предназначен для осознанного обновления после ревью.
+Approximately 263 MB is downloaded: two PCM WAV prefixes, three small Opus files, and annotations.
+The server must support HTTP Range; if it ignores the range, downloading the entire gigabyte-scale WAV is prohibited.
+Checksums are verified for annotations, Opus files, and requested WAV ranges.
+Full source WAV checksums are taken from upstream; the full WAVs were not downloaded or verified locally.
+Cache and audio are stored in ignored `cache/` and `audio/` directories.
+Preparation used FFmpeg 8.1.3.
+A mismatch with the pinned manifest stops preparation; `--refresh-manifest` is for deliberate updates after review.
 
-При сохранённом кэше работает офлайн-пересборка:
+With a retained cache, offline rebuilding is available:
 
 ```sh
 python3 evaluation/scripts/prepare_podcasts.py --offline
 ```
 
-## Проверка подготовки (2026-11-07)
+## Preparation validation (2026-11-07)
 
-Проверены контрольные суммы, длительности аудио, интервалы и соответствие JSON/RTTM.
-Офлайн-пересборка из сохранённого кэша воспроизвела зафиксированный manifest.
-Проверка структуры и оценка эталона против себя не являются измерением качества модели.
-Гипотезы на телефоне и независимая акустическая сверка эталонов пока не получены.
+Checksums, audio durations, intervals, and JSON/RTTM consistency were checked.
+Offline rebuilding from the retained cache reproduced the pinned manifest.
+Structural validation and reference-versus-itself scoring do not measure model quality.
+Phone hypotheses and independent acoustic verification of references have not yet been obtained.

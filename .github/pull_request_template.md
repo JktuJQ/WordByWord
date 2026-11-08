@@ -1,31 +1,36 @@
-## Проблема и результат
+## Problem and outcome
 
-<!-- Что меняется для пользователя или разработчика? Для исправления: конкретный пример до/после. -->
+<!-- What changes for the user or developer?
+For a fix, give a concrete before/after example. -->
 
-## Связанные задачи
+## Related issues
 
-<!-- Closes #N — только если все критерии Issue выполнены. Refs #N — если PR закрывает лишь часть работы. -->
+<!-- Use Closes #N only when all acceptance criteria are met.
+Use Refs #N for partial work. -->
 
-## Изменения
+## Changes
 
-<!-- Кратко опишите итоговое решение. Укажите изменения общих контрактов, новые зависимости и потребителей. -->
+<!-- Briefly describe the final implementation, including shared contract changes, new dependencies, and consumers. -->
 
-## Проверки
+## Validation
 
-<!-- Запишите реально выполненные команды и результаты. Для непроведённых проверок укажите причину.
-Для изменения Android-сценария: устройство, Android и пройденные шаги.
-Для ML: модели/runtime, тестовая запись, работа без сети и измерения, если они относятся к задаче.
-Для документации/шаблонов достаточно соответствующих проверок файлов; сборка APK не обязательна. -->
+<!-- Record commands actually run and their results.
+Explain any unperformed checks.
+For Android workflow changes, include the device, Android version, and completed steps.
+For ML, include models/runtime, test recording, offline operation, and relevant measurements.
+Documentation/template changes only need appropriate file checks; an APK build is not required. -->
 
-## Ограничения и последующие задачи
+## Limitations and follow-up
 
-<!-- Известные ограничения, блокеры и ссылки на отдельные Issues. Если их нет, укажите это явно. -->
+<!-- Known limitations, blockers, and links to separate Issues.
+Explicitly state if there are none. -->
 
-## Перед ревью
+## Before review
 
-- [ ] Просмотрен итоговый diff; изменения соответствуют связанной задаче.
-- [ ] Изменения общих контрактов и новые зависимости согласованы с потребителями, если применимо.
-- [ ] Указаны проверки, их результаты и оставшиеся ограничения.
-- [ ] Добавлены или обновлены инструкции, если изменился способ сборки или запуска.
+- [ ] The final diff has been reviewed and matches the related task.
+- [ ] Shared contract changes and new dependencies have been agreed with consumers, if applicable.
+- [ ] Validation, results, and remaining limitations are recorded.
+- [ ] Instructions have been added or updated if building or running has changed.
 
-<!-- Запросите ревью другого участника. После слияния проверьте затронутый сценарий в main. -->
+<!-- Request review from another team member.
+After merging, check the affected workflow on main. -->

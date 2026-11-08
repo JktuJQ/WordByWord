@@ -1,45 +1,45 @@
-# Veche: сценарные встречи
+# Veche: scripted meetings
 
-Источник: [artem-tish/veche-bench](https://huggingface.co/datasets/artem-tish/veche-bench), ревизия `a0ab08d6887b64995d076b475a87310953a51138`.
-Авторы: проект [veche-bench](https://github.com/veche-bench).
-Заявленная лицензия — [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
-Использованы все девять встреч в вариантах `data_raw` и `data_hard`; изменения формата и конвертация аудио выполнены командой WordByWord.
-Тексты и ID взяты из CSV; секунды округлены до миллисекунд, имена заменены устойчивыми `speaker_N`.
-Это зачитанные добровольцами сценарии, собранные в встречи, а не свободные подкасты.
-Эталоны суммаризации, созданные LLM, не используются.
+Source: [artem-tish/veche-bench](https://huggingface.co/datasets/artem-tish/veche-bench), revision `a0ab08d6887b64995d076b475a87310953a51138`.
+Authors: the [veche-bench](https://github.com/veche-bench) project.
+Declared license: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+All nine meetings are used in both `data_raw` and `data_hard` variants; format changes and audio conversion were performed by the WordByWord team.
+Texts and IDs come from CSV; seconds are rounded to milliseconds, and names are replaced with stable `speaker_N` IDs.
+These are scripts read by volunteers and assembled into meetings, not spontaneous podcasts.
+LLM-generated summary references are not used.
 
-Получилось 18 случаев, включая разговоры с двумя–десятью участниками.
-Варианты raw/hard имеют общий текст и голоса; они нужны для парного сравнения устойчивости, а не увеличения числа независимых примеров.
-Все встречи находятся в development: одни добровольцы могли озвучивать разные сценарии.
-Выделять разные версии или роли одного добровольца в независимый тест нельзя.
+There are 18 cases, including conversations with two to ten participants.
+Raw/hard variants share text and voices; they support paired robustness comparisons rather than increasing the number of independent examples.
+All meetings are in development because the same volunteers may have voiced different scripts.
+Different versions or roles voiced by the same volunteer must not be treated as independent tests.
 
-Разметка основана на сценарии и времени сборки исходных реплик.
-Совпадение произнесённого текста со сценарием и точность границ речи независимо не проверены.
-Статус эталонов предварительный; структурная проверка не подтверждает акустическую точность DER.
+Annotations are based on the script and the assembly timing of source utterances.
+Agreement between spoken text and script, and the accuracy of speech boundaries, have not been independently checked.
+References are provisional; structural validation does not establish acoustic DER accuracy.
 
-## Получение
+## Download and preparation
 
-Python 3.11+ со стандартной библиотекой, FFmpeg и FFprobe.
-Из корня:
+Python 3.11+ with the standard library, FFmpeg, and FFprobe are required.
+From the repository root:
 
 ```sh
 python3 evaluation/scripts/prepare_veche.py
 python3 evaluation/scripts/check_corpus.py evaluation/fixtures/veche/manifest.json --audio
 ```
 
-Исходные WAV занимают около 471 МБ.
-Проверяются SHA-256 аудио и Git blob ID CSV зафиксированной ревизии.
-В Git хранятся manifest, ссылки с суммами, JSON и RTTM; WAV, FLAC и кэш игнорируются.
-Локально подготовлено FFmpeg 8.1.3.
-Повторная подготовка с сохранённым кэшем:
+Source WAVs total approximately 471 MB.
+Audio SHA-256 checksums and CSV Git blob IDs are verified against the pinned revision.
+Git stores the manifest, source links and checksums, JSON, and RTTM; WAV, FLAC, and cache files are ignored.
+Local preparation used FFmpeg 8.1.3.
+To rebuild using the retained cache:
 
 ```sh
 python3 evaluation/scripts/prepare_veche.py --offline
 ```
 
-## Проверка подготовки (2026-11-07)
+## Preparation validation (2026-11-07)
 
-Проверены контрольные суммы, длительности аудио, интервалы и соответствие JSON/RTTM.
-Офлайн-пересборка из сохранённого кэша воспроизвела зафиксированный manifest.
-Проверка структуры и оценка эталона против себя не являются измерением качества модели.
-Гипотезы на телефоне и независимая акустическая сверка эталонов пока не получены.
+Checksums, audio durations, intervals, and JSON/RTTM consistency were checked.
+Offline rebuilding from the retained cache reproduced the pinned manifest.
+Structural validation and reference-versus-itself scoring do not measure model quality.
+Phone hypotheses and independent acoustic verification of references have not yet been obtained.

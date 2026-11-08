@@ -1,55 +1,55 @@
-name: Задача
-description: Функция, общий компонент, исследование или инфраструктурная работа
+name: Task
+description: A feature, shared component, investigation, or infrastructure task
 body:
   - type: dropdown
     id: scope
     attributes:
-      label: Область
+      label: Scope
       options:
         - MVP
-        - Расширение после MVP
-        - Инфраструктура и процесс
+        - Post-MVP extension
+        - Infrastructure and process
     validations:
       required: true
   - type: textarea
     id: goal
     attributes:
-      label: Проблема и ожидаемый результат
-      description: Что нужно получить и кому это поможет?
+      label: Problem and expected outcome
+      description: What outcome is needed, and who benefits?
     validations:
       required: true
   - type: textarea
     id: boundaries
     attributes:
-      label: Границы работы
-      description: Что входит в задачу и что остаётся за её пределами?
+      label: Boundaries
+      description: What is included, and what remains out of scope?
     validations:
       required: true
   - type: textarea
     id: dependencies
     attributes:
-      label: Зависимости и существующие интерфейсы
-      description: Ссылки на Issues, PR, общие типы и контракты. Если зависимостей нет, укажите это явно.
-      placeholder: "Зависит от #1. Использует интерфейс ...; изменение контракта согласуется с ..."
+      label: Dependencies and existing interfaces
+      description: Link Issues, PRs, shared types, and contracts. Explicitly state if there are no dependencies.
+      placeholder: "Depends on #1. Uses interface ...; contract changes are coordinated with ..."
     validations:
       required: true
   - type: textarea
     id: acceptance
     attributes:
-      label: Критерии готовности
-      description: Наблюдаемый результат, по которому можно принять задачу.
-      placeholder: "- [ ] Пользователь может ...\n- [ ] После перезапуска ..."
+      label: Acceptance criteria
+      description: Observable outcomes required to accept the task.
+      placeholder: "- [ ] The user can ...\n- [ ] After restarting ..."
     validations:
       required: true
   - type: textarea
     id: validation
     attributes:
-      label: Способ проверки
-      description: Команды, сценарий, тестовые данные и устройство, если оно требуется.
+      label: Validation method
+      description: Commands, workflow, test data, and device if needed.
     validations:
       required: true
   - type: markdown
     attributes:
       value: |
-        Перед началом назначьте одного ответственного в Assignees и выберите статус в Project.
-        Реализацию ведите в отдельной ветке; в PR укажите эту Issue, проверки и ограничения.
+        Before starting, assign one owner in Assignees and select a Project status.
+        Implement on a separate branch; reference this Issue, validation, and limitations in the PR.

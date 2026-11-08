@@ -1,35 +1,35 @@
-# Ограничения текущей версии
+# Current limitations
 
-Документ описывает ограничения `main`, а не обещания экспериментальных веток.
-Состояние обязательных требований и открытые вопросы организаторам приведены в [hackathon.md](hackathon.md).
+This document describes `main`, not promises made by experimental branches.
+Required functionality and open questions for the organizers are recorded in [hackathon.md](hackathon.md).
 
-## Качество
+## Quality
 
-- Точность на читаемой речи не гарантирует ту же точность на разговоре, с шумом, именами и перебиваниями.
-- ASR возвращает таймкоды VAD-фрагментов, а не отдельных слов; смена говорящего внутри блока может привести к неправильному назначению текста.
-- Одновременная речь может распознаваться неполностью; совпадение числа участников с эталоном не означает правильной диаризации.
-- У разговорных наборов предварительные эталоны; их пунктуация, текст и границы не прошли независимую проверку нашей командой.
-- MINDS-14 не содержит проверенного пунктуационного эталона, поэтому основной показатель для этого набора — lexical WER.
-- Небольшие выборки и публичные записи не гарантируют независимости от обучающих данных моделей или результата на неизвестных записях экспертов.
+- Accuracy on read speech does not guarantee the same accuracy on conversations, noise, names, or interruptions.
+- ASR returns VAD-fragment timestamps rather than individual word timestamps; a speaker change within a block can cause incorrect text attribution.
+- Overlapping speech may be recognized incompletely; matching the reference speaker count does not establish correct diarization.
+- Conversation datasets have provisional references; our team has not independently verified their punctuation, text, or boundaries.
+- MINDS-14 has no verified punctuation reference, so lexical WER is the primary metric for that dataset.
+- Small samples and public recordings do not guarantee independence from model training data or performance on unseen expert recordings.
 
-Правила нормализации и исторические сравнения моделей описаны в [asr-quality.md](asr-quality.md).
-Численные результаты вместе с условиями приведены в [TEST_RESULTS.md](TEST_RESULTS.md).
+Normalization rules and historical model comparisons are described in [asr-quality.md](asr-quality.md).
+Numerical results and their conditions are recorded in [TEST_RESULTS.md](TEST_RESULTS.md).
 
-## Ресурсы и жизненный цикл
+## Resources and lifecycle
 
-- Память растёт с длительностью записи: диаризация читает PCM в массив `float[]`.
-- При параллельной обработке модели держат ресурсы одновременно; RAM устройства не равна доступному Java heap приложения.
-- Отмена проверяется между операциями, но не прерывает один JNI-вызов sherpa-onnx.
-- Обработка живёт в процессе Application; foreground service и восстановление незавершённой задачи после завершения процесса не реализованы.
-- Повторное открытие завершённого результата поддерживается, автоматическое продолжение прерванной обработки — нет.
-- Скорость, нагрев и энергопотребление телефона нельзя вывести из результатов эмулятора.
+- Memory use grows with recording duration: diarization loads PCM into a `float[]` array.
+- Parallel processing holds model resources simultaneously; device RAM is not the same as the application's available Java heap.
+- Cancellation is checked between operations but does not interrupt an individual sherpa-onnx JNI call.
+- Processing runs in the Application process; there is no foreground service or recovery of unfinished work after process termination.
+- Completed results can be reopened; interrupted processing does not resume automatically.
+- Phone speed, thermal behavior, and energy use cannot be inferred from emulator results.
 
-Подробности исполнения и хранения — в [ARCHITECTURE.md](ARCHITECTURE.md).
+Execution and storage details are in [ARCHITECTURE.md](ARCHITECTURE.md).
 
-## Сборка и сдача
+## Build and submission
 
-Нужен Android 8.0+ и поддерживаемая ABI ARM64 или x86-64.
-Первая сборка требует интернета для получения зависимостей и моделей, после включения моделей в APK обработка выполняется офлайн.
-Debug APK подписан локальным debug-ключом; обновление сборкой с другой подписью может потребовать удаления приложения, которое удаляет его библиотеку.
-Готовый APK и демовидео должны иметь доступные ссылки для проверки; инструкции и временные CI-артефакты не заменяют опубликованные материалы сдачи.
-Точная длительность, кодеки, состав участников экспертных записей и официальная нормализация WER в имеющихся требованиях не определены.
+Android 8.0+ and a supported ARM64 or x86-64 ABI are required.
+The first build requires internet access for dependencies and models; once models are bundled in the APK, processing runs offline.
+The debug APK uses a local debug key; updating with another signing key may require uninstalling the app, which deletes its library.
+The APK and demo video need accessible download links; instructions and temporary CI artifacts do not replace published submission materials.
+The available requirements do not specify exact expert recording durations, codecs, speaker counts, or official WER normalization.

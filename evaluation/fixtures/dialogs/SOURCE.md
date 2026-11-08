@@ -1,131 +1,109 @@
-# Dialogs: составленные контрольные разговоры
+# Dialogs: assembled test conversations
 
-Источник: [Langswap Dialogs](https://huggingface.co/datasets/langswap/dialogs-ru-emotional-conversations),
-Ilya Shigabeev и Ilya Latyshev. Версия источника и SHA-256 скачанных файлов
-зафиксированы в `composition.json`; условия распространения — `LICENSE.md`.
-Описание авторов сохранено в `UPSTREAM_README.md`.
+Source: [Langswap Dialogs](https://huggingface.co/datasets/langswap/dialogs-ru-emotional-conversations), by Ilya Shigabeev and Ilya Latyshev.
+The source revision and downloaded file SHA-256 checksums are recorded in `composition.json`; distribution terms are in `LICENSE.md`.
+The authors' description is retained in `UPSTREAM_README.md`.
 
-Это три **искусственно составленных разговора из реальных записей актёров**,
-а не синтез речи и не оригинальные непрерывные встречи. В файлах только
-последовательная речь, без специально добавленных шумов и перекрытий.
+These are three **artificially assembled conversations from real actor recordings**, not synthesized speech or original continuous meetings.
+Files contain sequential speech without deliberately added noise or overlap.
 
-| Файл | Голоса | Длительность | Выбор реплик |
+| File | Voices | Duration | Utterance selection |
 | --- | --- | --- | --- |
-| `audio/dialogs_md.wav` | Маша, Дима | 71,915 с | `masha_dima_part1_1..12`, исходный номерной порядок |
-| `audio/dialogs_ms.wav` | Маша, Света | 75,326 с | `masha_sveta_part1`: 1–7, 10–14, исходный номерной порядок |
-| `audio/dialogs_msd.wav` | Маша, Света, Дима | 80,082 с | Кулинарная тема из `masha_sveta_part1` и `masha_dima_part10`; точный порядок в `composition.json` |
+| `audio/dialogs_md.wav` | Masha, Dima | 71.915 s | `masha_dima_part1_1..12`, original numerical order |
+| `audio/dialogs_ms.wav` | Masha, Sveta | 75.326 s | `masha_sveta_part1`: 1–7, 10–14, original numerical order |
+| `audio/dialogs_msd.wav` | Masha, Sveta, Dima | 80.082 s | Cooking topic from `masha_sveta_part1` and `masha_dima_part10`; exact order in `composition.json` |
 
-Говорящим присваиваются `speaker_1`, `speaker_2`, … в порядке первого появления
-в каждом файле. Соответствие исходным M/S/D сохранено в `composition.json`.
-Все три голоса повторяются в третьем файле.
-Реплики `masha_sveta_part1_8.wav` и `_9.wav` присутствуют в метаданных,
-но отсутствуют среди опубликованных WAV выбранной ревизии, поэтому пропущены.
+Speakers receive `speaker_1`, `speaker_2`, … in order of first appearance in each file.
+The mapping to original M/S/D IDs is retained in `composition.json`.
+All three voices appear in the third file.
+Utterances `masha_sveta_part1_8.wav` and `_9.wav` are listed in the metadata but missing from the published WAVs at the selected revision, so they are skipped.
 
-## Статус эталонов
+## Reference status
 
-- Текст взят **без исправлений** из upstream `metadata.csv`; независимая
-  сверка на слух не выполнена. Не называть эти эталоны безошибочными.
-- `manifest.json` совместим с `ScoreAsr`: `file` относительно этой папки,
-  `reference` — соединённые исходные тексты в порядке воспроизведения.
-- `transcripts/*.json` содержит корневой массив `transcript` и поля
-  `speaker_id`, `start_ms`, `end_ms`, `text`.
-- Таймкоды JSON и `rttm/*.rttm` — **границы исходных клипов**, включая
-  возможную тишину внутри них. RTTM предварительный: он не является точным
-  эталоном речевой активности для DER. До сравнения качества диаризации
-  проверить и скорректировать границы речи на слух/по осциллограмме.
-- Точные позиции клипов в сэмплах хранятся в `composition.json`; JSON
-  округлён до миллисекунд, RTTM — до микросекунд.
+- Text comes **unchanged** from upstream `metadata.csv`; no independent listening check was performed.
+Do not describe these references as error-free.
+- `manifest.json` is compatible with `ScoreAsr`: `file` is relative to this directory, and `reference` concatenates source texts in playback order.
+- `transcripts/*.json` contains a root `transcript` array with `speaker_id`, `start_ms`, `end_ms`, and `text` fields.
+- JSON and `rttm/*.rttm` timestamps are **source clip boundaries**, including possible silence inside clips.
+RTTM is provisional, not an accurate speech-activity reference for DER.
+Before comparing diarization quality, check and correct speech boundaries by listening and inspecting waveforms.
+- Exact clip positions in samples are stored in `composition.json`; JSON is rounded to milliseconds and RTTM to microseconds.
 
-## Сборка
+## Preparation
 
-Зависимости: Python 3.10+ (только стандартная библиотека), FFmpeg в PATH.
-Из корня репозитория:
+Dependencies: Python 3.10+ (standard library only), FFmpeg on PATH.
+From the repository root:
 
 ```sh
 python3 evaluation/scripts/prepare_dialogs.py
 python3 evaluation/scripts/prepare_dialogs.py --offline
 ```
 
-FFmpeg доступен в `nix develop`; Python нужно предоставить отдельно.
-Скачивается только метаинформация и выбранные WAV, а не весь корпус.
-По умолчанию кэш — `evaluation/results/dialogs-source-cache` (игнорируется Git);
-для постоянного хранения передать `--cache /путь/к/кэшу` в обоих запусках.
-При наличии `composition.json` используются зафиксированная ревизия, порядок
-реплик и контрольные суммы источников. Без кэша офлайн-пересборка невозможна.
+FFmpeg is available in `nix develop`; provide Python separately.
+Only metadata and selected WAVs are downloaded, not the entire corpus.
+The default cache is `evaluation/results/dialogs-source-cache` (ignored by Git); for persistent storage, pass `--cache /path/to/cache` on both runs.
+When `composition.json` is present, preparation uses its pinned revision, utterance order, and source checksums.
+Offline rebuilding requires the cache.
 
-Исходные WAV сводятся в моно и приводятся к 44 100 Гц средствами FFmpeg.
-Между клипами вставляется 250 мс цифровой тишины; исходная тишина не удаляется.
-Результат — PCM16 WAV без нормализации громкости, кроссфейдов и обрезания слов.
-Фактические параметры исходных WAV записаны в `composition.json`.
-Частота 44,1 кГц позволяет прогонять через Android-подготовку аудио, включая
-понижающий ресэмплинг. Это не проверка акустики телефонного микрофона.
-Побитовую воспроизводимость проверять с той же версией FFmpeg.
-В выбранных 28 уникальных исходных WAV фактически обнаружены 44 100 Гц,
-моно, PCM16; стереозаписи, упомянутые в общем описании корпуса, здесь нет.
+Source WAVs are converted to mono at 44,100 Hz with FFmpeg.
+A 250 ms digital silence is inserted between clips; original silence is retained.
+The result is PCM16 WAV without loudness normalization, crossfades, or word trimming.
+Actual source WAV parameters are recorded in `composition.json`.
+The 44.1 kHz rate exercises Android audio preparation, including downsampling.
+This does not test phone microphone acoustics.
+Check bitwise reproducibility with the same FFmpeg version.
+The 28 selected unique source WAVs were all 44,100 Hz mono PCM16; the stereo recordings mentioned in the general corpus description are not present here.
 
-Проверка целостности из этой папки:
+Verify integrity from this directory:
 
 ```sh
 sha256sum -c SHA256SUMS
 ```
 
-## Использование
+## Usage
 
-Прогнать все три файла через приложение на Android и сохранить гипотезы
-в `evaluation/results/dialogs/`. Пример оценки из корня:
+Process all three files through the Android app and save hypotheses in `evaluation/results/dialogs/`.
+Example scoring command from the repository root:
 
 ```sh
 ./gradlew :evaluation:scoreAsr --args='evaluation/fixtures/dialogs/manifest.json evaluation/results/dialogs/asr-hypotheses.json evaluation/results/dialogs/asr-report.json'
 ```
 
-В гипотезах `file` должен совпадать с manifest, например
-`audio/dialogs_md.wav`. Это **smoke-набор**, не разделение на подбор и
-независимый тест: в третьей записи повторяются реплики второй, голоса общие
-во всех файлах. Не использовать записи как независимые train/dev/test и
-не делать статистических выводов по трём коротким составленным разговорам.
+Hypothesis `file` values must match the manifest, for example `audio/dialogs_md.wav`.
+This is a **smoke-test set**, not a tuning/independent-test split: the third recording reuses utterances from the second, and voices are shared across files.
+Do not treat the recordings as independent train/dev/test splits or draw statistical conclusions from three short assembled conversations.
 
-При распространении сохранять приложенную лицензию и её ограничения.
+Preserve the included license and its restrictions when distributing the data.
 
-## Выполненные проверки (2026-11-07)
+## Completed checks (2026-11-07)
 
-- У всех трёх WAV проверены заголовки, число сэмплов, длительность 60–90 с
-  и наличие ненулевых аудиоданных.
-- В каждом файле 12 исходных клипов. Число ID участников — 2/2/3;
-  каждый из трёх голосов в третьем файле появляется как минимум дважды.
-- Тексты совпадают с upstream-метаданными в порядке сборки; проверены
-  согласованность JSON/RTTM/позиций в сэмплах и цифровая тишина между клипами.
-- Проверены SHA-256 всех артефактов. Пересборка с `--offline` дала
-  побитово одинаковые файлы с той же версией FFmpeg.
-- `:evaluation:test` прошёл. `:evaluation:scoreAsr` принял новый manifest
-  на техническом примере «эталон против себя». Нулевой WER такого примера
-  проверяет формат и оценщик, **не качество ASR**.
+- All three WAV headers, sample counts, 60–90 s durations, and nonzero audio content were checked.
+- Each file contains 12 source clips.
+Speaker ID counts are 2/2/3; each of the three voices appears at least twice in the third file.
+- Texts match upstream metadata in assembly order; JSON/RTTM/sample-position consistency and digital silence between clips were checked.
+- All artifact SHA-256 checksums were checked.
+Rebuilding with `--offline` produced bitwise identical files using the same FFmpeg version.
+- `:evaluation:test` passed.
+`:evaluation:scoreAsr` accepted the new manifest in a reference-versus-itself check.
+Zero WER in this check validates the format and scorer, **not ASR quality**.
 
-## Прогон через приложение (2026-11-07)
+## Application run (2026-11-07)
 
-Три файла прогнаны через настоящий `AndroidAudioPreparer`/`SherpaSpeechRecognizer`/
-`SherpaOnnxSpeakerDiarizer` инструментированным тестом `DialogsHypothesisTest`
-на эмуляторе Android API 36 (arm64-v8a), не на физическом устройстве.
+All three files were processed through the real `AndroidAudioPreparer`/`SherpaSpeechRecognizer`/`SherpaOnnxSpeakerDiarizer` using `DialogsHypothesisTest` instrumentation on an Android API 36 arm64-v8a emulator, not a physical device.
 
-ASR (`:evaluation:scoreAsr`): WER 5.81%, CER 1.64%, точных совпадений 0/3.
-Заметно лучше, чем на MINDS-14 (WER 14.09%, `evaluation/README.md`) — ожидаемо:
-чистая студийная речь без телефонного сжатия и переключения языка.
+ASR (`:evaluation:scoreAsr`): WER 5.81%, CER 1.64%, exact matches 0/3.
+The improvement over MINDS-14 (WER 14.09%, `evaluation/README.md`) is expected for clean studio speech without telephone compression or language switching.
 
-Диаризация (`:evaluation:scoreDiarization`), collar=0, RTTM — границы клипов,
-не выверенная речевая активность (см. выше), поэтому Missed/False alarm здесь
-не интерпретировать как точность VAD:
+Diarization (`:evaluation:scoreDiarization`) uses collar=0 and RTTM clip boundaries rather than verified speech activity (see above), so Missed/False alarm must not be interpreted as VAD accuracy here:
 
-| Файл | Говорящих (эталон/гипотеза) | DER | Confusion | Missed |
+| File | Speakers (reference/hypothesis) | DER | Confusion | Missed |
 | --- | --- | ---: | ---: | ---: |
-| `dialogs_md` | 2 / 2 | 23.98% | 1.78 с | 14.39 с |
-| `dialogs_ms` | 2 / **1** | 51.28% | 31.00 с | 5.97 с |
-| `dialogs_msd` | 3 / **4** | 42.59% | 24.72 с | 7.98 с |
+| `dialogs_md` | 2 / 2 | 23.98% | 1.78 s | 14.39 s |
+| `dialogs_ms` | 2 / **1** | 51.28% | 31.00 s | 5.97 s |
+| `dialogs_msd` | 3 / **4** | 42.59% | 24.72 s | 7.98 s |
 
-**Диаризация заметно хуже, чем на `rec_0055`/`rec_0273`** (там число говорящих
-совпадало точно, DER 13.5–28.0%). На `dialogs_ms` модель не разделила двух
-говорящих вообще (1 кластер вместо 2); на `dialogs_msd` — лишний кластер.
-Вероятная причина — короткие, быстро чередующиеся реплики актёров (в отличие
-от более длинных непрерывных сегментов в `rec_0055`/`rec_0273`), но это
-предположение, не проверенное экспериментом с подбором `clustering.threshold`
-отдельно для этого набора. Прослушивание вживую и ручная проверка границ не
-выполнялись — не считать эти DER окончательной оценкой диаризации на коротких
-переключениях говорящих.
+**Diarization is substantially worse than on `rec_0055`/`rec_0273`**, where speaker counts matched and DER was 13.5–28.0%.
+On `dialogs_ms`, the model did not separate the two speakers at all (one cluster instead of two); on `dialogs_msd`, it produced an extra cluster.
+Short, rapidly alternating actor turns, unlike the longer continuous segments in `rec_0055`/`rec_0273`, are a possible cause.
+This remains a hypothesis, not a finding verified by tuning `clustering.threshold` for this dataset.
+Listening and manual boundary checks were not performed; these DER values are not a final assessment of diarization on rapid speaker changes.

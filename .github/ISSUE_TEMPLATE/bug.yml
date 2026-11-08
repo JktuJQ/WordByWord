@@ -1,49 +1,49 @@
-name: Ошибка
-description: Воспроизводимая проблема в сборке или поведении приложения
+name: Bug
+description: A reproducible build or application behavior problem
 labels: [bug]
 body:
   - type: textarea
     id: problem
     attributes:
-      label: Проблема и её влияние
-      description: Что сломалось и какой сценарий это блокирует?
+      label: Problem and impact
+      description: What is broken, and which workflow does it block?
     validations:
       required: true
   - type: textarea
     id: reproduction
     attributes:
-      label: Шаги воспроизведения
-      placeholder: "1. Открыть ...\n2. Выбрать ...\n3. Нажать ..."
+      label: Steps to reproduce
+      placeholder: "1. Open ...\n2. Select ...\n3. Tap ..."
     validations:
       required: true
   - type: textarea
     id: expected
     attributes:
-      label: Ожидаемое поведение
+      label: Expected behavior
     validations:
       required: true
   - type: textarea
     id: actual
     attributes:
-      label: Фактическое поведение
+      label: Actual behavior
     validations:
       required: true
   - type: textarea
     id: environment
     attributes:
-      label: Окружение
-      description: Commit или версия APK, телефон/эмулятор и Android; для ошибки сборки — ОС, JDK и команда. Для ML — версии моделей и runtime.
+      label: Environment
+      description: Commit or APK version, phone/emulator, and Android version; for build failures, include the OS, JDK, and command. For ML, include model and runtime versions.
     validations:
       required: true
   - type: textarea
     id: evidence
     attributes:
-      label: Логи и дополнительные сведения
-      description: Стек ошибки, скриншот или описание тестовой записи, связанные Issues/PR и известный обходной путь.
+      label: Logs and supporting details
+      description: Stack trace, screenshot or test recording description, related Issues/PRs, and any known workaround.
   - type: textarea
     id: acceptance
     attributes:
-      label: Как проверить исправление
-      description: Какой результат должен получиться после повторения шагов?
+      label: Fix validation
+      description: What result should repeating these steps produce?
     validations:
       required: true

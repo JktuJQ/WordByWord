@@ -1,16 +1,16 @@
-# Форматы и протокол обработки
+# Formats and processing protocol
 
-## Вход
+## Input
 
-Пользователь выбирает аудио через Android Storage Access Framework.
-Поддержка конкретного кодека зависит от Android MediaExtractor/MediaCodec; обязательная проверка выполняется на предоставленных записях.
-После импорта приложение хранит приватную копию оригинала, а модели получают PCM 16 кГц, моно.
-Временные PCM-файлы удаляются после завершения обработки, ошибки или отмены.
+The user selects audio through the Android Storage Access Framework.
+Codec support depends on Android MediaExtractor/MediaCodec; the supplied recordings must be tested.
+After import, the app stores a private copy of the original; models receive 16 kHz mono PCM.
+Temporary PCM files are deleted after completion, failure, or cancellation.
 
-## Внешний JSON
+## External JSON
 
-Схема задания зафиксирована в [hackathon.md](hackathon.md).
-Корневой объект содержит массив `transcript`:
+The required schema is recorded in [hackathon.md](hackathon.md).
+The root object contains a `transcript` array:
 
 ```json
 {
@@ -19,27 +19,27 @@
       "speaker_id": "speaker_1",
       "start_ms": 1250,
       "end_ms": 4380,
-      "text": "Добрый день!"
+      "text": "Good afternoon!"
     }
   ]
 }
 ```
 
-| Поле | Значение |
+| Field | Meaning |
 | --- | --- |
-| `speaker_id` | Строковый ID участника, устойчивый в пределах стенограммы |
-| `start_ms` | Начало реплики в миллисекундах от начала записи |
-| `end_ms` | Окончание реплики в миллисекундах от начала записи |
-| `text` | Текст реплики |
+| `speaker_id` | String speaker ID, stable within the transcript |
+| `start_ms` | Utterance start in milliseconds from the recording start |
+| `end_ms` | Utterance end in milliseconds from the recording start |
+| `text` | Utterance text |
 
-Пользовательское имя участника не заменяет его ID в экспорте.
-Для неизвестного участника exporter выбирает строку `unknown`, добавляя подчёркивание спереди при совпадении с существующим ID.
-Точность временных границ зависит от распознавания речи и совмещения с диаризацией.
-Экспорт реализован в [TranscriptJsonExporter.java](../app/src/main/java/dev/wordbyword/app/export/TranscriptJsonExporter.java).
+A user-assigned speaker name does not replace the ID in the export.
+For an unknown speaker, the exporter uses `unknown`, prepending underscores if it conflicts with an existing ID.
+Time boundary accuracy depends on speech recognition and alignment with diarization.
+Export is implemented in [TranscriptJsonExporter.java](../app/src/main/java/dev/wordbyword/app/export/TranscriptJsonExporter.java).
 
-## Внутренние типы
+## Internal types
 
-`Recording` хранит запись, `Transcript` — участников и реплики, `RecognitionResult` — выход распознавания.
-Компоненты работают с PCM 16 кГц, моно; отмена кооперативная.
-Внутреннее хранение и исполнение описаны в [ARCHITECTURE.md](ARCHITECTURE.md).
-Методика оценки — в [evaluation/README.md](../evaluation/README.md).
+`Recording` holds the recording, `Transcript` holds speakers and utterances, and `RecognitionResult` holds recognition output.
+Components use 16 kHz mono PCM and cooperative cancellation.
+Internal storage and execution are described in [ARCHITECTURE.md](ARCHITECTURE.md).
+Evaluation methods are described in [evaluation/README.md](../evaluation/README.md).

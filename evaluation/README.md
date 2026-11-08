@@ -1,25 +1,25 @@
-# Оценка качества
+# Evaluation
 
-Отдельный JVM-модуль со скорерами WER/CER, cpWER и DER.
-Он не включается в APK.
-Опубликованные результаты находятся в [artifacts/test-results](../artifacts/test-results/), условия измерений — в [docs/TEST_RESULTS.md](../docs/TEST_RESULTS.md).
+A separate JVM module providing WER/CER, cpWER, and DER scorers.
+It is not included in the APK.
+Published results are in [artifacts/test-results](../artifacts/test-results/); measurement conditions are in [docs/TEST_RESULTS.md](../docs/TEST_RESULTS.md).
 
-## Данные
+## Data
 
-| Каталог | Содержание |
+| Directory | Contents |
 | --- | --- |
-| `fixtures/asr/` | MINDS-14 и manifest с эталонами |
-| `fixtures/asr-native-rate/` | Аудио для проверки декодирования с исходной частотой |
-| `fixtures/diarization/` | Два минутных контрольных примера с RTTM |
-| `fixtures/dialogs/` | Три составленных русскоязычных разговора |
-| `fixtures/podcasts/` | Разговорные фрагменты и длинные записи |
-| `fixtures/veche/` | Сценарные встречи raw/hard |
+| `fixtures/asr/` | MINDS-14 and a reference manifest |
+| `fixtures/asr-native-rate/` | Audio for decoding checks at the original sample rate |
+| `fixtures/diarization/` | Two one-minute test examples with RTTM |
+| `fixtures/dialogs/` | Three assembled Russian conversations |
+| `fixtures/podcasts/` | Conversation excerpts and long recordings |
+| `fixtures/veche/` | Scripted meetings, raw/hard |
 
-Источники, лицензии и ограничения разметки указаны в `SOURCE.md` рядом с каждым набором.
-Нормализация ASR и сравнение моделей описаны в [asr-quality.md](../docs/asr-quality.md).
-Предварительные эталоны разговоров не считаются независимо проверенной ручной разметкой.
+Sources, licenses, and annotation limitations are recorded in `SOURCE.md` beside each dataset.
+ASR normalization and model comparisons are described in [asr-quality.md](../docs/asr-quality.md).
+Provisional conversation references are not independently verified manual annotations.
 
-Подготовка разговорных наборов требует Python 3.11+ без сторонних пакетов и FFmpeg/FFprobe:
+Preparing conversation datasets requires Python 3.11+ without third-party packages and FFmpeg/FFprobe:
 
 ```sh
 python3 evaluation/scripts/prepare_podcasts.py
@@ -28,12 +28,12 @@ python3 evaluation/scripts/check_corpus.py evaluation/fixtures/podcasts/manifest
 python3 evaluation/scripts/check_corpus.py evaluation/fixtures/veche/manifest.json --audio
 ```
 
-Аудио и промежуточные результаты исключены из Git.
-Загрузки и кэш подготовки описаны в документах соответствующих наборов.
+Audio and intermediate results are excluded from Git.
+Dataset documents describe downloads and preparation caches.
 
-## Скореры
+## Scorers
 
-Команды выполняются из корня репозитория.
+Run these commands from the repository root.
 
 ```sh
 ./gradlew :evaluation:scoreAsr --args='evaluation/fixtures/asr/manifest.json evaluation/results/asr-hypotheses.json evaluation/results/asr-report.json'
@@ -41,19 +41,19 @@ python3 evaluation/scripts/check_corpus.py evaluation/fixtures/veche/manifest.js
 ./gradlew :evaluation:scoreTranscripts --args='evaluation/fixtures/podcasts/manifest.json evaluation/results/hypotheses evaluation/results/transcripts-report.json evaluation short --allow-provisional'
 ```
 
-- `scoreAsr`: JSON с массивом `runs` или `samples`, поля `file` и `hypothesis`.
-Для каждого файла manifest нужна ровно одна гипотеза; при наличии `status` требуется `READY`.
-- `scoreDiarization`: эталонный RTTM, RTTM-гипотеза, длительность записи в секундах и необязательное время обработки для RTF.
-- `scoreTranscripts`: каталог экспортированных стенограмм `<id>.json`, разделение development/evaluation и протокол short/long/raw/hard согласно manifest.
-Флаг `--allow-provisional` нужен для предварительной разметки.
+- `scoreAsr`: JSON with a `runs` or `samples` array containing `file` and `hypothesis` fields.
+Each manifest file requires exactly one hypothesis; if `status` is present, it must be `READY`.
+- `scoreDiarization`: reference RTTM, hypothesis RTTM, recording duration in seconds, and optional processing time for RTF.
+- `scoreTranscripts`: a directory of exported `<id>.json` transcripts, a development/evaluation split, and a short/long/raw/hard protocol as defined in the manifest.
+Use `--allow-provisional` for provisional annotations.
 
-WER/CER оценивают ошибки текста; `lexical_wer` и `lexical_cer` исключают пунктуацию.
-Числа канонизируются по правилам скорера.
-cpWER сопоставляет текстовые потоки участников оптимальной перестановкой.
-DER учитывает пропущенную речь, ложную речь и путаницу участников, collar=0, с учётом наложений.
-DER по итоговым репликам JSON включает влияние совмещения с ASR; прямой DER по RTTM оценивает диаризацию отдельно.
+WER/CER measure text errors; `lexical_wer` and `lexical_cer` exclude punctuation.
+Numbers are canonicalized according to scorer rules.
+cpWER matches speaker text streams using an optimal permutation.
+DER includes missed speech, false speech, and speaker confusion, with collar=0 and overlapping speech included.
+DER from final JSON utterances includes ASR alignment effects; direct RTTM DER evaluates diarization separately.
 
-## Android-проверки
+## Android checks
 
 ```sh
 ./gradlew :app:assembleDebug :app:assembleDebugAndroidTest
@@ -62,25 +62,25 @@ adb install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
 adb shell am instrument -w -e class dev.wordbyword.app.evaluation.DiarizationHypothesisTest dev.wordbyword.app.test/androidx.test.runner.AndroidJUnitRunner
 ```
 
-Доступны `AsrHypothesisTest`, `DialogsHypothesisTest`, `CommonVoiceHypothesisTest`, `DiarizationHypothesisTest`, `InferenceBenchmarkTest` и `SummaryFeatureTest`.
-Суммаризация требует явного opt-in `-e runSummary true`.
-Сохраняйте идентификатор устройства и проверяйте итог инструментирования, а не только код завершения adb.
+Available checks: `AsrHypothesisTest`, `DialogsHypothesisTest`, `CommonVoiceHypothesisTest`, `DiarizationHypothesisTest`, `InferenceBenchmarkTest`, and `SummaryFeatureTest`.
+Summarization requires explicit opt-in with `-e runSummary true`.
+Record the device identifier and check instrumentation results, not just the adb exit code.
 
-## Скорость и память
+## Speed and memory
 
-`benchmark.sh` снимает время и выборочные PSS/RSS при обработке одной записи через обычный интерфейс.
+`benchmark.sh` records timing and sampled PSS/RSS while processing one recording through the normal UI.
 
 ```sh
 bash evaluation/benchmark.sh parallel 60
 ```
 
-Полностью автоматическое сравнение последовательного и параллельного режимов:
+For an automated sequential/parallel comparison:
 
 ```sh
 bash evaluation/compare-inference.sh
 ```
 
-Скрипт собирает APK обоих режимов, запускает изолированный AVD и обрабатывает `rec_0055.flac` через производственный конвейер.
-Он сравнивает JSON и сохраняет отчёты в `evaluation/results/`.
-На машине с ограниченной RAM сборку выполняйте до запуска эмулятора.
-Выборочный пик памяти может пропустить кратковременный максимум.
+The script builds both APK modes, starts an isolated AVD, and processes `rec_0055.flac` through the production pipeline.
+It compares JSON output and saves reports in `evaluation/results/`.
+On a memory-constrained machine, build before starting the emulator.
+Sampled peak memory may miss a brief maximum.

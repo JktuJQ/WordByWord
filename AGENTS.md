@@ -1,49 +1,49 @@
 # AGENTS.md
 
-## Проект
+## Project
 
-WordByWord — Android-приложение на Java/XML для локальной обработки русскоязычных разговоров.
-Основной сценарий: импорт аудио → распознавание и диаризация → просмотр стенограммы → экспорт JSON.
-Аудио и текст не отправляются внешним сервисам.
-Модели включаются в APK при сборке и работают без сети.
+WordByWord is a Java/XML Android app for on-device processing of Russian conversations.
+Main workflow: import audio → recognition and diarization → transcript review → JSON export.
+Audio and text are not sent to external services.
+Models are bundled in the APK at build time and run offline.
 
-Требования организаторов приведены в [docs/hackathon.md](docs/hackathon.md).
-Обязательный экспорт — объект с массивом `transcript`; поля реплик: `speaker_id`, `start_ms`, `end_ms`, `text`.
-Готовая расшифровка не должна подменять запуск моделей.
+The organizers' requirements are recorded in [docs/hackathon.md](docs/hackathon.md).
+The required export is an object with a `transcript` array; utterance fields are `speaker_id`, `start_ms`, `end_ms`, and `text`.
+A prepared transcript must not substitute for running the models.
 
-## Структура
+## Structure
 
-- `app/src/main/java/` — приложение, обработка, хранение и интерфейс.
-- `app/src/main/res/` — XML-ресурсы интерфейса.
-- `app/src/test/` — JVM-тесты приложения.
-- `app/src/testAndroid/` — проверки моделей и конвейера на Android.
-- `app/gradle/` — подготовка моделей и упаковка APK.
-- `evaluation/` — скореры, тестовые наборы и скрипты измерений.
-- `artifacts/test-results/` — опубликованные результаты измерений.
-- `docs/` — архитектура, модели, ограничения и сборка.
+- `app/src/main/java/` — application, processing, storage, and UI.
+- `app/src/main/res/` — XML UI resources.
+- `app/src/test/` — application JVM tests.
+- `app/src/testAndroid/` — Android model and pipeline checks.
+- `app/gradle/` — model preparation and APK packaging.
+- `evaluation/` — scorers, datasets, and measurement scripts.
+- `artifacts/test-results/` — published measurements.
+- `docs/` — architecture, models, limitations, and build instructions.
 
-## Изменения
+## Changes
 
-Перед изменением проверь существующую реализацию и её потребителей.
-Переиспользуй общие типы и не создавай параллельные варианты хранилища или API.
-Изменения контрактов и новые зависимости согласуй с пользователем.
-Работай в отдельной ветке; публикуй изменения в пределах запроса пользователя.
-Не создавай Issues и PR ради внутренних заметок или временного плана.
+Check the existing implementation and its consumers before making changes.
+Reuse shared types rather than introducing parallel storage implementations or APIs.
+Agree on contract changes and new dependencies with the user.
+Work on a separate branch and publish changes within the user's requested scope.
+Do not create Issues or PRs for internal notes or temporary plans.
 
-Не добавляй комментарии в код.
-Пояснения к архитектуре храни в документации.
-В Markdown размещай каждое предложение на отдельной строке.
-Не добавляй в Git модели, APK, локальные логи и промежуточные отчёты.
-Сохраняй лицензии и сведения об источниках моделей и тестовых данных.
+Do not add code comments.
+Keep architecture explanations in the documentation.
+Place each Markdown sentence on a separate source line.
+Do not commit models, APKs, local logs, or intermediate reports.
+Preserve licenses and provenance information for models and test data.
 
-## Проверки
+## Validation
 
-Запускай проверки, соответствующие изменению, и просматривай итоговый diff.
-Команда основных проверок: `./gradlew :evaluation:test :app:testDebugUnitTest :app:assembleDebug :app:lintDebug`.
-Android-тесты собираются отдельно: `./gradlew :app:assembleDebugAndroidTest`.
+Run checks appropriate to the change and review the final diff.
+Main checks: `./gradlew :evaluation:test :app:testDebugUnitTest :app:assembleDebug :app:lintDebug`.
+Build Android tests separately: `./gradlew :app:assembleDebugAndroidTest`.
 
-На машине с ограниченной памятью используй `--no-daemon --no-parallel --max-workers=1` и ограничивай heap Gradle.
-Не запускай тяжёлую сборку одновременно с эмулятором.
-Не выдавай результаты эмулятора за измерения телефона.
-Фиксируй устройство, модель, конфигурацию и версию проверенного APK.
-Не изменяй измеренные значения ради улучшения отчёта и не отмечай непроведённые проверки как выполненные.
+On a memory-constrained machine, use `--no-daemon --no-parallel --max-workers=1` and limit the Gradle heap.
+Do not run a heavy build alongside the emulator.
+Do not present emulator measurements as phone measurements.
+Record the device, model, configuration, and tested APK version.
+Do not alter measured values to improve a report or mark unperformed checks as complete.
