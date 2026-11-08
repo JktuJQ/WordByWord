@@ -6,7 +6,7 @@ import json
 import subprocess
 from pathlib import Path
 
-from prepare_podcasts import digest, fetch, finish_manifest
+from prepare_podcasts import digest, fetch, finish_manifest, write_json
 
 DEST = Path(__file__).resolve().parents[1] / 'fixtures/veche'
 
