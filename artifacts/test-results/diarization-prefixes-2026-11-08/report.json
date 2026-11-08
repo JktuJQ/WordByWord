@@ -1,0 +1,127 @@
+{
+  "reference_quality": "upstream_corrected_predictions_not_independently_reviewed",
+  "purpose": "diarization_only_for_same_source_prefixes_as_published_WER",
+  "source_revision": "e3aaa8a28211afe56c913fcacb26db029b1fb10e",
+  "cases": [
+    {
+      "id": "astrology",
+      "audio": "evaluation/results/diarization-prefixes/input/astrology-continuous.wav",
+      "audio_sha256": "fa52b6e9bb1bcb86674b232e8d007ffaaab5603462d1ab3da00951c40087fb35",
+      "reference": "evaluation/results/diarization-prefixes/input/astrology-continuous.rttm",
+      "reference_sha256": "3b3eedccbc3c360691943d743c3b5ee003b9de298d66e3115f01deac33b7d0b9",
+      "source_reference": "evaluation/fixtures/podcasts/transcripts/astrology-long.json",
+      "source_reference_sha256": "a9d371671a85f981335534b394c79d251c50527a969c803c06dff64b30a00253",
+      "upstream_audio_data_sha256": "725b130d0e977445e087b085e5599d1fd3702affd3ef09b9c686fd4f9e4dbed8",
+      "duration_seconds": 189.778,
+      "expected_speakers": 3,
+      "reference_intervals": 41,
+      "score": {
+        "duration": 189.778,
+        "DER": 0.160136217,
+        "reference": 172.959,
+        "missed": 7.97,
+        "false_alarm": 6.025,
+        "confusion": 13.702,
+        "speakers": "3/4",
+        "standalone_seconds": 28.538
+      },
+      "reference_artifact": "artifacts/test-results/diarization-prefixes-2026-11-08/astrology-reference.rttm",
+      "hypothesis_artifact": "artifacts/test-results/diarization-prefixes-2026-11-08/astrology-hypothesis.rttm",
+      "hypothesis_sha256": "bf3798c541b716e226a39524275bf841fd3dbcfeea2111a6ad2bbee2a81b1cf7",
+      "raw_hypothesis_artifact": "artifacts/test-results/diarization-prefixes-2026-11-08/astrology-raw_hypothesis.txt",
+      "raw_hypothesis_sha256": "658f51142b4ad66b82cb9948f0a82c83bb5d9c5851b647e1efdda1b6abc83290",
+      "clipped_end_seconds": [
+        0.028999999999996362
+      ]
+    },
+    {
+      "id": "movie",
+      "audio": "evaluation/results/diarization-prefixes/input/movie-continuous.wav",
+      "audio_sha256": "f5d6482d2d153d118a13d156b769a42ab7c57e0dfe7cc89c7d767693893b9231",
+      "reference": "evaluation/results/diarization-prefixes/input/movie-continuous.rttm",
+      "reference_sha256": "8b7a25507d4e207555299feebd72d64108c2232eff900b67b42379be23cb4ccc",
+      "source_reference": "evaluation/fixtures/podcasts/transcripts/movie-long.json",
+      "source_reference_sha256": "55a2d6f2bd8962a4aaaa45f3ecaa3707760102e8be4c1cf90d7a14802e1b7899",
+      "upstream_audio_data_sha256": "5b7c63bbb849d6191eb5bbd30c6d447f102da28b391ada0e602b9e99e60b180f",
+      "duration_seconds": 183.125,
+      "expected_speakers": 3,
+      "reference_intervals": 40,
+      "score": {
+        "duration": 183.125,
+        "DER": 0.226227564,
+        "reference": 165.307,
+        "missed": 3.65,
+        "false_alarm": 18.869,
+        "confusion": 14.878,
+        "speakers": "3/7",
+        "standalone_seconds": 27.333
+      },
+      "reference_artifact": "artifacts/test-results/diarization-prefixes-2026-11-08/movie-reference.rttm",
+      "hypothesis_artifact": "artifacts/test-results/diarization-prefixes-2026-11-08/movie-hypothesis.rttm",
+      "hypothesis_sha256": "3dd93a9136f8215242a2abb78ef429aed9b671f38f1529d046f99916b9b25e13",
+      "raw_hypothesis_artifact": "artifacts/test-results/diarization-prefixes-2026-11-08/movie-raw_hypothesis.txt",
+      "raw_hypothesis_sha256": "8b088fda94c27ff58f5cf0ad5089bdbf1cad21d8b4869fee47ee3c301175ee0a",
+      "clipped_end_seconds": [
+        0.016999999999995907
+      ]
+    },
+    {
+      "id": "mavrodi",
+      "audio": "evaluation/results/diarization-prefixes/input/mavrodi-continuous.wav",
+      "audio_sha256": "611bb3839f313d2930c03ec2bc6bdae07370a83333a1141d5af5aec5afe52abb",
+      "reference": "evaluation/results/diarization-prefixes/input/mavrodi-continuous.rttm",
+      "reference_sha256": "d7cfafd8a7f48ee9a0506776d0e37e189c81256650e3593e6e5bc3ef95f61b9e",
+      "source_reference": "evaluation/fixtures/podcasts/transcripts/mavrodi-long.json",
+      "source_reference_sha256": "927867e9b330c9489b691608ac914741a2f208d497fa89eab03e6e5fd2797e41",
+      "upstream_audio_data_sha256": "2e28e7c7201b2b2d69b89699c1498bb2d93725c875106a4c7510855463440262",
+      "duration_seconds": 193.739,
+      "expected_speakers": 3,
+      "reference_intervals": 58,
+      "score": {
+        "duration": 193.739,
+        "DER": 0.432960147,
+        "reference": 175.873,
+        "missed": 34.71,
+        "false_alarm": 7.643,
+        "confusion": 33.793,
+        "speakers": "3/4",
+        "standalone_seconds": 20.782
+      },
+      "reference_artifact": "artifacts/test-results/diarization-prefixes-2026-11-08/mavrodi-reference.rttm",
+      "hypothesis_artifact": "artifacts/test-results/diarization-prefixes-2026-11-08/mavrodi-hypothesis.rttm",
+      "hypothesis_sha256": "465ec9780149d1378d03751ea8b4606c71ad8112fffc734cc1404ab560ccabb5",
+      "raw_hypothesis_artifact": "artifacts/test-results/diarization-prefixes-2026-11-08/mavrodi-raw_hypothesis.txt",
+      "raw_hypothesis_sha256": "d50a919e1c8e4e6f5f1b81ae9f4085d33dabf06e26bcb1fd9c98569ae1f8cd19",
+      "clipped_end_seconds": []
+    }
+  ],
+  "date": "2026-11-08",
+  "commit": "07489edf50edd84fda307f01da98efe868eac77f",
+  "platform": "macOS-26.2-arm64-arm-64bit-Mach-O",
+  "runtime": "sherpa-onnx JVM 2.0.1, macOS arm64, CPU, one thread",
+  "evaluation": "standalone diarizer intervals; no ASR, transcript assembly or Android execution",
+  "scoring": {
+    "collar_seconds": 0,
+    "overlap_included": true,
+    "speaker_mapping": "optimal one-to-one per recording",
+    "hypothesis_clipping": "intervals clipped to actual audio duration; raw output retained"
+  },
+  "historical_WER_comparability": "same source prefixes and durations; original historical WAV hashes unavailable, binary identity not established",
+  "bindings_adaptation": "production Java algorithm unchanged; Android Context stub, absolute model paths, desktop file constructors/builders and getSampleRate accessor",
+  "source_sha256": "23a2780f13447cf53264849526dbe8bc7bee56ed4c28673755a635d96250006e",
+  "adapted_source_sha256": "e28e0b943aa6d5af8aa91f244354f496e7e5d13348fe0818d9a9c67fa167434d",
+  "configuration": {
+    "boundary_threshold": 0.8,
+    "embedding_average_linkage_threshold": 0.45,
+    "anchor_seconds": 1.5,
+    "minimum_embedding_seconds": 0.3,
+    "maximum_embedding_seconds": 8,
+    "window_shift_ratio": 0.1,
+    "minimum_duration_on": 0.3,
+    "minimum_duration_off": 0.5
+  },
+  "models": {
+    "embedding.onnx": "1a331345f04805badbb495c775a6ddffcdd1a732567d5ec8b3d5749e3c7a5e4b",
+    "segmentation.int8.onnx": "d582f4b4c6b48205de7e0643c57df0df5615a3c176189be3fc461e9d18827b5d"
+  }
+}
