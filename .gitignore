@@ -32,3 +32,10 @@ keystore.properties
 *.hyp.rttm
 
 /evaluation/results/
+
+/artifacts/apk/*.apk
+/artifacts/apk/*.apk.sha256
+/artifacts/apk/*.apk.json
+
+/evaluation/scripts/__pycache__/
+/evaluation/scripts/tests/__pycache__/

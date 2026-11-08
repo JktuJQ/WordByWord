@@ -141,6 +141,24 @@ public final class FileTranscriptRepository implements TranscriptRepository {
   }
 
   @Override
+  public synchronized Recording renameRecording(String recordingId, String title)
+      throws IOException {
+    if (title == null || title.isBlank()) throw new IllegalArgumentException("Empty title");
+    Path directory = directory(recordingId);
+    var entry = read(directory);
+    var old = entry.recording();
+    var renamed = new Recording(old.id(), old.audioUri(), title.trim(), old.durationMs());
+    var transcript = entry.transcript();
+    write(
+        directory.resolve("recording.json"),
+        renamed,
+        transcript == null
+            ? null
+            : new Transcript(renamed, transcript.speakers(), transcript.utterances()));
+    return renamed;
+  }
+
+  @Override
   public synchronized void delete(String recordingId) throws IOException {
     Path directory = directory(recordingId);
     if (!Files.exists(directory)) return;

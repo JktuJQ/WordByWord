@@ -81,6 +81,43 @@ public class LocalTranscriptionPipelineTest {
     }
   }
 
+  @Test
+  public void progressIsMonotonicAndUsesUserFacingStages() throws Exception {
+    var values = new java.util.ArrayList<Double>();
+    var stages = new java.util.ArrayList<String>();
+    var pipeline = new LocalTranscriptionPipeline(
+        (uri, ctx) -> {
+          ctx.reportProgress("decode", OptionalDouble.of(0.5));
+          return audio;
+        },
+        (input, ctx) -> {
+          ctx.reportProgress("Ищем речь", OptionalDouble.of(1));
+          ctx.reportProgress("Загружаем распознавание", OptionalDouble.empty());
+          ctx.reportProgress("Распознаём речь", OptionalDouble.of(0.5));
+          return recognition();
+        },
+        (input, ctx) -> {
+          ctx.reportProgress("technical diarization", OptionalDouble.empty());
+          return List.of(new SpeakerDiarizer.Segment("speaker_0", 0, 1000));
+        }, new OverlapTranscriptAssembler(), Runnable::run);
+    pipeline.transcribe(recording(), new ProcessingContext() {
+      public boolean isCancellationRequested() { return false; }
+      public void reportProgress(String stage, OptionalDouble fraction) {
+        stages.add(stage);
+        values.add(fraction.orElseThrow());
+      }
+    });
+    double previous = 0;
+    for (double value : values) {
+      assertTrue(value >= previous && value <= 1);
+      previous = value;
+    }
+    assertEquals(1, previous, 0);
+    assertTrue(stages.contains("Различаем голоса"));
+    assertTrue(stages.stream().allMatch(stage -> List.of("Превращаем речь в текст",
+        "Различаем голоса", "Собираем всё воедино…").contains(stage)));
+  }
+
   @Test(timeout = 15000)
   public void modelsOverlapOnSamePcmAndAssemblerWaitsForBoth() throws Exception {
     var asrStarted = new CountDownLatch(1);

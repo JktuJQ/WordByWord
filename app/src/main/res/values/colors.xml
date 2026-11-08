@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="background">#F8F8FA</color>
+    <color name="background">#FAFAFA</color>
     <color name="surface">#FFFFFF</color>
-    <color name="ink">#1D1C24</color>
-    <color name="muted">#777582</color>
-    <color name="accent">#5947F5</color>
-    <color name="accent_soft">#EFECFF</color>
-    <color name="secondary_speaker">#238B68</color>
-    <color name="divider">#ECEBF1</color>
-    <color name="error">#C74B4B</color>
+    <color name="ink">#191C20</color>
+    <color name="muted">#646B74</color>
+    <color name="accent">#FF6A00</color>
+    <color name="accent_soft">#F0F1F3</color>
+    <color name="secondary_speaker">#246B60</color>
+    <color name="divider">#E3E6EA</color>
+    <color name="error">#B3261E</color>
+    <color name="active_surface">#E9ECEF</color>
+    <color name="active_muted">#646B74</color>
+    <color name="active_accent">#191C20</color>
+    <color name="accent_text">#191C20</color>
+    <color name="playback_yellow">#FFC928</color>
 </resources>
