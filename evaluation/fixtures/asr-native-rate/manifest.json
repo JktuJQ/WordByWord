@@ -1,0 +1,253 @@
+{
+  "dataset": "fsicoli/common_voice_17_0",
+  "revision": "8262c16bf297c87a9cd88c51997c4758ed7a8ba2",
+  "config": "ru",
+  "split": "test",
+  "license": "CC0-1.0",
+  "source": "https://huggingface.co/datasets/fsicoli/common_voice_17_0",
+  "attribution": "Mozilla Common Voice contributors, via the fsicoli/common_voice_17_0 mirror (the official mozilla-foundation Hugging Face listing was unavailable at collection time); CC0-1.0, no attribution legally required",
+  "selection": "first 30 clips (in tar order) from audio/ru/test/ru_test_0.tar that fully downloaded within a 15 MB byte-range fetch; no filtering by content or speaker",
+  "changes": "none -- original MP3 files unpacked from the tar as-is, native 48 kHz mono confirmed per-file via ffprobe, packed into audio.zip; used for issue #45 (resampler aliasing check), not for #5/ASR model comparison",
+  "samples": [
+    {
+      "row": 0,
+      "file": "common_voice_ru_18849869.mp3",
+      "reference": "Я беру маленький кусочек бумажки.",
+      "seconds": 2.904,
+      "sample_rate": 48000,
+      "sha256": "bdd90a1852c4d8a0d996ddb5240e73936b4d7575c303c3cba6070ee4242b1726"
+    },
+    {
+      "row": 1,
+      "file": "common_voice_ru_18849870.mp3",
+      "reference": "О потерях пока не сообщается.",
+      "seconds": 3.096,
+      "sample_rate": 48000,
+      "sha256": "cfd41c33c01089af9c3ace87e5551b075e43a7a95b76d6e1cc46dd7046a64584"
+    },
+    {
+      "row": 2,
+      "file": "common_voice_ru_18849871.mp3",
+      "reference": "Ваша воля.",
+      "seconds": 1.776,
+      "sample_rate": 48000,
+      "sha256": "5a7e54e372aa7269e5fbf02d7ee24fc7a2a288706ab1497952464d6b57d2d553"
+    },
+    {
+      "row": 3,
+      "file": "common_voice_ru_18849872.mp3",
+      "reference": "Мы высоко ценим ее роль в этом отношении.",
+      "seconds": 3.504,
+      "sample_rate": 48000,
+      "sha256": "fe59c2acdd9a0c85a647ff6a698eccd00e65d773bf5f4fe1a2efaa5349d1c30f"
+    },
+    {
+      "row": 4,
+      "file": "common_voice_ru_18849873.mp3",
+      "reference": "Вот это вызывало у нас жуткое отторжение.",
+      "seconds": 3.864,
+      "sample_rate": 48000,
+      "sha256": "5fa07568a83c8f452a864cb26d197c67e57f01fcb5eff3915fa778a97820287f"
+    },
+    {
+      "row": 5,
+      "file": "common_voice_ru_18850375.mp3",
+      "reference": "Он положил ей букет на книгу.",
+      "seconds": 2.616,
+      "sample_rate": 48000,
+      "sha256": "1ebb8b6ef1808e268df701ca4160cb681d0bade412b2282cefb03fbc89044c02"
+    },
+    {
+      "row": 6,
+      "file": "common_voice_ru_18850376.mp3",
+      "reference": "Ну и положу, – обиделась Женя.",
+      "seconds": 3.096,
+      "sample_rate": 48000,
+      "sha256": "583afccb8275be58179dfb5ef3066890aabb9b17ae36b8665acdaf1ac6662f0d"
+    },
+    {
+      "row": 7,
+      "file": "common_voice_ru_18850377.mp3",
+      "reference": "Благодарю представителя Австралии за ее заявление.",
+      "seconds": 3.864,
+      "sample_rate": 48000,
+      "sha256": "393f5fe7c42bd477a8f9fafda5e8b04653f1e52951615770d62e252e6dce9174"
+    },
+    {
+      "row": 8,
+      "file": "common_voice_ru_18850378.mp3",
+      "reference": "Для меня это не было неожиданностью.",
+      "seconds": 3.144,
+      "sample_rate": 48000,
+      "sha256": "3c471e296be8c8254fe7f2dfd50c7c772811f5256f7dc63c5fe4e422e866785a"
+    },
+    {
+      "row": 9,
+      "file": "common_voice_ru_18850379.mp3",
+      "reference": "Поздняя ночь.",
+      "seconds": 2.376,
+      "sample_rate": 48000,
+      "sha256": "2fa293c7ade13da361ab202c015a54f90e7d3d49edf057e050412ac3e30470c6"
+    },
+    {
+      "row": 10,
+      "file": "common_voice_ru_18851607.mp3",
+      "reference": "Тем не менее нужно вновь вычленить некоторые элементы наших политических установок.",
+      "seconds": 7.296,
+      "sample_rate": 48000,
+      "sha256": "6d481bf4abef4ff7f72f5cb145bef8e3ef248246fb2c16e2b859f0bad0344bca"
+    },
+    {
+      "row": 11,
+      "file": "common_voice_ru_18851608.mp3",
+      "reference": "Мы не можем позволить себе упустить эту возможность.",
+      "seconds": 5.136,
+      "sample_rate": 48000,
+      "sha256": "1078ad4c81e7c4b2cc4bc3151f7ec09b9c71896723882693092a1d7a73f4fc71"
+    },
+    {
+      "row": 12,
+      "file": "common_voice_ru_18851609.mp3",
+      "reference": "В предстоящие месяцы Суд примет решение по ордеру на арест министра обороны Хусейна.",
+      "seconds": 7.776,
+      "sample_rate": 48000,
+      "sha256": "9816e1b36651968651b6f6502c76cfcded21e83e43ce9d94e42a67074ed85ce8"
+    },
+    {
+      "row": 13,
+      "file": "common_voice_ru_18851610.mp3",
+      "reference": "Валерия живет в старом панельном доме советских времён.",
+      "seconds": 6.024,
+      "sample_rate": 48000,
+      "sha256": "edbff3bc2889dccffd0282024c4494c63327e6b4dd83778c1064ead05f936719"
+    },
+    {
+      "row": 14,
+      "file": "common_voice_ru_18851611.mp3",
+      "reference": "Я вернусь скоро.",
+      "seconds": 3.144,
+      "sample_rate": 48000,
+      "sha256": "82db82e7866764787184360010324dc2c73d94520ba9df5f71ca71162e4d5db1"
+    },
+    {
+      "row": 15,
+      "file": "common_voice_ru_18852110.mp3",
+      "reference": "Слово предоставляется Его Превосходительству принцу Зайду.",
+      "seconds": 5.904,
+      "sample_rate": 48000,
+      "sha256": "ada65341d145eefa364c3aeada9a21042c91c3feefcbd3dff694f1d5765d1d96"
+    },
+    {
+      "row": 16,
+      "file": "common_voice_ru_18852111.mp3",
+      "reference": "Ну конечно, тебе бы этого хотелось.",
+      "seconds": 5.904,
+      "sample_rate": 48000,
+      "sha256": "840263d3bf1dc6c728fbbea833866d2bafc6765a39308239bc3207683f14bade"
+    },
+    {
+      "row": 17,
+      "file": "common_voice_ru_18852112.mp3",
+      "reference": "Общественные объединения равны перед законом.",
+      "seconds": 3.624,
+      "sample_rate": 48000,
+      "sha256": "d1aef0d37fa5901342787139c27d0fb0caecffe2ddb36542e62d7424712bc163"
+    },
+    {
+      "row": 18,
+      "file": "common_voice_ru_18852113.mp3",
+      "reference": "Ну, что же, нету этики, эстетики.",
+      "seconds": 4.296,
+      "sample_rate": 48000,
+      "sha256": "a28f02d661c0a7ed3caaac781aaecd5a129a76fc0b0a892d6cc8b6738d0be920"
+    },
+    {
+      "row": 19,
+      "file": "common_voice_ru_18854915.mp3",
+      "reference": "Сразу же она легла в постель.",
+      "seconds": 9.024,
+      "sample_rate": 48000,
+      "sha256": "5c09ebab33a48f27bdd3200cdd2955a12877563d788a7054689796762e2ef566"
+    },
+    {
+      "row": 20,
+      "file": "common_voice_ru_18854916.mp3",
+      "reference": "Сейчас я сделаю заявление в своем национальном качестве.",
+      "seconds": 8.376,
+      "sample_rate": 48000,
+      "sha256": "5b146099442b521e8b81480c08dfae6d4f248fc689a7ab6e77c9a3b2d0a7d825"
+    },
+    {
+      "row": 21,
+      "file": "common_voice_ru_18854917.mp3",
+      "reference": "Что там сейчас происходит в Твиттере?",
+      "seconds": 8.568,
+      "sample_rate": 48000,
+      "sha256": "145473353ef68a1221316196f6d710bf96725d6a85c9ab839814dc28bd025523"
+    },
+    {
+      "row": 22,
+      "file": "common_voice_ru_18854918.mp3",
+      "reference": "Ну хорошо, что револьвер был заряжен холостыми.",
+      "seconds": 6.264,
+      "sample_rate": 48000,
+      "sha256": "3d73f40f7f158ff6414455ed45e66de75bffc7ec702363aad388f98dd7ee800a"
+    },
+    {
+      "row": 23,
+      "file": "common_voice_ru_18854919.mp3",
+      "reference": "А потом дальше может проходить работа такая.",
+      "seconds": 5.28,
+      "sample_rate": 48000,
+      "sha256": "1b076c903f9a1558788efe8e20c87209c1dc44241509bcb9ee816a6d1926e9a8"
+    },
+    {
+      "row": 24,
+      "file": "common_voice_ru_18854921.mp3",
+      "reference": "Из Microsoft написали что на текущий момент у них нет открытых вакансий.",
+      "seconds": 9.192,
+      "sample_rate": 48000,
+      "sha256": "4b0f6d120017607052114c315f8c97801fc29c5bb2cd8203ac210ef3d6d90dc4"
+    },
+    {
+      "row": 25,
+      "file": "common_voice_ru_18854923.mp3",
+      "reference": "Мы добились многого, но сейчас не время терять набранную динамику.",
+      "seconds": 8.568,
+      "sample_rate": 48000,
+      "sha256": "374584e5636e2296469ab0bb6fe17fb3eb4864a28d25743d794371be4f074cd5"
+    },
+    {
+      "row": 26,
+      "file": "common_voice_ru_18854924.mp3",
+      "reference": "Мы внимательно проанализировали документ и содержащиеся в нем выводы и рекомендации.",
+      "seconds": 8.832,
+      "sample_rate": 48000,
+      "sha256": "7524fc9c2452e6e2dc44d58f950ccefddf71992ef8edf1679146b4d94f9e7c54"
+    },
+    {
+      "row": 27,
+      "file": "common_voice_ru_18854925.mp3",
+      "reference": "А сейчас слово имеет представитель Соединенных Штатов Америки.",
+      "seconds": 5.496,
+      "sample_rate": 48000,
+      "sha256": "18884fe21afcb290df30a0a7bbedc5c6aaa3ec93da19384e435e99feb09894be"
+    },
+    {
+      "row": 28,
+      "file": "common_voice_ru_18854927.mp3",
+      "reference": "Обстоятельства изменились, и мы должны учитывать это.",
+      "seconds": 4.896,
+      "sample_rate": 48000,
+      "sha256": "113add5fe6bc0180130abdbdfd56bd7285d2dbd8866ac7214814405cf14a4692"
+    },
+    {
+      "row": 29,
+      "file": "common_voice_ru_18854928.mp3",
+      "reference": "На этом принципе основывается и наша позиция по Фолклендским островам.",
+      "seconds": 6.096,
+      "sample_rate": 48000,
+      "sha256": "a496ccbd6d058269d519428ee7a97fc328e5c1adf21af420e4548c568d8319de"
+    }
+  ]
+}
