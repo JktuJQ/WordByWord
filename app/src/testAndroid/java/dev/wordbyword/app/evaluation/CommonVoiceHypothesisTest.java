@@ -36,14 +36,11 @@ public class CommonVoiceHypothesisTest {
 
   @Test
   public void allSamples() throws Exception {
-    run(new AndroidAudioPreparer(InstrumentationRegistry.getInstrumentation().getTargetContext()), "common-voice-hypotheses.json");
-  }
-
-  static void run(AndroidAudioPreparer preparer, String outputFileName) throws Exception {
     var instrumentation = InstrumentationRegistry.getInstrumentation();
     var testAssets = instrumentation.getContext().getAssets();
     var targetContext = instrumentation.getTargetContext();
 
+    AndroidAudioPreparer preparer = new AndroidAudioPreparer(targetContext);
     SpeechRecognizer recognizer = new SherpaSpeechRecognizer(targetContext.getAssets());
 
     JsonArray runs = new JsonArray();
@@ -75,7 +72,7 @@ public class CommonVoiceHypothesisTest {
 
     JsonObject root = new JsonObject();
     root.add("runs", runs);
-    File output = new File(targetContext.getCacheDir(), outputFileName);
+    File output = new File(targetContext.getCacheDir(), "common-voice-hypotheses.json");
     try (FileWriter writer = new FileWriter(output)) {
       new Gson().toJson(root, writer);
     }

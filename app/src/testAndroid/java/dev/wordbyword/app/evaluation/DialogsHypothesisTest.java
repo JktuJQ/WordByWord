@@ -41,18 +41,11 @@ public class DialogsHypothesisTest {
 
   @Test
   public void processAllDialogs() throws Exception {
-    run(
-        new AndroidAudioPreparer(InstrumentationRegistry.getInstrumentation().getTargetContext()),
-        "dialogs-asr-hypotheses.json",
-        "");
-  }
-
-  static void run(AndroidAudioPreparer preparer, String asrOutputFileName, String rttmSuffix)
-      throws Exception {
     var instrumentation = InstrumentationRegistry.getInstrumentation();
     var testAssets = instrumentation.getContext().getAssets();
     var targetContext = instrumentation.getTargetContext();
 
+    AndroidAudioPreparer preparer = new AndroidAudioPreparer(targetContext);
     SpeakerDiarizer diarizer = new SherpaOnnxSpeakerDiarizer(targetContext);
     SpeechRecognizer recognizer = new SherpaSpeechRecognizer(targetContext.getAssets());
 
@@ -67,7 +60,7 @@ public class DialogsHypothesisTest {
       audio.close();
       audioFile.delete();
 
-      File rttm = new File(targetContext.getCacheDir(), recordingId + rttmSuffix + ".hyp.rttm");
+      File rttm = new File(targetContext.getCacheDir(), recordingId + ".hyp.rttm");
       try (FileWriter writer = new FileWriter(rttm)) {
         for (SpeakerDiarizer.Segment segment : segments) {
           double startSeconds = segment.startMs() / 1000.0;
@@ -92,7 +85,7 @@ public class DialogsHypothesisTest {
 
     JsonObject root = new JsonObject();
     root.add("runs", runs);
-    File asrOutput = new File(targetContext.getCacheDir(), asrOutputFileName);
+    File asrOutput = new File(targetContext.getCacheDir(), "dialogs-asr-hypotheses.json");
     try (FileWriter writer = new FileWriter(asrOutput)) {
       new Gson().toJson(root, writer);
     }
