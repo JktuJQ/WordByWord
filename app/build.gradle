@@ -40,7 +40,8 @@ android {
             assets.srcDirs = [
                 'src/testAndroid/assets',
                 '../evaluation/fixtures/diarization',
-                '../evaluation/fixtures/asr'
+                '../evaluation/fixtures/asr',
+                '../evaluation/fixtures/dialogs/audio'
             ]
         }
     }
@@ -207,7 +208,75 @@ tasks.register('prepareAsrModels') {
     }
 }
 
+def embeddingCandidatesAssetsDir = file('src/testAndroid/assets/diarization-candidates')
+def embeddingCandidatesDownloadDir = layout.buildDirectory.dir('diarization-embedding-candidates-downloads').get().asFile
+
+def embeddingCandidates = [
+    eres2netVoxceleb: [
+        url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/3dspeaker_speech_eres2net_sv_en_voxceleb_16k.onnx',
+        sha256: 'c59158379255ad66e161679cca6af8d52d51e389e3224ab7d7a7baae295c2db5',
+        fileName: '3dspeaker_speech_eres2net_sv_en_voxceleb_16k.onnx'
+    ],
+    campplusZhEn: [
+        url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/3dspeaker_speech_campplus_sv_zh_en_16k-common_advanced.onnx',
+        sha256: 'aa3cfc16963a10586a9393f5035d6d6b57e98d358b347f80c2a30bf4f00ceba2',
+        fileName: '3dspeaker_speech_campplus_sv_zh_en_16k-common_advanced.onnx'
+    ],
+    titanetLarge: [
+        url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/nemo_en_titanet_large.onnx',
+        sha256: 'd51abcf31717ef28162f26acb9d44dd4127c3d44c9b8624f699f3425daca8e77',
+        fileName: 'nemo_en_titanet_large.onnx'
+    ]
+]
+
+tasks.register('prepareDiarizationEmbeddingCandidates') {
+    dependsOn('prepareDiarizationModels')
+
+    def baselineEmbeddingCopy = new File(embeddingCandidatesAssetsDir, 'baseline_embedding.onnx')
+    def segmentationCopy = new File(embeddingCandidatesAssetsDir, 'segmentation.int8.onnx')
+
+    onlyIf {
+        !(embeddingCandidates.values().every { new File(embeddingCandidatesAssetsDir, it.fileName).exists() } &&
+            baselineEmbeddingCopy.exists() && segmentationCopy.exists())
+    }
+
+    doLast {
+        embeddingCandidatesDownloadDir.mkdirs()
+        embeddingCandidatesAssetsDir.mkdirs()
+
+        embeddingCandidates.each { key, artifact ->
+            def downloaded = new File(embeddingCandidatesDownloadDir, artifact.fileName)
+            if (!downloaded.exists() || sha256Of(downloaded) != artifact.sha256) {
+                logger.lifecycle("Downloading ${artifact.fileName}")
+                ant.get(src: artifact.url, dest: downloaded, verbose: false)
+            }
+            def actualSha256 = sha256Of(downloaded)
+            if (actualSha256 != artifact.sha256) {
+                throw new GradleException(
+                    "Checksum mismatch for ${artifact.fileName}: expected ${artifact.sha256}, got ${actualSha256}")
+            }
+        }
+
+        copy {
+            from(embeddingCandidatesDownloadDir)
+            into embeddingCandidatesAssetsDir
+        }
+
+        copy {
+            from(diarizationAssetsDir) {
+                include 'embedding.onnx'
+                rename { 'baseline_embedding.onnx' }
+            }
+            from(diarizationAssetsDir) {
+                include 'segmentation.int8.onnx'
+            }
+            into embeddingCandidatesAssetsDir
+        }
+    }
+}
+
 tasks.named('preBuild').configure {
     dependsOn('prepareDiarizationModels')
     dependsOn('prepareAsrModels')
+    dependsOn('prepareDiarizationEmbeddingCandidates')
 }
