@@ -39,7 +39,7 @@
                 <TextView android:id="@+id/hero_title" android:layout_width="match_parent" android:layout_height="56dp" android:gravity="center"
                     android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="16sp" android:autoSizeMaxTextSize="42sp" android:autoSizeStepGranularity="2sp" android:text="@string/home_headline" android:textColor="@color/ink" android:textSize="72sp" android:fontFamily="@font/soyuz_grotesk" android:lineSpacingExtra="-8dp" android:includeFontPadding="false" />
                 <TextView android:id="@+id/hero_description" style="@style/BodyText" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center"
-                    android:text="@string/home_intro" android:fontFamily="@font/soyuz_grotesk" android:includeFontPadding="false" android:textSize="28sp" android:layout_marginTop="8dp" android:textColor="#45494F" />
+                    android:text="@string/home_intro" android:fontFamily="@font/soyuz_grotesk" android:includeFontPadding="false" android:textSize="28sp" android:layout_marginTop="8dp" android:textColor="@color/ink" />
             </LinearLayout>
             <LinearLayout android:id="@+id/empty" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="32dp" android:orientation="vertical" android:padding="24dp" android:background="@drawable/card">
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/empty_title" android:textColor="@color/ink" android:textSize="20sp" android:textStyle="bold" />
